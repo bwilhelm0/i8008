@@ -1,49 +1,41 @@
+`include "internal_defines.vh"
+
 `default_nettype none
 
-typedef enum logic [2:0] {
-    T1 = 3'b010,
-    T1I = 3'b110,
-    T2 = 3'b100,
-    WAIT = 3'b000,
-    T3 = 3'b001,
-    STOPPED = 3'b011,
-    T4 = 3'b111,
-    T5 = 3'b101
-} state_t;
-
-typedef struct packed {
-    logic Z,
-    logic C,
-    logic S,
-    logic P
-} flags_t;
-
-typedef enum {
-    ADD,
-    SUB,
-    AND,
-    XOR,
-    OR,
-    COMP,
-    ROT
-} alu_op_t;
-
 module 8008_core
-    #(parameter WIDTH = 8);
+    #(parameter WIDTH = 8)
     (input logic [WIDTH-1:0] D_in,
-     input logic INT, Ready, clk1, clk2,
+     input logic Intr, Ready, clk1, clk2,
      output logic [WIDTH-1:0] D_out,
      output logic Sync,
      output state_t state);
 
-    Register A #(.WIDTH, .RESET_VAL('d0)) (.D(A_in), .Q(A_out), .clk(), .en(), .clr());
-    Register B #(.WIDTH, .RESET_VAL('d0)) (.D(B_in), .Q(B_out), .clk(), .en(), .clr());
+    logic [WIDTH-1:0] bus;
+    logic [WIDTH-1:0] instr;
+
+    Flipper R (.D(Ready), .clock(), .Q());
+    Flipper I (.D(Intr), .clock(), .Q());
+
+
+    Register DBR #(.WIDTH) ();
+
+    Register IR #(.WIDTH) (.Q(instr));
+
+    Register A #(.WIDTH) (.D(A_in), .Q(A_out), .clock(), .en(), .clear());
+    Register B #(.WIDTH) (.D(B_in), .Q(B_out), .clock(), .en(), .clear());
     ALU Unit ();
+    Register flag_reg #(.WIDTH($bits(flags_t))) (.D(flag_in), .Q(flag_out), .clock(), .en(), .clear());
+
+    Decoder Dec (.instr);
+    Timing_ctrl TC ();
+
+    reg_file rf #(.WIDTH, .HEIGHT(8)) (.bus, .sel(), .we(), re(), .clk());
+    reg_file Stack #(.WIDTH(14), .HEIGHT(8)) (.bus, .sel(), .we(), re(), .clk());
 
 endmodule: 8008_core
 
 module ALU
-   #(parameter WIDTH = 8);
+   #(parameter WIDTH = 8)
     (input logic [WIDTH-1:0] A, B,
      input alu_op_t alu_op,
      output logic [WIDTH-1:0] D,
@@ -61,34 +53,27 @@ module ALU
 
 endmodule: ALU
 
-module Stack
-    #(parameter WIDTH = 14,
-                HEIGHT = 8);
-    (input logic [$clog2(HEIGHT)-1:0] sel,
-     input logic [WIDTH-1:0] D,
-     input logic we, re, clk,
-     output logic [WIDTH-1:0] SP);
+// Module for storing large amounts of information
+module reg_file
+#(parameter WIDTH = 8,
+            HEIGHT = 8,
+            ADDR_WIDTH = $clog2(WIDTH))
+(inout tri [WIDTH-1:0] bus,
+ input logic [ADDR_WIDTH-1:0] sel,
+ input logic we, re, clk);
 
-    Register #(.WIDTH, .RESET_VAL('d0)) stack[HEIGHT] (.D, .clk, .en(we), .clr(1'd0), .Q);
+  logic [WIDTH-1:0] rf[HEIGHT];
+  logic [WIDTH-1:0] rs;
 
-    assign SP = re ? stack[sel].Q : 'bz;
+  assign bus = (re) ? rs: 'bz;
 
-endmodule: Stack
+  always_ff @(posedge clock)
+    if (we)
+      rf[sel] <= bus;
 
-module Register
-    #(parameter WIDTH = 8,
-                RESET_VAL = 'd0);
-    (input logic [WIDTH-1:0] D,
-     input logic clk, en, clear,
-     output logic [WIDTH-1:0] Q);
+  always_comb
+    rs = rf[sel];
 
-     always_ff @(posedge clk) begin
-        if (clear) 
-            Q <= 'd0;
-        else if (clk && en)
-            Q <= D;
-     end
-
-endmodule: Register
+endmodule: reg_file
 
 `default_nettype wire
