@@ -61,48 +61,134 @@ module ALU
 endmodule: ALU
 
 module Decoder
-  (logic input [7:0] instr
-  );
+  (input logic [7:0] instr,
+   input cycle_t cycle,
+   output logic [6:0] decoded,
+   output ctrl_signals_t output ctrl_signals,
+   output cycle_ctrl_t cycle_ctrl
+   );
+
+  logic [1:0] D7_6 = instr[7:6];
+  logic [2:0] D5_3 = instr[5:3];
+  logic [2:0] D2_0 = instr[2:0];
+
+  always_comb begin
+    unique case (D7_6) 
+      LOAD: begin
+        unique case (D5_3)
+          // Perform load cases
+          Hi_MEM: // Check these first two cases for halts
+          Hi_MACH:
+          default:
+        endcase
+      end
+      ALU_IND_MEM: begin
+      end
+      IO_CTRL: begin
+      end
+      IMM_MISC: begin
+      end
+    endcase
+  end
+
 endmodule: Decoder
 
 module fsm
-  (input logic clk, Ready, Intr, rst,
+  (input logic clk, Ready, Intr, rst, CF, // CF condition failure
    output state_t state,
    output cycle_t cycle
    output cycle_ctrl_t cycle_ctrl);
 
   always_comb begin
-    unique case (state) begin
+    next_cycle = cycle;
+    unique case (state) 
       T1: next_state = T2;
       T1I: next_state = T2;
 
-      T2: next_state = ready ? T3 : WAIT;
-      WAIT: next_state = ready ? T3 : WAIT;
+      T2: next_state = Ready ? T3 : WAIT;
+      WAIT: next_state = Ready ? T3 : WAIT;
+      STOPPED: begin 
+        next_state = Intr ? T1I : STOPPED;
+      end
 
       T3: begin
-        unique case (cycle) begin
-          CYCLE1:
-          CYCLE2:
-          CYCLE3: 
-          default: next_cycle = T1;
+        unique case (cycle) 
+          CYCLE1: begin
+            unique case (instr) 
+              HLT: next_state = Intr ? T1I : STOPPED; 
+              RET: begin
+                if (CF) begin
+                  next_cycle = CYCLE1;
+                  next_state = T1;
+                end 
+                else begin
+                  next_state = T4;
+                end
+              end
+              LrM, ALUM, ALUI, INP, OUT, LrI, JMP, CAL: begin
+                next_cycle = CYCLE2;
+                next_state = T1;
+              end
+            endcase
+          end
+          CYCLE2: begin
+            unique case (instr)
+              OUT, LMr: begin
+                next_cycle = CYCLE1;
+                next_state = T1;
+              end
+              LMI, JMP, CAL: begin
+                next_state = T1; 
+                next_cycle = CYCLE3;
+              end
+              default: begin
+                next_state = T4;
+              end
+            endcase
+          end
+          CYCLE3: begin
+            unique case (instr) 
+              LMI: begin 
+                next_state = T1;
+                next_cycle = CYCLE1;
+              end
+              JMP, CAL: begin
+                if (CF) begin
+                  next_state = T1;
+                  next_cycle = CYCLE1;
+                end
+                else begin
+                  next_state = T4;
+                end
+              end
+              default: next_state = T4;
+            endcase
+          end
+          default: next_state = T4;
         endcase
       end
 
-      STOPPED: next_state = Intr ? T1I : STOPPED;
 
-      T4: next_state = (cycle == CYCLE1 && instr == LMr) ? T1 : T5;
-      T5: next_state = T1;
-      default: next_state = T1;
+      T4: begin
+        if (cycle == CYCLE1 && instr == LMr) begin
+          next_state = T1;
+          next_cycle = CYCLE2;
+        end
+        else begin
+          next_state = T5;
+        end
+      end
+
+      T5: begin 
+        next_state = T1;
+        next_cycle = CYCLE1;
+      end
+
+      default: begin 
+        next_state = T1;
+        next_cycle = CYCLE1;
+      end
     endcase
-
-    if (next_state == T1) begin
-      unique case (cycle) begin
-        CYCLE1: next_cycle = CYCLE2;
-        CYCLE2: next_cycle = CYCLE3;
-        CYCLE3: next_cycle = CYCLE1;
-        default: next_cycle = CYCLE1;
-      endcase
-    end
   end
 
   always_ff @(posedge clk, rst) begin
