@@ -21,7 +21,8 @@ module 8008_core
   Flipper R (.D(Ready), .clock(), .Q());
   Flipper I (.D(Intr), .clock(), .Q());
 
-
+  // Shouldn't be a register, just a bus buffer
+  // But since there's 8 ins and outs, use buffer for out
   Register DBR #(.WIDTH) ();  // Enable is tied to ready or a ctrl signal
 
   Register IR #(.WIDTH) (.Q(instr));
@@ -65,9 +66,55 @@ module Decoder
 endmodule: Decoder
 
 module fsm
-  (output state_t state,
+  (input logic clk, Ready, Intr, rst,
+   output state_t state,
    output cycle_t cycle
    output cycle_ctrl_t cycle_ctrl);
+
+  always_comb begin
+    unique case (state) begin
+      T1: next_state = T2;
+      T1I: next_state = T2;
+
+      T2: next_state = ready ? T3 : WAIT;
+      WAIT: next_state = ready ? T3 : WAIT;
+
+      T3: begin
+        unique case (cycle) begin
+          CYCLE1:
+          CYCLE2:
+          CYCLE3: 
+          default: next_cycle = T1;
+        endcase
+      end
+
+      STOPPED: next_state = Intr ? T1I : STOPPED;
+
+      T4: next_state = (cycle == CYCLE1 && instr == LMr) ? T1 : T5;
+      T5: next_state = T1;
+      default: next_state = T1;
+    endcase
+
+    if (next_state == T1) begin
+      unique case (cycle) begin
+        CYCLE1: next_cycle = CYCLE2;
+        CYCLE2: next_cycle = CYCLE3;
+        CYCLE3: next_cycle = CYCLE1;
+        default: next_cycle = CYCLE1;
+      endcase
+    end
+  end
+
+  always_ff @(posedge clk, rst) begin
+    if (rst) begin
+      cycle <= CYCLE1;
+      state <= T1;
+    end
+    else begin
+      cycle <= next_cycle;
+      state <= next_state;
+    end
+  end
 
 endmodule: fsm
 
