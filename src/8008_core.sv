@@ -64,29 +64,117 @@ module Decoder
   (input logic [7:0] instr,
    input cycle_t cycle,
    output logic [6:0] decoded,
-   output ctrl_signals_t output ctrl_signals,
-   output cycle_ctrl_t cycle_ctrl
+   output ctrl_signals_t ctrl_signals,
+   output cycle_ctrl_t cycle_ctrl,
+   output instr_t op
    );
 
   logic [1:0] D7_6 = instr[7:6];
   logic [2:0] D5_3 = instr[5:3];
   logic [2:0] D2_0 = instr[2:0];
 
+  logic r1 = instr[5:3];
+  logic r2 = instr[2:0];
+
+  logic true_flag = instr[5];
+  flags_t flags = instr[4:3];
+
+  logic IO_instr = instr[0];
+  logic [1:0] RR = instr[5:4];
+  logic [2:0] MMM = instr[3:1];
+
+  // TODO: Don't set a specific operation, set ctrl signals??
+  // Nah, easier to set op for fsm
   always_comb begin
     unique case (D7_6) 
       LOAD: begin
         unique case (D5_3)
           // Perform load cases
-          Hi_MEM: // Check these first two cases for halts
-          Hi_MACH:
-          default:
+          // Check first cases for halts
+          Hi_MEM: begin 
+            op = D2_0 == Lo_MEM ? HLT : LMr;
+          end
+          default: begin
+            op = D2_0 == Lo_MEM ? LrM : Lr1r2;
+          end
         endcase
       end
       ALU_IND_MEM: begin
+        if (D2_0 == 3'b111) // Set control signals here for memory op?
+          asdf
+        unique case (D5_3)
+          ADx:
+          ACx:
+          SUx:
+          SBx:
+          NDx:
+          XRx:
+          ORx:
+          CPx:
+        endcase
       end
       IO_CTRL: begin
+        unique case (D2_0)
+          Lo_JMP: begin 
+            op = JMP;
+          end
+          Lo_JXc: begin
+            ctrl_signals.flags = flags;
+            op = true_flag ? JTc : JFc;
+          end
+          Lo_CAL: begin 
+            op = CAL;
+          end
+          Lo_CXc: begin
+            ctrl_signals.flags = flags;
+            op = true_flag ? CTc : CFc;
+          end
+          default: begin
+            op = IO_instr ? (RR == 2'd0 ? INP : OUT) : INVALID;
+          end
+        endcase
       end
       IMM_MISC: begin
+        unique case (D2_0)
+          Lo_RST: begin 
+            op = RST;
+          end
+          Lo_RXc: begin
+            ctrl_signals.flags = flags;
+            op = true_flag ? RTc : RFc;
+          end
+          Lo_RET: begin 
+            op = RET;
+          end
+          Lo_INr: begin
+            op = INr;
+          end
+          Lo_DCr: begin 
+            op = DCr;
+          end
+          Lo_ROT: begin
+            unique case (D5_3)
+              Hi_RLC:
+              Hi_RRC:
+              Hi_RAL:
+              Hi_RAR:
+            endcase
+          end
+          Lo_ALU: begin 
+            unique case (D5_3)
+              ADx:
+              ACx:
+              SUx:
+              SBx:
+              NDx:
+              XRx:
+              ORx:
+              CPx:
+            endcase
+          end
+          Lo_LOAD: begin
+          end
+        endcase
       end
     endcase
   end

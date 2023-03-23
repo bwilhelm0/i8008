@@ -67,6 +67,7 @@ typedef struct packed {
     logic memRead;          // load instruction
     logic memWrite;         // store instruction
     alu_op_t alu_op;        // The ALU operation to perform
+    flags_t flags;
 } ctrl_signals_t;
 
 `endif INTERNAL_DEFINES_VH_

@@ -15,6 +15,49 @@
     } D2_0_t;
 
     typedef enum logic [2:0] {
+        Lo_JXc = 3'b000,
+        Lo_CXc = 3'b010,
+        Lo_JMP = 3'b100,
+        Lo_CAL = 3'b110,
+        Lo_IO = 3'bxx1
+    } IO_CTRL_Lo_t;
+
+    typedef enum logic [2:0] {
+        Lo_INr = 3'b000,
+        Lo_DCr = 3'b001,
+        Lo_ROT = 3'b010,
+        Lo_RXc = 3'b011,
+        Lo_ALU = 3'b100,
+        Lo_RST = 3'b101,
+        Lo_LOAD = 3'b110,
+        Lo_RET = 3'b111
+    } IMM_MISC_Lo_t;
+
+    typedef enum logic [2:0] {
+        Hi_RLC = 3'b000,
+        Hi_RRC = 3'b001,
+        Hi_RAL = 3'b010,
+        Hi_RAR = 3'b011
+    } IMM_MISC_Hi_t;
+
+    typedef enum logic [2:0] {
+    } LOAD_Lo_t;
+
+    typedef enum logic [2:0] {
+    } ALU_IND_MEM_Lo_t;
+
+    typedef enum logic [2:0] {
+        ADx = 3'b000,
+        ACx = 3'b001,
+        SUx = 3'b010,
+        SBx = 3'b011,
+        NDx = 3'b100,
+        XRx = 3'b101,
+        ORx = 3'b110,
+        CPx = 3'b111
+    } ALU_IND_MEM_Hi_t;
+
+    typedef enum logic [2:0] {
         Hi_MEM = 3'b111,
         Hi_MACH = 3'b000,
         Hi_DC = 3'bxxx
@@ -92,7 +135,9 @@
         OUT,        // Write accumulator into output port, RRMMM, RR != 0
 
         // Machine
-        HLT         // Enter stopped state until interrupted
-    }
+        HLT,         // Enter stopped state until interrupted
+
+        INVALID     // Instruction unrecognized
+    } instr_t;
 
 `endif 
