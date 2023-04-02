@@ -50,7 +50,7 @@ typedef enum logic [1:0] {
     P = 2'b11       // Parity
 } flags_t;
 
-typedef enum {
+typedef enum logic [2:0] {
     ADD,            // Addition
     SUB,            // Subtraction
     AND,            // Logical And

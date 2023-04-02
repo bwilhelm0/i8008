@@ -100,7 +100,7 @@ module DFlipFlop
 
 endmodule: DFlipFlop
 
-module Flipper
+module Stabilizer
   (input logic D, clock,
    output logic Q);
   logic temp;
@@ -110,7 +110,7 @@ module Flipper
     Q <= temp;
   end
 
-endmodule: Flipper
+endmodule: Stabilizer
 
 // Module for storing multiple bits
 module Register
