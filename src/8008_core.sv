@@ -3,7 +3,7 @@
 `default_nettype none
 
 module 8008_core
-  #(parameter WIDTH = 8,
+  #(parameter WIDTH = DATA_WIDTH,
               STACK_HEIGHT = 8)
   (input logic [WIDTH-1:0] D_in,
    input logic INTR, READY, clk1, clk2,
@@ -40,9 +40,9 @@ module 8008_core
   Timing_ctrl TC ();
 
   
-  reg_file #(.WIDTH, .HEIGHT(7)) rf (.bus, .sel(sel_rf), .we(we_rf), .re(re_rf), .clk());
+  reg_file #(.WIDTH(DATA_WIDTH), .HEIGHT(7)) rf (.bus, .sel(sel_rf), .we(we_rf), .re(re_rf), .clk());
 
-  Counter #(.WIDTH($clog2(STACK_HEIGHT))) (.en(en_SP), .clear(clr_SP), .load('d0), .up(inc_SP)), .clock(), .D('d0), .Q(sel_Stack));
+  Counter #(.WIDTH($clog2(STACK_HEIGHT))) (.en(en_SP), .clear(clr_SP), .load('d0), .up(inc_SP), .clock(), .D('d0), .Q(sel_Stack));
   stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack (.bus, .sel(sel_Stack), .we(we_Stack), .re(re_Stack), .clk(), .lower());
 
   fsm controller (.state, .cycle, .clk());
@@ -342,19 +342,31 @@ module fsm_decoder
             end
             T3: begin 
               unique case (instr) 
-                HLT: next_state = Intr ? T1I : STOPPED;
+                HLT: begin 
+                  if (Intr) begin
+                    next_state = T1; // Go to "T1I" next
+                    next_cycle = CYCLE1;
+                  end
+                  else begin
+                    next_state = T3;
+                    // STOPPED STATE
+                  end
+                end
                 RET: begin
                   if (CF) begin
                     next_cycle = CYCLE1;
                     next_state = T1;
                   end 
                   else begin
-                    next_state = T4;
+                    next_state = Ready ? T4 : T3; // WAIT state
                   end
                 end
                 LrM, ALUM, ALUI, INP, OUT, LrI, JMP, CAL: begin
                   next_cycle = CYCLE2;
                   next_state = T1;
+                end
+                default: begin
+                  next_state = Ready ? T4 : T3; // WAIT state
                 end
               endcase
             end
@@ -371,7 +383,10 @@ module fsm_decoder
               next_state = T1;
               next_cycle = CYCLE1;
             end
-            default:
+            default: begin
+              next_state = T1;
+              next_cycle = CYCLE1;
+            end
           endcase
          end
         CYCLE2: begin
@@ -393,7 +408,7 @@ module fsm_decoder
                   next_cycle = CYCLE3;
                 end
                 default: begin
-                  next_state = T4;
+                  next_state = Ready ? T4 : T3; // WAIT state
               end
             endcase
             end
@@ -404,7 +419,10 @@ module fsm_decoder
               next_state = T1;
               next_cycle = CYCLE1;
             end
-            default:
+            default: begin
+              next_cycle = CYCLE1;
+              next_state = T1;
+            end
           endcase
          end
         CYCLE3: begin
@@ -416,8 +434,8 @@ module fsm_decoder
               next_state = T3;
             end
             T3: begin 
-              unique case (instr) 
-                LMI: begin 
+              unique case (instr)
+                LMI: begin
                   next_state = T1;
                   next_cycle = CYCLE1;
                 end
@@ -427,32 +445,38 @@ module fsm_decoder
                     next_cycle = CYCLE1;
                   end
                   else begin
-                    next_state = T4;
+                    next_state = Ready ? T4 : T3; // WAIT state
                   end
                 end
-                default: next_state = T4;
+                default: next_state = Ready ? T4 : T3; // WAIT state
               endcase
             end
-            T4: begin 
+            T4: begin
               next_state = T5;
             end
             T5: begin 
               next_state = T1;
               next_cycle = CYCLE1;
             end
-            default:
+            default: begin
+              next_state = T1;
+              next_cycle = CYCLE1;
+            end
           endcase
          end
         default: begin
+          next_state = T1;
+          next_cycle = CYCLE1;
         end
       endcase
    end
 
 
-  always_ff @(posedge clk, posedge rst) begin
+  always_ff @(posedge clk) begin
     if (rst) begin
       cycle <= CYCLE1;
       state <= T1;
+      // RESET ctrl_sginals as well?
     end
     else begin
       cycle <= next_cycle;

@@ -1,6 +1,8 @@
 `ifndef INTERNAL_DEFINES_VH_
 `define INTERNAL_DEFINES_VH_
 
+'define DATA_WIDTH = 8;
+
 // The current state of proc, also to be output
 typedef enum logic [2:0] {
     T1 = 3'b010,
@@ -61,13 +63,33 @@ typedef enum logic [2:0] {
 } alu_op_t;
 
 typedef struct packed {
-    logic rfWrite;          // write GPR
-    logic mem2RF;           // memory load result write to GPR
-    logic pc2RF;            // PC+4 write to GPR (link)
-    logic memRead;          // load instruction
-    logic memWrite;         // store instruction
-    alu_op_t alu_op;        // The ALU operation to perform
-    flags_t flags;
+    logic en_DBR;                  // Enable Data Buffer Reg
+    logic clr_DBR;                 //
+
+    logic en_IR;                   //
+    logic clr_IR;                  //
+
+    logic re_A;                    //
+    logic re_B;                    //
+    logic we_A;                    //
+    logic we_B;                    //
+
+    logic re_ALU;                  //
+    alu_op_t alu_op;               // Operation for ALU to perform
+
+    logic en_Flag;                 // Enable flags from ALU
+    logic clr_Flag;                //
+
+    logic [DATA_WIDTH-1:0] sel_rf; //
+    logic re_rf;                   //
+    logic we_rf;                   //
+
+    logic en_SP;                   //
+    logic clr_SP;                  //
+    logic inc_SP;                  //
+
+    logic we_Stack;                //
+    logic re_Stack;                //
 } ctrl_signals_t;
 
 `endif INTERNAL_DEFINES_VH_

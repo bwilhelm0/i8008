@@ -70,74 +70,79 @@
         IMM_MISC = 2'b00
     } D7_6_t;
 
-    typedef enum logic [5:0] {
+    typedef enum logic [7:0] {
         // Index register instructions
-        Lr1r2,      // Load r1 with r2
-        LrM,        // Load r with Mem
-        LMr,        // Load Mem with r
-        LrI,        // Load r with Immediate
-        LMI,        // Load Mem with Immediate
-        INr,        // Increment r (r != A)
-        DCr,        // Decrement r (r != A)
+        Lr1r2 = 8'b11_xxx_xxx,      // Load r1 with r2
+        LrM = 8'b11_xxx_111,        // Load r with Mem
+        LMr = 8'b11_111_xxx,        // Load Mem with r
+        LrI = 8'b00_xxx_110,        // Load r with Immediate
+        LMI = 8'b00_111_110,        // Load Mem with Immediate
+        INr = 8'b00_xxx_000,        // Increment r (r != A)
+        DCr = 8'b00_xxx_001,        // Decrement r (r != A)
+
+        ALU_op = 8'b10_xxx_xxx,
+        ALUM = 8'b10_xxx_111,
+        ALUI = 8'b10_xxx_100,
 
         // Accumulator group instructions
-        ADr,        // Add contents to A, set carry
-        ADM,
-        ADI,
+        ADr = 8'b10_000_xxx,        // Add contents to A, set carry
+        ADM = 8'b10_000_111,
+        ADI = 8'b00_000_100,
 
-        ACr,        // Add contents + carry to A
-        ACM,
-        ACI,
+        ACr = 8'b10_001_xxx,        // Add contents + carry to A
+        ACM = 8'b10_001_111,
+        ACI = 8'b00_001_100,
 
-        SUr,        // Subtract contents from A, set carry
-        SUM,
-        SUI,
+        SUr = 8'b10_010_xxx,        // Subtract contents from A, set carry
+        SUM = 8'b10_010_111,
+        SUI = 8'b00_010_100,
 
-        SBr,        // Subtract contents from A, subtract borrow, set carry
-        SBM,
-        SBI,
+        SBr = 8'b10_011_xxx,        // Subtract contents from A, subtract borrow, set carry
+        SBM = 8'b10_011_111,
+        SBI = 8'b00_011_100,
 
-        NDr,        // Logical AND of contents with accumulator
-        NDM,
-        NDI,
+        NDr = 8'b10_100_xxx,        // Logical AND of contents with accumulator
+        NDM = 8'b10_100_111,
+        NDI = 8'b00_100_100,
 
-        XRr,        // Logical XOR of contents with accumulator
-        XRM,
-        XRI,
+        XRr = 8'b10_101_xxx,        // Logical XOR of contents with accumulator
+        XRM = 8'b10_101_111,
+        XRI = 8'b00_101_100,
 
-        ORr,        // Logical OR of contents with accumulator
-        ORM,
-        ORI,
+        ORr = 8'b10_110_xxx,        // Logical OR of contents with accumulator
+        ORM = 8'b10_110_111,
+        ORI = 8'b00_110_100,
 
-        CPr,        // Compare contents with accumulator, accumulator unaffected. Sub sets flags
-        CPM,
-        CPI,
+        CPr = 8'b10_111_xxx,        // Compare contents with accumulator, accumulator unaffected. Sub sets flags
+        CPM = 8'b10_111_111,
+        CPI = 8'b00_111_100,
 
-        RLC,        // Rotate accumulator left
-        RRC,        // Rotate accumulator right
-        RAL,        // Rotate accumulator left through carry
-        RAR,        // Rotate accumulator right through carry
+        RLC = 8'b00_000_010,        // Rotate accumulator left
+        RRC = 8'b00_001_010,        // Rotate accumulator right
+        RAL = 8'b00_010_010,        // Rotate accumulator left through carry
+        RAR = 8'b00_011_010,        // Rotate accumulator right through carry
 
-        // PC and stack control instructions
-        JMP,        
-        JFc,        // Jump to B3B2 if false, else continue
-        JTc,
-        CAL,       
-        CFc,        // Call subroutine at B3B2 if false, move up in stack, else continue
-        CTc,
-        RET,    
-        RFc,        // Return down a level of the stack if false, else continue
-        RTc,
-        RST,
+        //  = 8'bPC and stack control instructions
+        JMP = 8'b01_xxx_100,        
+        JFc = 8'b01_0xx_000,        // Jump to B3B2 if false, else continue
+        JTc = 8'b01_1xx_000,
+        CAL = 8'b01_xxx_110,       
+        CFc = 8'b01_0xx_010,        // Call subroutine at B3B2 if false, move up in stack, else continue
+        CTc = 8'b01_1xx_010,
+        RET = 8'b00_xxx_111,    
+        RFc = 8'b00_0xx_011,        // Return down a level of the stack if false, else continue
+        RTc = 8'b00_1xx_011,
+        RST = 8'b00_xxx_101,
 
-        // I/O instructions
-        INP,        // Read contents of input port into accumulator
-        OUT,        // Write accumulator into output port, RRMMM, RR != 0
+        //  = 8'bI/O instructions
+        INP = 8'b01_00x_xx1,        // Read contents of input port into accumulator
+        OUT = 8'b01_xxx_xx1,        // Write accumulator into output port, RRMMM, RR != 0
 
-        // Machine
-        HLT,         // Enter stopped state until interrupted
+        //  = 8'bMachine
+        HLT0 = 8'b00_000_00x,         // Enter stopped state until interrupted
+        HLT1 = 8'b11_111_111,         // Enter stopped state until interrupted
 
-        INVALID     // Instruction unrecognized
+        INVALID = 'bx     // Instruction unrecognized
     } instr_t;
 
 `endif 
