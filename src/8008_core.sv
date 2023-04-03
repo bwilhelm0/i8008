@@ -20,36 +20,30 @@ module 8008_core
   // state_t state;
 
   // Stabilize async inputs?? Maybe only need flip flop
-  Stabilizer R (.D(READY), .clock(), .Q(Ready));
-  Stabilizer I (.D(INTR), .clock(), .Q(Intr));
+  Stabilizer R (.D(READY), .clk, .Q(Ready));
+  Stabilizer I (.D(INTR), .clk, .Q(Intr));
 
   // Shouldn't be a register, just a bus buffer
   // But since there's 8 ins and outs, use buffer for out
   // TODO: Connect DBR enable to Ready?? 
   // I think add an in, and out buffer for ease of use
   BusDriver #(.WIDTH) DBRdriver (.en(re_DBR), .data(B_out), .buff(B_in), .bus);
-  Register #(.WIDTH) DBR (.D(bus), .Q(D_out), .clock(), .en(we_DBR), .clear(clr_DBR));  // Enable is tied to ready or a ctrl signal
-  Register #(.WIDTH) IR (.D(bus), .Q(instr), .clock(), .en(we_IR), .clear(clr_IR));
+  Register #(.WIDTH) DBR (.D(bus), .Q(D_out), .clk, .en(we_DBR), .clear(clr_DBR));  // Enable is tied to ready or a ctrl signal
+  Register #(.WIDTH) IR (.D(bus), .Q(instr), .clk, .en(we_IR), .clear(clr_IR));
 
   BusDriver #(.WIDTH) Adriver (.en(re_A), .data(A_out), .buff(A_in), .bus);
   BusDriver #(.WIDTH) Bdriver (.en(re_B), .data(B_out), .buff(B_in), .bus);
-  Register #(.WIDTH) A (.D(A_in), .Q(A_out), .clock(), .en(we_A), .clear(clr_A));
-  Register #(.WIDTH) B (.D(B_in), .Q(B_out), .clock(), .en(we_B), .clear(clr_B));
+  Register #(.WIDTH) A (.D(A_in), .Q(A_out), .clk, .en(we_A), .clear(clr_A));
+  Register #(.WIDTH) B (.D(B_in), .Q(B_out), .clk, .en(we_B), .clear(clr_B));
 
   BusDriver #(.WIDTH) ALUdriver (.en(re_ALU), .data(ALU_out), .buff('d0), .bus);
   ALU Unit (.A(A_out), .B(B_out), .alu_op(), .D(ALU_out), .flags(flag_in));
 
-  Decoder Dec (.instr, .cycle);
-  Timing_ctrl TC ();
-
-  
-  reg_file #(.WIDTH(DATA_WIDTH), .HEIGHT(7)) rf (.bus, .sel(sel_rf), .we(we_rf), .re(re_rf), .clk());
+  reg_file #(.WIDTH(DATA_WIDTH), .HEIGHT(7)) rf (.bus, .sel(sel_rf), .we(we_rf), .re(re_rf), .clk);
 
   assign enable_SP = en_SP & ~((sel_Stack == 'd0) & ~inc_SP);
-  Counter #(.WIDTH($clog2(STACK_HEIGHT))) (.en(enable_SP), .clear(clr_SP), .load('d0), .up(inc_SP), .clock(), .D('d0), .Q(sel_Stack));
-  stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack (.bus, .sel(sel_Stack), .we(we_Stack), .re(re_Stack), .clk(), .lower());
-
-  fsm controller (.state, .cycle, .clk());
+  Counter #(.WIDTH($clog2(STACK_HEIGHT))) (.en(enable_SP), .clear(clr_SP), .load('d0), .up(inc_SP), .clk, .D('d0), .Q(sel_Stack));
+  stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack (.bus, .sel(sel_Stack), .we(we_Stack), .re(re_Stack), .clk, .lower(lower), .incr(inc_PC), .en(en_PC));
 endmodule: 8008_core
 
 module ALU
@@ -116,429 +110,406 @@ module fsm_decoder
    input logic [7:0] instr,
    input flags_t flags,
    output ctrl_signals_t ctrl_signals,
-   output state_t state,
-   output cycle_t cycle
-   output cycle_ctrl_t cycle_ctrl);
+   output state_t state);
 
   logic [2:0] SSS = instr[2:0];
   logic [2:0] DDD = instr[5:3];
+  cycle_t cycle;
 
   // Should flags be one hot, or fully encoded?
   // logic CF = 
 
-   // TODO: Make sure all internal states are represented, 
-   // How does T1I work? Why no PC increment?
-   // TODO: Fix Conditional instruction logic
+  // TODO: Make sure all internal states are represented, 
+  // How does T1I work? Why no PC increment?
+  // TODO: Fix Conditional instruction logic
 
-  ctrl_signals_t ctrl_signals;
 
-  logic we_DBR;                  // Enable Data Buffer Reg
-  logic re_DBR;                  // Enable Data Buffer Reg
-  logic clr_DBR;                 //
-
-  logic we_IR;                   //
-  logic clr_IR;                  //
-
-  logic re_A;                    //
-  logic re_B;                    //
-  logic we_A;                    //
-  logic we_B;                    //
-  logic clr_A;
-  logic clr_B;
-
-  logic re_ALU;                  //
-  alu_op_t alu_op;               // Operation for ALU to perform
-
-  logic en_Flag;                 // Enable flags from ALU
-  logic clr_Flag;                //
-
-  logic [DATA_WIDTH-1:0] sel_rf; //
-  logic re_rf;                   //
-  logic we_rf;                   //
-
-  logic en_SP;                   //
-  logic clr_SP;                  //
-  logic inc_SP;                  //
-
-  logic we_Stack;                //
-  logic re_Stack;                //
-
-   always_comb begin
+  always_comb begin
     next_cycle = cycle;
-    ctrl_signals = 'd0; // Should these be initialized to X's?
-      unique case (cycle)
-        CYCLE1: begin
-          unique case (state)
-            T1: begin // INCR PC??
-              next_state = T2;
+    out_state = state;
+    ctrl_signals = 'd0; // Should these be initialized to X's? No, apparently doesn't minimize logic
+    unique case (cycle)
+      CYCLE1: begin
+        unique case (state)
+          T1, T1I: begin // INCR PC??
+            next_state = T2;
 
-              ctrl_signals.we_DBR = 1'b1;
-              ctrl_signals.re_Stack = 1'b1;
-              ctrl_signals.lower_Stack = PC_L;
+            ctrl_signals.we_DBR = 1'b1;
+            ctrl_signals.re_Stack = 1'b1;
+            ctrl_signals.lower_Stack = PC_L;
+
+            ctrl_signals.inc_PC = 1'b1;
+            ctrl_signals.en_PC = 1'b1;
+          end
+          T2: begin 
+            next_state = T3;
+
+            ctrl_signals.we_DBR = 1'b1;
+            ctrl_signals.re_Stack = 1'b1;
+            ctrl_signals.lower_Stack = PC_H;
+
+            ctrl_signals.cycle_ctrl = PCI;
+          end
+          T3, WAIT, STOPPED: begin
+            if (instr == RST) begin
+              ctrl_signals.we_B = 1'b1;
+              ctrl_signals.clr_A = 1'b1;
+              ctrl_signals.inc_SP = 1'b1;
+              ctrl_signals.en_SP = 1'b1;
+              ctrl_signals.re_DBR = 1'b1;
             end
-            T2: begin 
-              next_state = T3;
-
-              ctrl_signals.we_DBR = 1'b1;
-              ctrl_signals.re_Stack = 1'b1;
-              ctrl_signals.lower_Stack = PC_H;
-
-              ctrl_signals.cycle_ctrl = PCI;
+            else begin
+              ctrl_signals.we_IR = 1'b1;
+              ctrl_signals.we_B = 1'b1;
+              ctrl_signals.re_DBR = 1'b1;
             end
-            T3: begin
-              if (instr == RST) begin
-                ctrl_signals.we_B = 1'b1;
-                ctrl_signals.clr_A = 1'b1;
-                ctrl_signals.inc_SP = 1'b1;
-                ctrl_signals.en_SP = 1'b1;
-                ctrl_signals.re_DBR = 1'b1;
-              end
-              else begin
-                ctrl_signals.we_IR = 1'b1;
-                ctrl_signals.we_B = 1'b1;
-                ctrl_signals.re_DBR = 1'b1;
-              end
 
-              unique case (instr) 
-                HLT0, HLT1: begin 
-                  if (Intr) begin
-                    next_state = T1; // Go to "T1I" next
-                    next_cycle = CYCLE1;
-                  end
-                  else begin
-                    next_state = T3; // STOPPED STATE
-                  end
+            unique case (instr) 
+              HLT0, HLT1: begin 
+                if (Intr) begin
+                  next_state = T1I; // Go to "T1I" next
+                  next_cycle = CYCLE1;
                 end
-                RFc, RTc: begin  // Conditional return only?
-                  if (CF) begin
-                    next_cycle = CYCLE1;
-                    next_state = T1;
-                  end 
-                  else begin
-                    next_state = Ready ? T4 : T3; // WAIT state
-                  end
+                else begin
+                  next_state = STOPPED; // STOPPED STATE
                 end
-                LrM, ALUM, ALUI, INP, OUT, LrI, JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  next_cycle = CYCLE2;
+              end
+              RFc, RTc: begin  // Conditional return only?
+                if (CF) begin
+                  next_cycle = CYCLE1;
                   next_state = T1;
-                end
-                default: begin
-                  next_state = Ready ? T4 : T3; // WAIT state
-                end
-              endcase
-            end
-            T4: begin
-              unique case (instr)
-                Lr1r2, LMr, ALU_op: begin
-                  // Deal with LrM case? No, it shouldn't get here
-                  // Deal with other ALU cases? Nope, shouldn't get here
-                  if (SSS == 3'b111) begin
-                  end
-                  else begin
-                    ctrl_signals.we_B = 1'b1;
-                    ctrl_signals.re_rf = 1'b1;
-                    ctrl_signals.sel_rf = SSS;
-                    ctrl_signals.we_DBR = 1'b1;
-                  end
-                end
-                INr, DCr: begin 
-                  // Deal with HALT case and mem case for INr/DCr? No, shouldn't get here
-                  ctrl_signals.re_rf = 1'b1;
-                  ctrl_signals.sel_rf = DDD;
-                  ctrl_signals.we_A = 1'b1;
-                end
-                RLC, RRC, RAL, RAR: begin
-                  // read Accum into A alu reg
-                  ctrl_signals.re_rf = 1'b1;
-                  ctrl_signals.sel_rf = A;
-                  ctrl_signals.we_A = 1'b1;
-                end
-                RET: begin // Pop stack
-                  ctrl_signals.inc_SP = 1'b0;
-                  ctrl_signals.en_SP = 1'b1;
-                end
-                RFc, RTc: begin // Pop stack conditionally
-                  ctrl_signals.inc_SP = 1'b0;
-                  ctrl_signals.en_SP = ~CF;
-                end
-                RST: begin
-                  ctrl_signals.re_A = 1'b1;
-                  ctrl_signals.lower = 1'b0;
-                  ctrl_signals.we_Stack = 1'b1;
-                end
-                default: begin
-                  // Do nothing!
-                end
-              endcase
-
-              if (instr == LMr) begin
-                next_state = T1;
-                next_cycle = CYCLE2;
-              end
-              else begin
-                next_state = T5;
-              end
-            end
-            T5: begin
-              unique case (instr)
-                RST: begin
-                  ctrl_signals.re_B = 1'b1;
-                  ctrl_signals.we_Stack = 1'b1;
-                  ctrl_signals.lower = 1'b1; // What to do here since only want D5-3?
-                  ctrl_signals.D5_3 = 1'b1;
-                end
-                INr, DCr: begin
-                  ctrl_signals.we_rf = 1'b1;
-                  ctrl_signals.sel_rf = DDD;
-                  ctrl_signals.alu_op = instr == INr ? ADD1 : SUB1;
-                  ctrl_signals.en_flags = 1'b1;
                 end 
-                ALU_op: begin
-                  ctrl_signals.we_rf = 1'b1;
-                  ctrl_signals.sel_rf = A;
-                  ctrl_signals.alu_op = ; // Enter ops for ALU commands
-                  ctrl_signals.en_flags = 1'b1;
+                else begin
+                  next_state = Ready ? T4 : WAIT; // WAIT state
                 end
-                RLC, RRC, RAL, RAR: begin
-                  ctrl_signals.we_rf = 1'b1;
-                  ctrl_signals.sel_rf = A;
-                  ctrl_signals.alu_op = ; // Enter ops for rotate commands
-                  ctrl_signals.en_flags = 1'b1;
-                end
-                RET, RFc, RTc: // do nothing!
-                default: // do nothing!
-              endcase
-
-              next_state = T1;
-              next_cycle = CYCLE1;
-            end
-            default: begin
-              next_state = T1;
-              next_cycle = CYCLE1;
-            end
-          endcase
-         end
-        CYCLE2: begin
-          unique case (state)
-            T1: begin 
-              next_state = T2;
-
-              unique case (instr)
-                LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  ctrl_signals.re_Stack = 1'b1;
-                  ctrl_signals.lower = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.cycle_ctrl = PCR;
-                end
-                LrM, LMr, ALUM: begin
-                  ctrl_signals.re_rf = 1'b1;
-                  ctrl_signals.sel_rf = L;
-                  ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
-                  ctrl_signals.we_DBR = 1'b1;
-                end
-                INP, OUT: begin
-                  ctrl_signals.cycle_ctrl = PCC;
-                  ctrl_signals.re_A = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                end
-              endcase
-            end
-            T2: begin 
-              next_state = T3;
-
-              unique case (instr)
-                LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  ctrl_signals.re_Stack = 1'b1;
-                  ctrl_signals.lower = 1'b0;
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.cycle_ctrl = PCR;
-                end
-                LrM, LMr, ALUM: begin
-                  ctrl_signals.re_rf = 1'b1;
-                  ctrl_signals.sel_rf = H;
-                  ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
-                  ctrl_signals.we_DBR = 1'b1;
-                end
-                INP, OUT: begin
-                  ctrl_signals.cycle_ctrl = PCC;
-                  ctrl_signals.re_B = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                end
-              endcase
-            end
-            T3: begin 
-              unique case (instr)
-                OUT, LMr: begin
-                  next_cycle = Ready ? CYCLE1 : CYCLE2;
-                  next_state = Ready ? T1 : T3;
-                end
-                LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  next_state = Ready ? T1 : T3;
-                  next_cycle = Ready ? CYCLE3 : CYCLE2;
-                end
-                default: begin
-                  next_state = Ready ? T4 : T3; // WAIT state
               end
-
-              unique case (instr)
-                INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin 
-                  // For control flow instructions, this is the lower address
-                  ctrl_signals.re_DBR = 1'b1;
-                  ctrl_signals.we_B = 1'b1;
-                end
-                LMr: begin
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.re_B = 1'b1;
-                end
-                OUT: begin
-                  // do nothing!
-                end
-                default: // do nothing!
-              endcase
+              LrM, ALUM, ALUI, INP, OUT, LrI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+                next_cycle = CYCLE2;
+                next_state = T1;
+              end
+              default: begin
+                next_state = Ready ? T4 : WAIT; // WAIT state
+              end
             endcase
-            end
-            T4: begin 
-              next_state = T5;
-
-              if (instr == INP) begin
-                ctrl_signals.we_DBR = 1'b1;
-                ctrl_signals.re_flags = 1'b1; // Write flags into output
+          end
+          T4: begin
+            unique case (instr)
+              Lr1r2, LMr, ALU_op: begin
+                // Deal with LrM case? No, it shouldn't get here
+                // Deal with other ALU cases? Nope, shouldn't get here
+                if (SSS == 3'b111) begin
+                end
+                else begin
+                  ctrl_signals.we_B = 1'b1;
+                  ctrl_signals.re_rf = 1'b1;
+                  ctrl_signals.sel_rf = SSS;
+                  ctrl_signals.we_DBR = 1'b1;
+                end
               end
-              // else do nothing!
-            end
-            T5: begin 
-              next_state = T1;
-              next_cycle = CYCLE1;
+              INr, DCr: begin 
+                // Deal with HALT case and mem case for INr/DCr? No, shouldn't get here
+                ctrl_signals.re_rf = 1'b1;
+                ctrl_signals.sel_rf = DDD;
+                ctrl_signals.we_A = 1'b1;
+              end
+              RLC, RRC, RAL, RAR: begin
+                // read Accum into A alu reg
+                ctrl_signals.re_rf = 1'b1;
+                ctrl_signals.sel_rf = A;
+                ctrl_signals.we_A = 1'b1;
+              end
+              RET: begin // Pop stack
+                ctrl_signals.inc_SP = 1'b0;
+                ctrl_signals.en_SP = 1'b1;
+              end
+              RFc, RTc: begin // Pop stack conditionally
+                ctrl_signals.inc_SP = 1'b0;
+                ctrl_signals.en_SP = ~CF;
+              end
+              RST: begin
+                ctrl_signals.re_A = 1'b1;
+                ctrl_signals.lower = 1'b0;
+                ctrl_signals.we_Stack = 1'b1;
+              end
+              default: begin
+                // Do nothing!
+              end
+            endcase
 
-              unique case (instr)
-                LrM, LRI, INP: begin
-                  ctrl_signals.re_B = 1'b1;
-                  ctrl_signals.sel_rf = instr == INP ? A : DDD;
-                  ctrl_signals.we_rf = 1'b1;
-                end
-                ALUM, ALUI: begin
-                  // Execute alu op and affect flags
-                  ctrl_signals.sel_rf = A;
-                  ctrl_signals.we_rf = 1'b1;
-                  ctrl_signals.alu_op = asdf;  // Set alu op based on instruction, add arith op?
-                end
-              endcase
-            end
-            default: begin
-              next_cycle = CYCLE1;
+            if (instr == LMr) begin
               next_state = T1;
+              next_cycle = CYCLE2;
             end
+            else begin
+              next_state = T5;
+            end
+          end
+          T5: begin
+            unique case (instr)
+              RST: begin
+                ctrl_signals.re_B = 1'b1;
+                ctrl_signals.we_Stack = 1'b1;
+                ctrl_signals.lower = 1'b1; // What to do here since only want D5-3?
+                ctrl_signals.D5_3 = 1'b1;
+              end
+              INr, DCr: begin
+                ctrl_signals.we_rf = 1'b1;
+                ctrl_signals.sel_rf = DDD;
+                ctrl_signals.alu_op = instr == INr ? ADD1 : SUB1;
+                ctrl_signals.en_flags = 1'b1;
+              end 
+              ALU_op: begin
+                ctrl_signals.we_rf = 1'b1;
+                ctrl_signals.sel_rf = A;
+                ctrl_signals.alu_op = ; // Enter ops for ALU commands
+                ctrl_signals.en_flags = 1'b1;
+              end
+              RLC, RRC, RAL, RAR: begin
+                ctrl_signals.we_rf = 1'b1;
+                ctrl_signals.sel_rf = A;
+                ctrl_signals.alu_op = ; // Enter ops for rotate commands
+                ctrl_signals.en_flags = 1'b1;
+              end
+              RET, RFc, RTc: // do nothing!
+              default: // do nothing!
+            endcase
+
+            next_state = T1;
+            next_cycle = CYCLE1;
+          end
+          default: begin
+            next_state = T1;
+            next_cycle = CYCLE1;
+          end
+        endcase
+      end
+      CYCLE2: begin
+        unique case (state)
+          T1, T1I: begin 
+            next_state = T2;
+
+            unique case (instr)
+              LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+                ctrl_signals.re_Stack = 1'b1;
+                ctrl_signals.lower = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.cycle_ctrl = PCR;
+
+                ctrl_signals.inc_PC = 1'b1;
+                ctrl_signals.en_PC = 1'b1;
+              end
+              LrM, LMr, ALUM: begin
+                ctrl_signals.re_rf = 1'b1;
+                ctrl_signals.sel_rf = L;
+                ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
+                ctrl_signals.we_DBR = 1'b1;
+              end
+              INP, OUT: begin
+                ctrl_signals.cycle_ctrl = PCC;
+                ctrl_signals.re_A = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+              end
+            endcase
+          end
+          T2: begin 
+            next_state = T3;
+
+            unique case (instr)
+              LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+                ctrl_signals.re_Stack = 1'b1;
+                ctrl_signals.lower = 1'b0;
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.cycle_ctrl = PCR;
+              end
+              LrM, LMr, ALUM: begin
+                ctrl_signals.re_rf = 1'b1;
+                ctrl_signals.sel_rf = H;
+                ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
+                ctrl_signals.we_DBR = 1'b1;
+              end
+              INP, OUT: begin
+                ctrl_signals.cycle_ctrl = PCC;
+                ctrl_signals.re_B = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+              end
+            endcase
+          end
+          T3, WAIT, STOPPED: begin 
+            unique case (instr)
+              OUT, LMr: begin
+                next_cycle = Ready ? CYCLE1 : CYCLE2;
+                next_state = Ready ? T1 : WAIT;
+              end
+              LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+                next_state = Ready ? T1 : WAIT;
+                next_cycle = Ready ? CYCLE3 : CYCLE2;
+              end
+              default: begin
+                next_state = Ready ? T4 : WAIT; // WAIT state
+            end
+
+            unique case (instr)
+              INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin 
+                // For control flow instructions, this is the lower address
+                ctrl_signals.re_DBR = 1'b1;
+                ctrl_signals.we_B = 1'b1;
+              end
+              LMr: begin
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.re_B = 1'b1;
+              end
+              OUT: begin
+                // do nothing!
+              end
+              default: // do nothing!
+            endcase
           endcase
-         end
-        CYCLE3: begin
-          unique case (state)
-            T1: begin 
-              next_state = T2;
+          end
+          T4: begin 
+            next_state = T5;
 
-              unique case (instr)
-                LMI: begin
-                  ctrl_signals.sel_rf = L;
-                  ctrl_signals.re_rf = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.cycle_ctrl = PCW;
-                end
-                JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  ctrl_signals.re_Stack = 1'b1;
-                  ctrl_signals.lower = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.cycle_ctrl = PCR;
-                end
-              endcase
+            if (instr == INP) begin
+              ctrl_signals.we_DBR = 1'b1;
+              ctrl_signals.re_flags = 1'b1; // Write flags into output
             end
-            T2: begin 
-              next_state = T3;
+            // else do nothing!
+          end
+          T5: begin 
+            next_state = T1;
+            next_cycle = CYCLE1;
 
-              unique case (instr)
-                LMI: begin
-                  ctrl_signals.sel_rf = H;
-                  ctrl_signals.re_rf = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.cycle_ctrl = PCW;
-                end
-                JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  ctrl_signals.re_Stack = 1'b1;
-                  ctrl_signals.lower = 1'b0;
-                  ctrl_signals.we_DBR = 1'b1;
-                  ctrl_signals.cycle_ctrl = PCR;
-                end
-              endcase
-            end
-            T3: begin 
-              unique case (instr)
-                LMI: begin
+            unique case (instr)
+              LrM, LRI, INP: begin
+                ctrl_signals.re_B = 1'b1;
+                ctrl_signals.sel_rf = instr == INP ? A : DDD;
+                ctrl_signals.we_rf = 1'b1;
+              end
+              ALUM, ALUI: begin
+                // Execute alu op and affect flags
+                ctrl_signals.sel_rf = A;
+                ctrl_signals.we_rf = 1'b1;
+                ctrl_signals.alu_op = asdf;  // Set alu op based on instruction, add arith op?
+              end
+            endcase
+          end
+          default: begin
+            next_cycle = CYCLE1;
+            next_state = T1;
+          end
+        endcase
+      end
+      CYCLE3: begin
+        unique case (state)
+          T1, T1I: begin 
+            next_state = T2;
+
+            unique case (instr)
+              LMI: begin
+                ctrl_signals.sel_rf = L;
+                ctrl_signals.re_rf = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.cycle_ctrl = PCW;
+              end
+              JMP, JFc, JTc, CAL, CTc, CFc: begin
+                ctrl_signals.re_Stack = 1'b1;
+                ctrl_signals.lower = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.cycle_ctrl = PCR;
+
+                ctrl_signals.inc_PC = 1'b1;
+                ctrl_signals.en_PC = 1'b1;
+              end
+            endcase
+          end
+          T2: begin 
+            next_state = T3;
+
+            unique case (instr)
+              LMI: begin
+                ctrl_signals.sel_rf = H;
+                ctrl_signals.re_rf = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.cycle_ctrl = PCW;
+              end
+              JMP, JFc, JTc, CAL, CTc, CFc: begin
+                ctrl_signals.re_Stack = 1'b1;
+                ctrl_signals.lower = 1'b0;
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.cycle_ctrl = PCR;
+              end
+            endcase
+          end
+          T3, WAIT, STOPPED: begin 
+            unique case (instr)
+              LMI: begin
+                next_state = T1;
+                next_cycle = CYCLE1;
+              end
+              JTc, JFc, CFc, CTc: begin
+                if (CF) begin
                   next_state = T1;
                   next_cycle = CYCLE1;
                 end
-                JTc, JFc, CFc, CTc: begin
-                  if (CF) begin
-                    next_state = T1;
-                    next_cycle = CYCLE1;
-                  end
-                  else begin
-                    next_state = Ready ? T4 : T3; // WAIT state
-                  end
+                else begin
+                  next_state = Ready ? T4 : WAIT; // WAIT state
                 end
-                default: next_state = Ready ? T4 : T3; // WAIT state
-              endcase
+              end
+              default: next_state = Ready ? T4 : WAIT; // WAIT state
+            endcase
 
-              unique case (instr)
-                LMI: begin
-                  ctrl_signals.re_B = 1'b1;
-                  ctrl_signals.we_DBR = 1'b1;
-                end
-                JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  ctrl_signals.we_A = 1'b1;
-                  ctrl_signals.re_DBR = 1'b1;
-                end
-              endcase
-            end
-            T4: begin
-              next_state = T5;
+            unique case (instr)
+              LMI: begin
+                ctrl_signals.re_B = 1'b1;
+                ctrl_signals.we_DBR = 1'b1;
+              end
+              JMP, JFc, JTc, CAL, CTc, CFc: begin
+                ctrl_signals.we_A = 1'b1;
+                ctrl_signals.re_DBR = 1'b1;
+              end
+            endcase
+          end
+          T4: begin
+            next_state = T5;
 
-              unique case (instr)
-                CAL, CTc, CFc: begin // Is there an issue where the stack isn't pushed early enough?
-                  ctrl_signals.re_A = 1'b1;
-                  ctrl_signals.we_Stack = ((instr == CAL) | ~CF);
-                  ctrl_signals.lower = 1'b0;
-                  ctrl_signals.inc_SP = 1'b1;
-                  ctrl_signals.en_SP = ((instr == CAL) | ~CF);
-                end
-                JMP, JFc, JTc: begin
-                  ctrl_signals.re_A = 1'b1;
-                  ctrl_signals.we_Stack = ((instr == JMP) | ~CF);
-                  ctrl_signals.lower = 1'b0;
-                end
-              endcase
-            end
-            T5: begin 
-              next_state = T1;
-              next_cycle = CYCLE1;
+            unique case (instr)
+              CAL, CTc, CFc: begin // Is there an issue where the stack isn't pushed early enough?
+                ctrl_signals.re_A = 1'b1;
+                ctrl_signals.we_Stack = ((instr == CAL) | ~CF);
+                ctrl_signals.lower = 1'b0;
+                ctrl_signals.inc_SP = 1'b1;
+                ctrl_signals.en_SP = ((instr == CAL) | ~CF);
+              end
+              JMP, JFc, JTc: begin
+                ctrl_signals.re_A = 1'b1;
+                ctrl_signals.we_Stack = ((instr == JMP) | ~CF);
+                ctrl_signals.lower = 1'b0;
+              end
+            endcase
+          end
+          T5: begin 
+            next_state = T1;
+            next_cycle = CYCLE1;
 
-              unique case (instr)
-                CAL, CTc, CFc, JMP, JFc, JTc: begin // Is there an issue where the stack isn't pushed early enough?
-                  ctrl_signals.re_B = 1'b1;
-                  ctrl_signals.we_Stack = 1'b1;
-                  ctrl_signals.lower = 1'b1;
-                end
-              endcase
-            end
-            default: begin
-              next_state = T1;
-              next_cycle = CYCLE1;
-            end
-          endcase
-         end
-        default: begin
-          next_state = T1;
-          next_cycle = CYCLE1;
-        end
-      endcase
-   end
+            unique case (instr)
+              CAL, CTc, CFc, JMP, JFc, JTc: begin // Is there an issue where the stack isn't pushed early enough?
+                ctrl_signals.re_B = 1'b1;
+                ctrl_signals.we_Stack = 1'b1;
+                ctrl_signals.lower = 1'b1;
+              end
+            endcase
+          end
+          default: begin
+            next_state = T1;
+            next_cycle = CYCLE1;
+          end
+        endcase
+      end
+      default: begin
+        next_state = T1;
+        next_cycle = CYCLE1;
+      end
+    endcase
+  end
 
 
   always_ff @(posedge clk) begin
