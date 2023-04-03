@@ -60,11 +60,14 @@ typedef enum logic [2:0] {
     AND,            // Logical And
     XOR,            // Exclusive Or
     OR,             // Inclusive Or
-    RLC,             // Rotate
+} alu_op_t;
+
+typedef enum logic [2:0] {
+    RLC,
     RRC,
     RAL,
     RAR
-} alu_op_t;
+} arith_op_t;
 
 typedef struct packed {
     logic we_DBR;                  // Enable Data Buffer Reg
@@ -97,6 +100,9 @@ typedef struct packed {
 
     logic we_Stack;                //
     logic re_Stack;                //
+    logic lower;
+
+    cycle_ctrl_t cycle_ctrl;
 } ctrl_signals_t;
 
 `endif INTERNAL_DEFINES_VH_

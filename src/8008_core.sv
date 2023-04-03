@@ -13,6 +13,7 @@ module 8008_core
 
   logic [WIDTH-1:0] bus;
   logic [WIDTH-1:0] instr;
+  logic enable_SP;
 
   // // State logic
   cycle_t cycle;
@@ -44,7 +45,8 @@ module 8008_core
   
   reg_file #(.WIDTH(DATA_WIDTH), .HEIGHT(7)) rf (.bus, .sel(sel_rf), .we(we_rf), .re(re_rf), .clk());
 
-  Counter #(.WIDTH($clog2(STACK_HEIGHT))) (.en(en_SP), .clear(clr_SP), .load('d0), .up(inc_SP), .clock(), .D('d0), .Q(sel_Stack));
+  assign enable_SP = en_SP & ~((sel_Stack == 'd0) & ~inc_SP);
+  Counter #(.WIDTH($clog2(STACK_HEIGHT))) (.en(enable_SP), .clear(clr_SP), .load('d0), .up(inc_SP), .clock(), .D('d0), .Q(sel_Stack));
   stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack (.bus, .sel(sel_Stack), .we(we_Stack), .re(re_Stack), .clk(), .lower());
 
   fsm controller (.state, .cycle, .clk());
@@ -61,6 +63,8 @@ module ALU
   logic [WIDTH-1:0] art_tmp;
 
   flags_t add_flags, art_flags;
+
+  // TODO: reformat ALU so can input separate ALU/arith ops
 
   Register #(.WIDTH($bits(flags_t))) flag_reg (.D(flag_in), .Q(flag_out), .clock(), .en(en_Flag), .clear(clr_Flag));
 
@@ -178,6 +182,8 @@ module fsm_decoder
               ctrl_signals.we_DBR = 1'b1;
               ctrl_signals.re_Stack = 1'b1;
               ctrl_signals.lower_Stack = PC_H;
+
+              ctrl_signals.cycle_ctrl = PCI;
             end
             T3: begin
               if (instr == RST) begin
@@ -257,8 +263,8 @@ module fsm_decoder
                 end
                 RST: begin
                   ctrl_signals.re_A = 1'b1;
-                  ctrl_signals.sel_rf = H;
-                  ctrl_signals.we_rf = 1'b1;
+                  ctrl_signals.lower = 1'b0;
+                  ctrl_signals.we_Stack = 1'b1;
                 end
                 default: begin
                   // Do nothing!
@@ -277,8 +283,9 @@ module fsm_decoder
               unique case (instr)
                 RST: begin
                   ctrl_signals.re_B = 1'b1;
-                  ctrl_signals.sel_rf = L;
-                  ctrl_signals.we_rf = 1'b1;
+                  ctrl_signals.we_Stack = 1'b1;
+                  ctrl_signals.lower = 1'b1; // What to do here since only want D5-3?
+                  ctrl_signals.D5_3 = 1'b1;
                 end
                 INr, DCr: begin
                   ctrl_signals.we_rf = 1'b1;
@@ -315,31 +322,107 @@ module fsm_decoder
           unique case (state)
             T1: begin 
               next_state = T2;
+
+              unique case (instr)
+                LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+                  ctrl_signals.re_Stack = 1'b1;
+                  ctrl_signals.lower = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.cycle_ctrl = PCR;
+                end
+                LrM, LMr, ALUM: begin
+                  ctrl_signals.re_rf = 1'b1;
+                  ctrl_signals.sel_rf = L;
+                  ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
+                  ctrl_signals.we_DBR = 1'b1;
+                end
+                INP, OUT: begin
+                  ctrl_signals.cycle_ctrl = PCC;
+                  ctrl_signals.re_A = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                end
+              endcase
             end
             T2: begin 
               next_state = T3;
+
+              unique case (instr)
+                LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+                  ctrl_signals.re_Stack = 1'b1;
+                  ctrl_signals.lower = 1'b0;
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.cycle_ctrl = PCR;
+                end
+                LrM, LMr, ALUM: begin
+                  ctrl_signals.re_rf = 1'b1;
+                  ctrl_signals.sel_rf = H;
+                  ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
+                  ctrl_signals.we_DBR = 1'b1;
+                end
+                INP, OUT: begin
+                  ctrl_signals.cycle_ctrl = PCC;
+                  ctrl_signals.re_B = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                end
+              endcase
             end
             T3: begin 
               unique case (instr)
                 OUT, LMr: begin
-                  next_cycle = CYCLE1;
-                  next_state = T1;
+                  next_cycle = Ready ? CYCLE1 : CYCLE2;
+                  next_state = Ready ? T1 : T3;
                 end
                 LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin
-                  next_state = T1; 
-                  next_cycle = CYCLE3;
+                  next_state = Ready ? T1 : T3;
+                  next_cycle = Ready ? CYCLE3 : CYCLE2;
                 end
                 default: begin
                   next_state = Ready ? T4 : T3; // WAIT state
               end
+
+              unique case (instr)
+                INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin 
+                  // For control flow instructions, this is the lower address
+                  ctrl_signals.re_DBR = 1'b1;
+                  ctrl_signals.we_B = 1'b1;
+                end
+                LMr: begin
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.re_B = 1'b1;
+                end
+                OUT: begin
+                  // do nothing!
+                end
+                default: // do nothing!
+              endcase
             endcase
             end
             T4: begin 
               next_state = T5;
+
+              if (instr == INP) begin
+                ctrl_signals.we_DBR = 1'b1;
+                ctrl_signals.re_flags = 1'b1; // Write flags into output
+              end
+              // else do nothing!
             end
             T5: begin 
               next_state = T1;
               next_cycle = CYCLE1;
+
+              unique case (instr)
+                LrM, LRI, INP: begin
+                  ctrl_signals.re_B = 1'b1;
+                  ctrl_signals.sel_rf = instr == INP ? A : DDD;
+                  ctrl_signals.we_rf = 1'b1;
+                end
+                ALUM, ALUI: begin
+                  // Execute alu op and affect flags
+                  ctrl_signals.sel_rf = A;
+                  ctrl_signals.we_rf = 1'b1;
+                  ctrl_signals.alu_op = asdf;  // Set alu op based on instruction, add arith op?
+                end
+              endcase
             end
             default: begin
               next_cycle = CYCLE1;
@@ -351,9 +434,39 @@ module fsm_decoder
           unique case (state)
             T1: begin 
               next_state = T2;
+
+              unique case (instr)
+                LMI: begin
+                  ctrl_signals.sel_rf = L;
+                  ctrl_signals.re_rf = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.cycle_ctrl = PCW;
+                end
+                JMP, JFc, JTc, CAL, CTc, CFc: begin
+                  ctrl_signals.re_Stack = 1'b1;
+                  ctrl_signals.lower = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.cycle_ctrl = PCR;
+                end
+              endcase
             end
             T2: begin 
               next_state = T3;
+
+              unique case (instr)
+                LMI: begin
+                  ctrl_signals.sel_rf = H;
+                  ctrl_signals.re_rf = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.cycle_ctrl = PCW;
+                end
+                JMP, JFc, JTc, CAL, CTc, CFc: begin
+                  ctrl_signals.re_Stack = 1'b1;
+                  ctrl_signals.lower = 1'b0;
+                  ctrl_signals.we_DBR = 1'b1;
+                  ctrl_signals.cycle_ctrl = PCR;
+                end
+              endcase
             end
             T3: begin 
               unique case (instr)
@@ -372,13 +485,47 @@ module fsm_decoder
                 end
                 default: next_state = Ready ? T4 : T3; // WAIT state
               endcase
+
+              unique case (instr)
+                LMI: begin
+                  ctrl_signals.re_B = 1'b1;
+                  ctrl_signals.we_DBR = 1'b1;
+                end
+                JMP, JFc, JTc, CAL, CTc, CFc: begin
+                  ctrl_signals.we_A = 1'b1;
+                  ctrl_signals.re_DBR = 1'b1;
+                end
+              endcase
             end
             T4: begin
               next_state = T5;
+
+              unique case (instr)
+                CAL, CTc, CFc: begin // Is there an issue where the stack isn't pushed early enough?
+                  ctrl_signals.re_A = 1'b1;
+                  ctrl_signals.we_Stack = ((instr == CAL) | ~CF);
+                  ctrl_signals.lower = 1'b0;
+                  ctrl_signals.inc_SP = 1'b1;
+                  ctrl_signals.en_SP = ((instr == CAL) | ~CF);
+                end
+                JMP, JFc, JTc: begin
+                  ctrl_signals.re_A = 1'b1;
+                  ctrl_signals.we_Stack = ((instr == JMP) | ~CF);
+                  ctrl_signals.lower = 1'b0;
+                end
+              endcase
             end
             T5: begin 
               next_state = T1;
               next_cycle = CYCLE1;
+
+              unique case (instr)
+                CAL, CTc, CFc, JMP, JFc, JTc: begin // Is there an issue where the stack isn't pushed early enough?
+                  ctrl_signals.re_B = 1'b1;
+                  ctrl_signals.we_Stack = 1'b1;
+                  ctrl_signals.lower = 1'b1;
+                end
+              endcase
             end
             default: begin
               next_state = T1;
@@ -398,7 +545,7 @@ module fsm_decoder
     if (rst) begin
       cycle <= CYCLE1;
       state <= T1;
-      // RESET ctrl_sginals as well?
+      // RESET ctrl_signals as well?
     end
     else begin
       cycle <= next_cycle;
