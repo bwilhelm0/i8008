@@ -45,25 +45,30 @@ typedef struct packed {
     logic clear;
 } reg_ctrl_t;
 
-typedef enum logic [1:0] {
-    C = 2'b00,      // Carry
-    Z = 2'b01,      // Zero
-    S = 2'b10,      // Sign
-    P = 2'b11       // Parity
+typedef struct packed [3:0] {
+    logic CARRY,
+    logic ZERO,
+    logic SIGN,
+    logic PARITY
 } flags_t;
 
 typedef enum logic [2:0] {
-    ADD,            // Addition
+    ADD = 'd0,            // Addition
+    ADDC,            // Addition
     SUB,            // Subtraction
+    SUBC,            // Subtraction
     AND,            // Logical And
     XOR,            // Exclusive Or
     OR,             // Inclusive Or
-    COMP,           // Compare
-    ROT             // Rotate
+    RLC,             // Rotate
+    RRC,
+    RAL,
+    RAR
 } alu_op_t;
 
 typedef struct packed {
-    logic en_DBR;                  // Enable Data Buffer Reg
+    logic we_DBR;                  // Enable Data Buffer Reg
+    logic re_DBR;
     logic clr_DBR;                 //
 
     logic en_IR;                   //
@@ -73,6 +78,8 @@ typedef struct packed {
     logic re_B;                    //
     logic we_A;                    //
     logic we_B;                    //
+    logic clr_A;
+    logic clr_B;
 
     logic re_ALU;                  //
     alu_op_t alu_op;               // Operation for ALU to perform
@@ -80,7 +87,7 @@ typedef struct packed {
     logic en_Flag;                 // Enable flags from ALU
     logic clr_Flag;                //
 
-    logic [DATA_WIDTH-1:0] sel_rf; //
+    logic [$clog2(DATA_WIDTH)-1:0] sel_rf; //
     logic re_rf;                   //
     logic we_rf;                   //
 
