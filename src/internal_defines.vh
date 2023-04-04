@@ -1,7 +1,7 @@
 `ifndef INTERNAL_DEFINES_VH_
 `define INTERNAL_DEFINES_VH_
 
-'define DATA_WIDTH = 8;
+`define DATA_WIDTH = 8;
 
 // The current state of proc, also to be output
 typedef enum logic [2:0] {
@@ -40,38 +40,38 @@ typedef enum logic [2:0] {
     ILLEGAL = 3'd7  // Cannot use this, reserved for instructions
 } reg_t;
 
-typedef struct packed [3:0] {
-    logic CARRY,
-    logic ZERO,
-    logic SIGN,
-    logic PARITY
+typedef struct packed {
+    logic CARRY;
+    logic ZERO;
+    logic SIGN;
+    logic PARITY;
 } flags_t;
 
 typedef enum logic [1:0] {
-    C = 2'b00,
+    Ca = 2'b00,
     Z = 2'b01,
     S = 2'b10,
     P = 2'b11
 } flag_enc_t;
 
 typedef enum logic [2:0] {
-    ADD = 3'b000,            // Addition
-    ADDC = 3'b001,            // Addition
-    SUB = 3'b010,            // Subtraction
-    SUBC = 3'b011,            // Subtraction
-    AND = 3'b100,            // Logical And
-    XOR = 3'b101,            // Exclusive Or
-    OR = 3'b110,             // Inclusive Or
-    CMP = 3'b111
+    ADD_op = 3'b000,            // Addition
+    ADDC_op = 3'b001,            // Addition
+    SUB_op = 3'b010,            // Subtraction
+    SUBC_op = 3'b011,            // Subtraction
+    AND_op = 3'b100,            // Logical And
+    XOR_op = 3'b101,            // Exclusive Or
+    OR_op = 3'b110,             // Inclusive Or
+    CMP_op = 3'b111
 } alu_op_t;
 
 typedef enum logic [2:0] {
-    RLC = 3'b000,
-    RRC = 3'b001,
-    RAL = 3'b010,
-    RAR = 3'b011,
-    ADD1,
-    SUB1
+    RLC_op = 3'b000,
+    RRC_op = 3'b001,
+    RAL_op = 3'b010,
+    RAR_op = 3'b011,
+    ADD1_op,
+    SUB1_op
 } arith_op_t;
 
 typedef struct packed {
@@ -90,7 +90,7 @@ typedef struct packed {
 } ALU_ctrl_t;
 
 typedef struct packed {
-    logic [$clog2(DATA_WIDTH)-1:0] sel; //
+    logic [2:0] sel; //
     logic re;                   //
     logic we;                   //
 } rf_ctrl_t;
@@ -128,4 +128,4 @@ typedef struct packed {
     Stack_ctrl_t Stack_ctrl;
 } ctrl_signals_t;
 
-`endif INTERNAL_DEFINES_VH_
+`endif

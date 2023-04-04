@@ -1,104 +1,104 @@
 `default_nettype none
 
 // Module for choosing a high output line
-module Decoder
- #(parameter WIDTH = 8,
-             IW = $clog2(WIDTH))
-  (input logic [IW-1:0] I,
-   input logic en,
-   output logic [WIDTH-1:0] D);
+// module Decoder
+//  #(parameter WIDTH = 8,
+//              IW = $clog2(WIDTH))
+//   (input logic [IW-1:0] I,
+//    input logic en,
+//    output logic [WIDTH-1:0] D);
 
-  assign D = en ? ('d1 << I) : 'd0;
+//   assign D = en ? ('d1 << I) : 'd0;
 
-endmodule: Decoder
+// endmodule: Decoder
 
 // Module for shifting by 0-3
-module BarrelShifter
-  #(parameter WIDTH = 16,
-              byW = $clog2(WIDTH))
-  (input logic [WIDTH-1:0] V,
-   input logic [byW-1:0] by,
-   output logic [WIDTH-1:0] S);
+// module BarrelShifter
+//   #(parameter WIDTH = 16,
+//               byW = $clog2(WIDTH))
+//   (input logic [WIDTH-1:0] V,
+//    input logic [byW-1:0] by,
+//    output logic [WIDTH-1:0] S);
 
-  assign S = V << by;
+//   assign S = V << by;
 
-endmodule: BarrelShifter
+// endmodule: BarrelShifter
 
 // Module for choosing one of the input bits
-module Multiplexer
-  #(parameter WIDTH = 8,
-              SW = $clog2(WIDTH))
-  (input logic [WIDTH-1:0] I,
-   input logic [SW-1:0] S,
-   output logic Y);
+// module Multiplexer
+//   #(parameter WIDTH = 8,
+//               SW = $clog2(WIDTH))
+//   (input logic [WIDTH-1:0] I,
+//    input logic [SW-1:0] S,
+//    output logic Y);
 
-  logic [WIDTH-1:0] X;
+//   logic [WIDTH-1:0] X;
 
-  assign X = (I >> S);
-  assign Y = X[0];
+//   assign X = (I >> S);
+//   assign Y = X[0];
 
-endmodule: Multiplexer
+// endmodule: Multiplexer
 
 // Choose between two inputs
-module Mux2to1
-  #(parameter WIDTH = 8)
-  (input logic [WIDTH-1:0] I0, I1,
-   input logic S,
-   output logic [WIDTH-1:0] Y);
+// module Mux2to1
+//   #(parameter WIDTH = 8)
+//   (input logic [WIDTH-1:0] I0, I1,
+//    input logic S,
+//    output logic [WIDTH-1:0] Y);
 
-  assign Y = S ? I1 : I0;
+//   assign Y = S ? I1 : I0;
 
-endmodule: Mux2to1
+// endmodule: Mux2to1
 
 // Outputs relative info about two numbers
-module MagComp
-  #(parameter WIDTH = 8)
-  (input logic [WIDTH-1:0] A, B,
-   output logic AltB, AeqB, AgtB);
+// module MagComp
+//   #(parameter WIDTH = 8)
+//   (input logic [WIDTH-1:0] A, B,
+//    output logic AltB, AeqB, AgtB);
 
-  assign AltB = (A < B);
-  assign AeqB = (A == B);
-  assign AgtB = (A > B);
+//   assign AltB = (A < B);
+//   assign AeqB = (A == B);
+//   assign AgtB = (A > B);
 
-endmodule: MagComp
+// endmodule: MagComp
 
 // Outputs if two numbers are equal
-module Comparator
-  #(parameter WIDTH = 8)
-  (input logic [WIDTH-1:0] A, B,
-   output logic AeqB);
+// module Comparator
+//   #(parameter WIDTH = 8)
+//   (input logic [WIDTH-1:0] A, B,
+//    output logic AeqB);
 
-   assign AeqB = (A == B);
+//    assign AeqB = (A == B);
 
-endmodule: Comparator
+// endmodule: Comparator
 
 // Module for adding two number with carry in and out
-module Adder
-  #(parameter WIDTH = 8)
-  (input logic [WIDTH-1:0] A, B,
-   input logic cin,
-   output logic [WIDTH-1:0] sum,
-   output logic cout);
+// module Adder
+//   #(parameter WIDTH = 8)
+//   (input logic [WIDTH-1:0] A, B,
+//    input logic cin,
+//    output logic [WIDTH-1:0] sum,
+//    output logic cout);
 
-  assign {cout, sum} = A + B + cin;
+//   assign {cout, sum} = A + B + cin;
 
-endmodule: Adder
+// endmodule: Adder
 
 // Module for storing a single bit
-module DFlipFlop
-  (input logic D, clock, reset_L, preset_L,
-   output logic Q);
+// module DFlipFlop
+//   (input logic D, clock, reset_L, preset_L,
+//    output logic Q);
 
-  always_ff @(posedge clock, negedge reset_L, negedge preset_L) begin
-    if(~reset_L)
-      Q <= 1'b0;
-    else if(~preset_L)
-      Q <= 1'b1;
-    else
-      Q <= D;
-  end
+//   always_ff @(posedge clock, negedge reset_L, negedge preset_L) begin
+//     if(~reset_L)
+//       Q <= 1'b0;
+//     else if(~preset_L)
+//       Q <= 1'b1;
+//     else
+//       Q <= D;
+//   end
 
-endmodule: DFlipFlop
+// endmodule: DFlipFlop
 
 module Stabilizer
   (input logic D, clock,
@@ -229,27 +229,27 @@ module BarrelShiftRegister
 endmodule: BarrelShiftRegister
 
 // Module for storing large amounts of information
-module Memory
- #(parameter DW = 16,
-             AW = 8,
-              W = 1 << AW)
-  (input logic re, we, clock,
-   input logic [AW-1:0] addr,
-   inout tri   [DW-1:0] data);
+// module Memory
+//  #(parameter DW = 16,
+//              AW = 8,
+//               W = 1 << AW)
+//   (input logic re, we, clock,
+//    input logic [AW-1:0] addr,
+//    inout tri   [DW-1:0] data);
 
-  logic [DW-1:0] M[W];
-  logic [DW-1:0] rData;
+//   logic [DW-1:0] M[W];
+//   logic [DW-1:0] rData;
 
-  assign data = (re) ? rData: 'bz;
+//   assign data = (re) ? rData: 'bz;
 
-  always_ff @(posedge clock)
-    if (we)
-      M[addr] <= data;
+//   always_ff @(posedge clock)
+//     if (we)
+//       M[addr] <= data;
 
-  always_comb
-    rData = M[addr];
+//   always_comb
+//     rData = M[addr];
 
-endmodule: Memory
+// endmodule: Memory
 
 // Intermediary driver for shared data line
 module BusDriver
