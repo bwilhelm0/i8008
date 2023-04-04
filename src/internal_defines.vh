@@ -40,11 +40,6 @@ typedef enum logic [2:0] {
     ILLEGAL = 3'd7  // Cannot use this, reserved for instructions
 } reg_t;
 
-typedef struct packed {
-    logic en;
-    logic clear;
-} reg_ctrl_t;
-
 typedef struct packed [3:0] {
     logic CARRY,
     logic ZERO,
@@ -52,57 +47,85 @@ typedef struct packed [3:0] {
     logic PARITY
 } flags_t;
 
+typedef enum logic [1:0] {
+    C = 2'b00,
+    Z = 2'b01,
+    S = 2'b10,
+    P = 2'b11
+} flag_enc_t;
+
 typedef enum logic [2:0] {
-    ADD = 'd0,            // Addition
-    ADDC,            // Addition
-    SUB,            // Subtraction
-    SUBC,            // Subtraction
-    AND,            // Logical And
-    XOR,            // Exclusive Or
-    OR,             // Inclusive Or
+    ADD = 3'b000,            // Addition
+    ADDC = 3'b001,            // Addition
+    SUB = 3'b010,            // Subtraction
+    SUBC = 3'b011,            // Subtraction
+    AND = 3'b100,            // Logical And
+    XOR = 3'b101,            // Exclusive Or
+    OR = 3'b110,             // Inclusive Or
+    CMP = 3'b111
 } alu_op_t;
 
 typedef enum logic [2:0] {
-    RLC,
-    RRC,
-    RAL,
-    RAR
+    RLC = 3'b000,
+    RRC = 3'b001,
+    RAL = 3'b010,
+    RAR = 3'b011,
+    ADD1,
+    SUB1
 } arith_op_t;
 
 typedef struct packed {
-    logic we_DBR;                  // Enable Data Buffer Reg
-    logic re_DBR;
-    logic clr_DBR;                 //
+    logic re;                    //
+    logic we;                    //
+    logic clr;
+} reg_ctrl_t;
 
-    logic en_IR;                   //
-    logic clr_IR;                  //
-
-    logic re_A;                    //
-    logic re_B;                    //
-    logic we_A;                    //
-    logic we_B;                    //
-    logic clr_A;
-    logic clr_B;
-
-    logic re_ALU;                  //
+typedef struct packed {
+    logic re;                  //
     alu_op_t alu_op;               // Operation for ALU to perform
+    arith_op_t arith_op;
+    logic ARITH;
+    logic en_Flag;
+    logic clr_Flag;
+} ALU_ctrl_t;
 
-    logic en_Flag;                 // Enable flags from ALU
-    logic clr_Flag;                //
+typedef struct packed {
+    logic [$clog2(DATA_WIDTH)-1:0] sel; //
+    logic re;                   //
+    logic we;                   //
+} rf_ctrl_t;
 
-    logic [$clog2(DATA_WIDTH)-1:0] sel_rf; //
-    logic re_rf;                   //
-    logic we_rf;                   //
-
+typedef struct packed {
     logic en_SP;                   //
     logic clr_SP;                  //
     logic inc_SP;                  //
+} SP_ctrl_t;
 
+typedef struct packed {
     logic we_Stack;                //
     logic re_Stack;                //
     logic lower;
+    logic inc_PC;
+    logic D5_3;
 
     cycle_ctrl_t cycle_ctrl;
+} Stack_ctrl_t;
+
+typedef struct packed {
+    reg_ctrl_t DBR;
+
+    reg_ctrl_t IR;
+
+    reg_ctrl_t A;
+    reg_ctrl_t B;
+    reg_ctrl_t flags;
+
+    ALU_ctrl_t ALU;
+
+    rf_ctrl_t rf_ctrl;
+
+    SP_ctrl_t SP_ctrl;
+    Stack_ctrl_t Stack_ctrl;
 } ctrl_signals_t;
 
 `endif INTERNAL_DEFINES_VH_
