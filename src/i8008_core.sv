@@ -1,5 +1,5 @@
 `include "internal_defines.vh"
-`include "8008_isa.vh"
+`include "i8008_isa.vh"
 
 `default_nettype none
 
@@ -43,9 +43,9 @@ module top (
   assign READY = sw[9];
   assign clk = clk100;
   assign rst = ~reset_n;
-  assign D_out = chip_outputs[7:0];
-  assign Sync = chip_outputs[8];
-  assign state = chip_outputs[11:9];
+  assign chip_outputs[7:0] = D_out;
+  assign chip_outputs[8] = Sync;
+  assign chip_outputs[11:9] = state;
   assign chip_inputs[9:0] = sw[9:0];
 
   i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT 
@@ -65,10 +65,10 @@ module i8008_core
    output logic Sync,
    output state_t state);
 
-  logic [7:0] bus;
+  tri [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, Intr, DBR_D, DBR_en;
-  logic [7:0] A_in, A_out, B_in, B_out, ALU_out;
+  logic enable_SP, Ready, Intr, DBR_en;
+  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
   logic [2:0] sel_Stack;
@@ -88,12 +88,12 @@ module i8008_core
   // But since there's 8 ins and outs, use buffer for out
   // Connect DBR enable to Ready?? Done, now external mem can write to reg
   // I think add an in, and out buffer for ease of use
-  BusDriver #(.WIDTH(WIDTH)) DBRdriver (.en(ctrl_signals.DBR.re), .data(B_out), .buff(B_in), .bus);
+  BusDriver #(.WIDTH(WIDTH)) DBRdriver (.en(ctrl_signals.DBR.re), .data(DBR_out), .buff(DBR_in), .bus);
 
-  assign DBR_D = Ready ? D_in : bus;
+  assign DBR_D = Ready ? DBR_in : bus;
   assign DBR_en = Ready | ctrl_signals.DBR.we;
 
-  Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(D_out), .clk, .en(DBR_en), .clear(ctrl_signals.DBR.clr));  // Enable is tied to ready or a ctrl signal
+  Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(ctrl_signals.DBR.clr));  // Enable is tied to ready or a ctrl signal
   Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(ctrl_signals.IR.clr));
 
   BusDriver #(.WIDTH(WIDTH)) Adriver (.en(ctrl_signals.A.re), .data(A_out), .buff(A_in), .bus);
@@ -106,9 +106,9 @@ module i8008_core
 
   reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .bus, .rf_ctrl(ctrl_signals.rf_ctrl));
 
-  assign enable_SP = ctrl_signals.SP_ctrl.en_SP & ~((sel_Stack == 'd0) & ~ctrl_signals.SP_ctrl.inc_SP);
-  Counter #(.WIDTH($clog2(STACK_HEIGHT))) SP_SEL
-    (.load('d0), .clk, .d('d0), .Q(sel_Stack),
+  assign enable_SP = ctrl_signals.SP_ctrl.en_SP & ~((sel_Stack == 3'd0) & ~ctrl_signals.SP_ctrl.inc_SP);
+  Counter #(.WIDTH(3)) SP_SEL
+    (.load(1'd0), .clk, .d(3'd0), .Q(sel_Stack),
     .en(enable_SP), 
     .clear(ctrl_signals.SP_ctrl.clr_SP), 
     .up(ctrl_signals.SP_ctrl.inc_SP));
@@ -135,7 +135,7 @@ module ALU
 
   logic [7:0] NA;
 
-  Register #(.WIDTH(4)) 
+  FlagRegister #(.WIDTH(4)) 
     flag_reg (.d(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(ALU_ctrl.clr_Flag));
 
   always_comb begin
@@ -353,6 +353,7 @@ module fsm_decoder
               ALU_op: begin
                 ctrl_signals.rf_ctrl.we = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Acc;
+                //ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for ALU commands
                 ctrl_signals.ALU.alu_op = D5_3; // Enter ops for ALU commands
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
@@ -360,7 +361,8 @@ module fsm_decoder
               end
               RLC, RRC, RAL, RAR: begin
                 ctrl_signals.rf_ctrl.we = 1'b1;
-                ctrl_signals.rf_ctrl.sel = A;
+                ctrl_signals.rf_ctrl.sel = Acc;
+                //ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for rotate commands
                 ctrl_signals.ALU.alu_op = D5_3; // Enter ops for rotate commands
                 ctrl_signals.ALU.ARITH = 1'b1;
                 ctrl_signals.ALU.re = 1'b1;
@@ -483,6 +485,7 @@ module fsm_decoder
                 // Execute alu op and affect flags
                 ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.rf_ctrl.we = 1'b1;
+                //ctrl_signals.ALU.alu_op = alu_op_t'(D5_3);  // Set alu op based on instruction, add arith op?
                 ctrl_signals.ALU.alu_op = D5_3;  // Set alu op based on instruction, add arith op?
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
@@ -694,7 +697,7 @@ module Stabilizer
    output logic Q);
   logic temp;
 
-  always_ff @(posedge clock) begin
+  always_ff @(posedge clk) begin
     temp <= d;
     Q <= temp;
   end
@@ -707,13 +710,27 @@ module Register
    input logic [7:0] d,
    output logic [7:0] Q);
 
-  always_ff @(posedge clock) begin
+  always_ff @(posedge clk) begin
     if (en)
       Q <= d;
     else if (clear)
       Q <= 'd0;
   end
 endmodule: Register
+
+module FlagRegister
+ #(parameter WIDTH = 4)
+  (input logic en, clear, clk,
+   input logic [3:0] d,
+   output logic [3:0] Q);
+
+  always_ff @(posedge clk) begin
+    if (en)
+      Q <= d;
+    else if (clear)
+      Q <= 'd0;
+  end
+endmodule: FlagRegister
 
 module BusDriver
  #(parameter WIDTH = 8)
@@ -728,12 +745,12 @@ module BusDriver
 endmodule: BusDriver
 
 module Counter
- #(parameter WIDTH = 8)
+ #(parameter WIDTH = 3)
   (input logic en, clear, load, up, clk,
-   input logic [7:0] d,
-   output logic [7:0] Q);
+   input logic [2:0] d,
+   output logic [2:0] Q);
 
-   always_ff @(posedge clock) begin
+   always_ff @(posedge clk) begin
      if (clear)
        Q <= 'd0;
      else if (load)

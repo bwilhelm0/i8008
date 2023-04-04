@@ -64,7 +64,7 @@
         }
       },
       "cells": {
-        "$specify$1229": {
+        "$specify$1230": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -95,7 +95,7 @@
             "SRC": [ 6 ]
           }
         },
-        "$specify$1230": {
+        "$specify$1231": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -126,7 +126,7 @@
             "SRC": [ 2 ]
           }
         },
-        "$specify$1231": {
+        "$specify$1232": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -157,7 +157,7 @@
             "SRC": [ 2 ]
           }
         },
-        "$specify$1232": {
+        "$specify$1233": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -188,7 +188,7 @@
             "SRC": [ 3 ]
           }
         },
-        "$specify$1233": {
+        "$specify$1234": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -219,7 +219,7 @@
             "SRC": [ 3 ]
           }
         },
-        "$specify$1234": {
+        "$specify$1235": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -250,7 +250,7 @@
             "SRC": [ 3 ]
           }
         },
-        "$specify$1235": {
+        "$specify$1236": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -281,7 +281,7 @@
             "SRC": [ 4 ]
           }
         },
-        "$specify$1236": {
+        "$specify$1237": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -312,7 +312,7 @@
             "SRC": [ 4 ]
           }
         },
-        "$specify$1237": {
+        "$specify$1238": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -343,7 +343,7 @@
             "SRC": [ 4 ]
           }
         },
-        "$specify$1238": {
+        "$specify$1239": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -374,7 +374,7 @@
             "SRC": [ 5 ]
           }
         },
-        "$specify$1239": {
+        "$specify$1240": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -405,7 +405,7 @@
             "SRC": [ 5 ]
           }
         },
-        "$specify$1240": {
+        "$specify$1241": {
           "hide_name": 1,
           "type": "$specify3",
           "parameters": {
@@ -442,7 +442,7 @@
             "SRC": [ 7 ]
           }
         },
-        "$specify$1241": {
+        "$specify$1242": {
           "hide_name": 1,
           "type": "$specify2",
           "parameters": {
@@ -473,7 +473,7 @@
             "SRC": [ 9 ]
           }
         },
-        "$specify$1242": {
+        "$specify$1243": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -508,7 +508,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1243": {
+        "$specify$1244": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -543,7 +543,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1244": {
+        "$specify$1245": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -578,7 +578,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1245": {
+        "$specify$1246": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -613,7 +613,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1246": {
+        "$specify$1247": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -648,7 +648,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1247": {
+        "$specify$1248": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -683,7 +683,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1248": {
+        "$specify$1249": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -718,7 +718,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1249": {
+        "$specify$1250": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -753,7 +753,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1250": {
+        "$specify$1251": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -788,7 +788,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1251": {
+        "$specify$1252": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -823,7 +823,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1252": {
+        "$specify$1253": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -858,7 +858,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1253": {
+        "$specify$1254": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -893,7 +893,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1254": {
+        "$specify$1255": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -928,7 +928,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1255": {
+        "$specify$1256": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -963,7 +963,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1256": {
+        "$specify$1257": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -998,7 +998,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1257": {
+        "$specify$1258": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -1033,7 +1033,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1258": {
+        "$specify$1259": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -1068,7 +1068,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1259": {
+        "$specify$1260": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -1103,7 +1103,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1260": {
+        "$specify$1261": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -1138,7 +1138,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1261": {
+        "$specify$1262": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -1173,7 +1173,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1262": {
+        "$specify$1263": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -1208,7 +1208,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1263": {
+        "$specify$1264": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6380,7 +6380,7 @@
         }
       },
       "cells": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1661$1348": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1661$1349": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -6404,7 +6404,7 @@
             "Y": [ 78 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1663$1349": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1663$1350": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -6428,7 +6428,7 @@
             "Y": [ 79 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1669$1350": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1669$1351": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -6452,7 +6452,7 @@
             "Y": [ 80 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1673$1351": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1673$1352": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -6476,7 +6476,7 @@
             "Y": [ 81 ]
           }
         },
-        "$specify$1193": {
+        "$specify$1194": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6511,7 +6511,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1194": {
+        "$specify$1195": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6546,7 +6546,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1195": {
+        "$specify$1196": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6581,7 +6581,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1196": {
+        "$specify$1197": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6616,7 +6616,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1197": {
+        "$specify$1198": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6651,7 +6651,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1198": {
+        "$specify$1199": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6686,7 +6686,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1199": {
+        "$specify$1200": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6721,7 +6721,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1200": {
+        "$specify$1201": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -6756,7 +6756,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1201": {
+        "$specify$1202": {
           "hide_name": 1,
           "type": "$specify3",
           "parameters": {
@@ -6795,28 +6795,28 @@
         }
       },
       "netnames": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1661$1348_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1661$1349_Y": {
           "hide_name": 1,
           "bits": [ 78 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1661.33-1661.44"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1663$1349_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1663$1350_Y": {
           "hide_name": 1,
           "bits": [ 79 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1663.34-1663.45"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1669$1350_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1669$1351_Y": {
           "hide_name": 1,
           "bits": [ 80 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1669.34-1669.45"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1673$1351_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1673$1352_Y": {
           "hide_name": 1,
           "bits": [ 81 ],
           "attributes": {
@@ -6981,7 +6981,7 @@
         }
       },
       "cells": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1797$1352": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1797$1353": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7005,7 +7005,7 @@
             "Y": [ 78 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1799$1353": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1799$1354": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7029,7 +7029,7 @@
             "Y": [ 79 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1805$1354": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1805$1355": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7053,7 +7053,7 @@
             "Y": [ 80 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1809$1355": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1809$1356": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7077,7 +7077,7 @@
             "Y": [ 81 ]
           }
         },
-        "$specify$1202": {
+        "$specify$1203": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7112,7 +7112,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1203": {
+        "$specify$1204": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7147,7 +7147,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1204": {
+        "$specify$1205": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7182,7 +7182,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1205": {
+        "$specify$1206": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7217,7 +7217,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1206": {
+        "$specify$1207": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7252,7 +7252,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1207": {
+        "$specify$1208": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7287,7 +7287,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1208": {
+        "$specify$1209": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7322,7 +7322,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1209": {
+        "$specify$1210": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7357,7 +7357,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1210": {
+        "$specify$1211": {
           "hide_name": 1,
           "type": "$specify3",
           "parameters": {
@@ -7396,28 +7396,28 @@
         }
       },
       "netnames": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1797$1352_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1797$1353_Y": {
           "hide_name": 1,
           "bits": [ 78 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1797.33-1797.44"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1799$1353_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1799$1354_Y": {
           "hide_name": 1,
           "bits": [ 79 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1799.35-1799.46"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1805$1354_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1805$1355_Y": {
           "hide_name": 1,
           "bits": [ 80 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1805.34-1805.45"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1809$1355_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1809$1356_Y": {
           "hide_name": 1,
           "bits": [ 81 ],
           "attributes": {
@@ -7582,7 +7582,7 @@
         }
       },
       "cells": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2069$1360": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2069$1361": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7606,7 +7606,7 @@
             "Y": [ 78 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2071$1361": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2071$1362": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7630,7 +7630,7 @@
             "Y": [ 79 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2077$1362": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2077$1363": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7654,7 +7654,7 @@
             "Y": [ 80 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2081$1363": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2081$1364": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -7678,7 +7678,7 @@
             "Y": [ 81 ]
           }
         },
-        "$specify$1220": {
+        "$specify$1221": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7713,7 +7713,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1221": {
+        "$specify$1222": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7748,7 +7748,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1222": {
+        "$specify$1223": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7783,7 +7783,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1223": {
+        "$specify$1224": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7818,7 +7818,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1224": {
+        "$specify$1225": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7853,7 +7853,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1225": {
+        "$specify$1226": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7888,7 +7888,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1226": {
+        "$specify$1227": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7923,7 +7923,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1227": {
+        "$specify$1228": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -7958,7 +7958,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1228": {
+        "$specify$1229": {
           "hide_name": 1,
           "type": "$specify3",
           "parameters": {
@@ -7997,28 +7997,28 @@
         }
       },
       "netnames": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2069$1360_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2069$1361_Y": {
           "hide_name": 1,
           "bits": [ 78 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2069.34-2069.45"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2071$1361_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2071$1362_Y": {
           "hide_name": 1,
           "bits": [ 79 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2071.35-2071.46"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2077$1362_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2077$1363_Y": {
           "hide_name": 1,
           "bits": [ 80 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2077.35-2077.46"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2081$1363_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:2081$1364_Y": {
           "hide_name": 1,
           "bits": [ 81 ],
           "attributes": {
@@ -8183,7 +8183,7 @@
         }
       },
       "cells": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1933$1356": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1933$1357": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -8207,7 +8207,7 @@
             "Y": [ 78 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1935$1357": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1935$1358": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -8231,7 +8231,7 @@
             "Y": [ 79 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1941$1358": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1941$1359": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -8255,7 +8255,7 @@
             "Y": [ 80 ]
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1945$1359": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1945$1360": {
           "hide_name": 1,
           "type": "$logic_and",
           "parameters": {
@@ -8279,7 +8279,7 @@
             "Y": [ 81 ]
           }
         },
-        "$specify$1211": {
+        "$specify$1212": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8314,7 +8314,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1212": {
+        "$specify$1213": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8349,7 +8349,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1213": {
+        "$specify$1214": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8384,7 +8384,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1214": {
+        "$specify$1215": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8419,7 +8419,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1215": {
+        "$specify$1216": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8454,7 +8454,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1216": {
+        "$specify$1217": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8489,7 +8489,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1217": {
+        "$specify$1218": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8524,7 +8524,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1218": {
+        "$specify$1219": {
           "hide_name": 1,
           "type": "$specrule",
           "parameters": {
@@ -8559,7 +8559,7 @@
             "SRC_EN": [ "1" ]
           }
         },
-        "$specify$1219": {
+        "$specify$1220": {
           "hide_name": 1,
           "type": "$specify3",
           "parameters": {
@@ -8598,28 +8598,28 @@
         }
       },
       "netnames": {
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1933$1356_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1933$1357_Y": {
           "hide_name": 1,
           "bits": [ 78 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1933.34-1933.45"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1935$1357_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1935$1358_Y": {
           "hide_name": 1,
           "bits": [ 79 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1935.34-1935.45"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1941$1358_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1941$1359_Y": {
           "hide_name": 1,
           "bits": [ 80 ],
           "attributes": {
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1941.35-1941.46"
           }
         },
-        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1945$1359_Y": {
+        "$logic_and$/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_sim.v:1945$1360_Y": {
           "hide_name": 1,
           "bits": [ 81 ],
           "attributes": {
@@ -9641,7 +9641,7 @@
     "top": {
       "attributes": {
         "top": "00000000000000000000000000000001",
-        "src": "8008_core.sv:6.1-57.15"
+        "src": "i8008_core.sv:6.1-57.15"
       },
       "ports": {
         "clk100": {
@@ -9666,7 +9666,7 @@
         },
         "led": {
           "direction": "output",
-          "bits": [ "x", "0", "0", "0", "0", "0", "0", "0", "x", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, "x", "x" ]
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x", "x", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, "x", "x" ]
         },
         "sw": {
           "direction": "input",
@@ -9726,11 +9726,11 @@
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "1111101011000000"
+            "LUT_INIT": "1111111111000000"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:22.34-23.52"
           },
           "port_directions": {
             "I0": "input",
@@ -9740,36 +9740,11 @@
             "O": "output"
           },
           "connections": {
-            "I0": [ 36 ],
-            "I1": [ 33 ],
-            "I2": [ 37 ],
-            "I3": [ 35 ],
+            "I0": [ "0" ],
+            "I1": [ 36 ],
+            "I2": [ 35 ],
+            "I3": [ 37 ],
             "O": [ 34 ]
-          }
-        },
-        "DUT.Brain.cycle_SB_DFF_Q_1_D_SB_LUT4_O_I2_SB_LUT4_O": {
-          "hide_name": 0,
-          "type": "SB_LUT4",
-          "parameters": {
-            "LUT_INIT": "0101000011001000"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
-          },
-          "port_directions": {
-            "I0": "input",
-            "I1": "input",
-            "I2": "input",
-            "I3": "input",
-            "O": "output"
-          },
-          "connections": {
-            "I0": [ 5 ],
-            "I1": [ 7 ],
-            "I2": [ 38 ],
-            "I3": [ 6 ],
-            "O": [ 39 ]
           }
         },
         "DUT.Brain.cycle_SB_DFF_Q_2": {
@@ -9788,15 +9763,90 @@
           },
           "connections": {
             "C": [ 2 ],
-            "D": [ 40 ],
-            "Q": [ 38 ]
+            "D": [ 38 ],
+            "Q": [ 39 ]
           }
         },
         "DUT.Brain.cycle_SB_DFF_Q_2_D_SB_LUT4_O": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "1111000011111111"
+            "LUT_INIT": "1111110011111111"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:22.34-23.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ "0" ],
+            "I1": [ 39 ],
+            "I2": [ 37 ],
+            "I3": [ 36 ],
+            "O": [ 38 ]
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "0100000011111111"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ 40 ],
+            "I1": [ 3 ],
+            "I2": [ 33 ],
+            "I3": [ 41 ],
+            "O": [ 32 ]
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I0_SB_LUT4_I2": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "0000000011111000"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ 42 ],
+            "I1": [ 43 ],
+            "I2": [ 40 ],
+            "I3": [ 44 ],
+            "O": [ 45 ]
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I0_SB_LUT4_I2_1": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "0000111100000000"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
@@ -9812,16 +9862,16 @@
           "connections": {
             "I0": [ "0" ],
             "I1": [ "0" ],
-            "I2": [ 41 ],
-            "I3": [ 42 ],
-            "O": [ 40 ]
+            "I2": [ 40 ],
+            "I3": [ 3 ],
+            "O": [ 36 ]
           }
         },
-        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O": {
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I0_SB_LUT4_O": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "1111111111000000"
+            "LUT_INIT": "0011000000000000"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
@@ -9836,17 +9886,17 @@
           },
           "connections": {
             "I0": [ "0" ],
-            "I1": [ 36 ],
-            "I2": [ 33 ],
-            "I3": [ 41 ],
-            "O": [ 32 ]
+            "I1": [ 6 ],
+            "I2": [ 7 ],
+            "I3": [ 5 ],
+            "O": [ 40 ]
           }
         },
         "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3_SB_LUT4_O": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "1111100000000000"
+            "LUT_INIT": "0001111111111111"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
@@ -9860,11 +9910,86 @@
             "O": "output"
           },
           "connections": {
-            "I0": [ 33 ],
-            "I1": [ 37 ],
-            "I2": [ 38 ],
-            "I3": [ 43 ],
+            "I0": [ 46 ],
+            "I1": [ 42 ],
+            "I2": [ 3 ],
+            "I3": [ 39 ],
             "O": [ 41 ]
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3_SB_LUT4_O_I0_SB_LUT4_I2": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "0001111100000000"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ 35 ],
+            "I1": [ 33 ],
+            "I2": [ 46 ],
+            "I3": [ 47 ],
+            "O": [ 48 ]
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3_SB_LUT4_O_I0_SB_LUT4_O": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "1100000000000000"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:22.34-23.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ "0" ],
+            "I1": [ 5 ],
+            "I2": [ 7 ],
+            "I3": [ 6 ],
+            "O": [ 46 ]
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3_SB_LUT4_O_I1_SB_LUT4_O": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "0000000011110011"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:22.34-23.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ "0" ],
+            "I1": [ 6 ],
+            "I2": [ 5 ],
+            "I3": [ 7 ],
+            "O": [ 42 ]
           }
         },
         "DUT.Brain.state_SB_DFFSR_Q": {
@@ -9875,7 +10000,7 @@
           "attributes": {
             "always_ff": "00000000000000000000000000000001",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:625.3-635.6|8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:19.59-19.105"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:628.3-638.6|i8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:19.59-19.105"
           },
           "port_directions": {
             "C": "input",
@@ -9885,9 +10010,9 @@
           },
           "connections": {
             "C": [ 2 ],
-            "D": [ 44 ],
+            "D": [ 49 ],
             "Q": [ 5 ],
-            "R": [ 45 ]
+            "R": [ 50 ]
           }
         },
         "DUT.Brain.state_SB_DFFSR_Q_1": {
@@ -9898,7 +10023,7 @@
           "attributes": {
             "always_ff": "00000000000000000000000000000001",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:625.3-635.6|8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:19.59-19.105"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:628.3-638.6|i8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:19.59-19.105"
           },
           "port_directions": {
             "C": "input",
@@ -9908,9 +10033,9 @@
           },
           "connections": {
             "C": [ 2 ],
-            "D": [ 46 ],
+            "D": [ 51 ],
             "Q": [ 7 ],
-            "R": [ 45 ]
+            "R": [ 50 ]
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q": {
@@ -9921,7 +10046,7 @@
           "attributes": {
             "always_ff": "00000000000000000000000000000001",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:625.3-635.6|8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:20.59-20.105"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:628.3-638.6|i8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:20.59-20.105"
           },
           "port_directions": {
             "C": "input",
@@ -9931,62 +10056,12 @@
           },
           "connections": {
             "C": [ 2 ],
-            "D": [ 47 ],
+            "D": [ 45 ],
             "Q": [ 6 ],
-            "S": [ 45 ]
+            "S": [ 50 ]
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q_D_SB_LUT4_O": {
-          "hide_name": 0,
-          "type": "SB_LUT4",
-          "parameters": {
-            "LUT_INIT": "0000101100000000"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
-          },
-          "port_directions": {
-            "I0": "input",
-            "I1": "input",
-            "I2": "input",
-            "I3": "input",
-            "O": "output"
-          },
-          "connections": {
-            "I0": [ 7 ],
-            "I1": [ 5 ],
-            "I2": [ 48 ],
-            "I3": [ 6 ],
-            "O": [ 46 ]
-          }
-        },
-        "DUT.Brain.state_SB_DFFSS_Q_D_SB_LUT4_O_1": {
-          "hide_name": 0,
-          "type": "SB_LUT4",
-          "parameters": {
-            "LUT_INIT": "0001000000000000"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
-          },
-          "port_directions": {
-            "I0": "input",
-            "I1": "input",
-            "I2": "input",
-            "I3": "input",
-            "O": "output"
-          },
-          "connections": {
-            "I0": [ 48 ],
-            "I1": [ 6 ],
-            "I2": [ 5 ],
-            "I3": [ 7 ],
-            "O": [ 47 ]
-          }
-        },
-        "DUT.Brain.state_SB_DFFSS_Q_D_SB_LUT4_O_2": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
@@ -10007,19 +10082,19 @@
             "I0": [ "0" ],
             "I1": [ "0" ],
             "I2": [ 48 ],
-            "I3": [ 49 ],
-            "O": [ 44 ]
+            "I3": [ 44 ],
+            "O": [ 49 ]
           }
         },
-        "DUT.Brain.state_SB_DFFSS_Q_D_SB_LUT4_O_2_I3_SB_LUT4_O": {
+        "DUT.Brain.state_SB_DFFSS_Q_D_SB_LUT4_O_1": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "1011110011111111"
+            "LUT_INIT": "0000000000001111"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:17.34-18.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10029,11 +10104,11 @@
             "O": "output"
           },
           "connections": {
-            "I0": [ 50 ],
-            "I1": [ 5 ],
-            "I2": [ 6 ],
-            "I3": [ 7 ],
-            "O": [ 49 ]
+            "I0": [ "0" ],
+            "I1": [ "0" ],
+            "I2": [ 44 ],
+            "I3": [ 52 ],
+            "O": [ 51 ]
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q_S_SB_LUT4_O": {
@@ -10056,66 +10131,16 @@
           "connections": {
             "I0": [ "0" ],
             "I1": [ "0" ],
-            "I2": [ 48 ],
+            "I2": [ 44 ],
             "I3": [ 3 ],
-            "O": [ 45 ]
+            "O": [ 50 ]
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q_S_SB_LUT4_O_I2_SB_LUT4_O": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "0000111100000000"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:17.34-18.52"
-          },
-          "port_directions": {
-            "I0": "input",
-            "I1": "input",
-            "I2": "input",
-            "I3": "input",
-            "O": "output"
-          },
-          "connections": {
-            "I0": [ "0" ],
-            "I1": [ "0" ],
-            "I2": [ 38 ],
-            "I3": [ 50 ],
-            "O": [ 48 ]
-          }
-        },
-        "DUT.Brain.state_SB_DFFSS_Q_S_SB_LUT4_O_I2_SB_LUT4_O_I3_SB_LUT4_O": {
-          "hide_name": 0,
-          "type": "SB_LUT4",
-          "parameters": {
-            "LUT_INIT": "0000000000001111"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:17.34-18.52"
-          },
-          "port_directions": {
-            "I0": "input",
-            "I1": "input",
-            "I2": "input",
-            "I3": "input",
-            "O": "output"
-          },
-          "connections": {
-            "I0": [ "0" ],
-            "I1": [ "0" ],
-            "I2": [ 35 ],
-            "I3": [ 33 ],
-            "O": [ 50 ]
-          }
-        },
-        "reset_n_SB_LUT4_I3": {
-          "hide_name": 0,
-          "type": "SB_LUT4",
-          "parameters": {
-            "LUT_INIT": "1111001100000000"
+            "LUT_INIT": "0000000000000011"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
@@ -10130,17 +10155,38 @@
           },
           "connections": {
             "I0": [ "0" ],
-            "I1": [ 5 ],
-            "I2": [ 6 ],
-            "I3": [ 3 ],
-            "O": [ 36 ]
+            "I1": [ 35 ],
+            "I2": [ 33 ],
+            "I3": [ 39 ],
+            "O": [ 44 ]
           }
         },
-        "reset_n_SB_LUT4_I3_1": {
+        "DUT.R.Q_SB_DFF_Q": {
+          "hide_name": 0,
+          "type": "SB_DFF",
+          "parameters": {
+          },
+          "attributes": {
+            "always_ff": "00000000000000000000000000000001",
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:700.3-703.6|i8008_core.sv:84.14-84.44|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:2.51-2.90"
+          },
+          "port_directions": {
+            "C": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "C": [ 2 ],
+            "D": [ 53 ],
+            "Q": [ 43 ]
+          }
+        },
+        "DUT.R.Q_SB_LUT4_I0": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "0000011100000000"
+            "LUT_INIT": "1111110001011101"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
@@ -10154,18 +10200,18 @@
             "O": "output"
           },
           "connections": {
-            "I0": [ 35 ],
-            "I1": [ 37 ],
-            "I2": [ 39 ],
-            "I3": [ 3 ],
-            "O": [ 42 ]
+            "I0": [ 43 ],
+            "I1": [ 6 ],
+            "I2": [ 5 ],
+            "I3": [ 7 ],
+            "O": [ 47 ]
           }
         },
-        "reset_n_SB_LUT4_I3_2": {
+        "DUT.R.Q_SB_LUT4_I0_1": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
-            "LUT_INIT": "1100010100000000"
+            "LUT_INIT": "1111100000000000"
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
@@ -10179,14 +10225,60 @@
             "O": "output"
           },
           "connections": {
-            "I0": [ 7 ],
-            "I1": [ 5 ],
-            "I2": [ 6 ],
-            "I3": [ 3 ],
-            "O": [ 43 ]
+            "I0": [ 43 ],
+            "I1": [ 33 ],
+            "I2": [ 35 ],
+            "I3": [ 54 ],
+            "O": [ 37 ]
           }
         },
-        "reset_n_SB_LUT4_I3_3": {
+        "DUT.R.Q_SB_LUT4_I3": {
+          "hide_name": 0,
+          "type": "SB_LUT4",
+          "parameters": {
+            "LUT_INIT": "0011000000111011"
+          },
+          "attributes": {
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:26.33-27.52"
+          },
+          "port_directions": {
+            "I0": "input",
+            "I1": "input",
+            "I2": "input",
+            "I3": "input",
+            "O": "output"
+          },
+          "connections": {
+            "I0": [ 5 ],
+            "I1": [ 6 ],
+            "I2": [ 7 ],
+            "I3": [ 43 ],
+            "O": [ 52 ]
+          }
+        },
+        "DUT.R.temp_SB_DFF_Q": {
+          "hide_name": 0,
+          "type": "SB_DFF",
+          "parameters": {
+          },
+          "attributes": {
+            "always_ff": "00000000000000000000000000000001",
+            "module_not_derived": "00000000000000000000000000000001",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:700.3-703.6|i8008_core.sv:84.14-84.44|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/ff_map.v:2.51-2.90"
+          },
+          "port_directions": {
+            "C": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "C": [ 2 ],
+            "D": [ 17 ],
+            "Q": [ 53 ]
+          }
+        },
+        "reset_n_SB_LUT4_I3": {
           "hide_name": 0,
           "type": "SB_LUT4",
           "parameters": {
@@ -10208,7 +10300,7 @@
             "I1": [ 5 ],
             "I2": [ 7 ],
             "I3": [ 3 ],
-            "O": [ 37 ]
+            "O": [ 54 ]
           }
         }
       },
@@ -10218,7 +10310,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT ALU_out",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:71.41-71.48"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.41-71.48"
           }
         },
         "DUT.ALUdriver.buff": {
@@ -10226,7 +10318,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT ALUdriver buff",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:722.23-722.27|8008_core.sv:104.30-104.97"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:739.23-739.27|i8008_core.sv:104.30-104.97"
           }
         },
         "DUT.ALUdriver.bus": {
@@ -10234,7 +10326,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT ALUdriver bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:723.20-723.23|8008_core.sv:104.30-104.97"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:740.20-740.23|i8008_core.sv:104.30-104.97"
           }
         },
         "DUT.ALUdriver.data": {
@@ -10242,7 +10334,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT ALUdriver data",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:721.22-721.26|8008_core.sv:104.30-104.97"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:738.22-738.26|i8008_core.sv:104.30-104.97"
           }
         },
         "DUT.ALUdriver.en": {
@@ -10250,7 +10342,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT ALUdriver en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:720.16-720.18|8008_core.sv:104.30-104.97"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:737.16-737.18|i8008_core.sv:104.30-104.97"
           }
         },
         "DUT.A_in": {
@@ -10258,7 +10350,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT A_in",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:71.15-71.19"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.15-71.19"
           }
         },
         "DUT.A_out": {
@@ -10266,7 +10358,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT A_out",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:71.21-71.26"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.21-71.26"
           }
         },
         "DUT.Adriver.buff": {
@@ -10274,7 +10366,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Adriver buff",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:722.23-722.27|8008_core.sv:99.30-99.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:739.23-739.27|i8008_core.sv:99.30-99.95"
           }
         },
         "DUT.Adriver.bus": {
@@ -10282,7 +10374,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Adriver bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:723.20-723.23|8008_core.sv:99.30-99.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:740.20-740.23|i8008_core.sv:99.30-99.95"
           }
         },
         "DUT.Adriver.data": {
@@ -10290,7 +10382,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Adriver data",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:721.22-721.26|8008_core.sv:99.30-99.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:738.22-738.26|i8008_core.sv:99.30-99.95"
           }
         },
         "DUT.Adriver.en": {
@@ -10298,7 +10390,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT Adriver en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:720.16-720.18|8008_core.sv:99.30-99.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:737.16-737.18|i8008_core.sv:99.30-99.95"
           }
         },
         "DUT.B_in": {
@@ -10306,7 +10398,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT B_in",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:71.28-71.32"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.28-71.32"
           }
         },
         "DUT.B_out": {
@@ -10314,7 +10406,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT B_out",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:71.34-71.39"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.34-71.39"
           }
         },
         "DUT.Bdriver.buff": {
@@ -10322,7 +10414,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Bdriver buff",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:722.23-722.27|8008_core.sv:100.30-100.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:739.23-739.27|i8008_core.sv:100.30-100.95"
           }
         },
         "DUT.Bdriver.bus": {
@@ -10330,7 +10422,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Bdriver bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:723.20-723.23|8008_core.sv:100.30-100.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:740.20-740.23|i8008_core.sv:100.30-100.95"
           }
         },
         "DUT.Bdriver.data": {
@@ -10338,7 +10430,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Bdriver data",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:721.22-721.26|8008_core.sv:100.30-100.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:738.22-738.26|i8008_core.sv:100.30-100.95"
           }
         },
         "DUT.Bdriver.en": {
@@ -10346,7 +10438,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT Bdriver en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:720.16-720.18|8008_core.sv:100.30-100.95"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:737.16-737.18|i8008_core.sv:100.30-100.95"
           }
         },
         "DUT.Brain.CF": {
@@ -10354,7 +10446,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT Brain CF",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:203.9-203.11|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:203.9-203.11|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.D5_3": {
@@ -10362,7 +10454,7 @@
           "bits": [ "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Brain D5_3",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:195.15-195.19|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:195.15-195.19|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.DDD": {
@@ -10370,15 +10462,15 @@
           "bits": [ "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Brain DDD",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:194.20-194.23|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:194.20-194.23|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.Ready": {
           "hide_name": 0,
-          "bits": [ "x" ],
+          "bits": [ 43 ],
           "attributes": {
             "hdlname": "DUT Brain Ready",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:188.21-188.26|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:188.21-188.26|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.SSS": {
@@ -10386,7 +10478,7 @@
           "bits": [ "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Brain SSS",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:194.15-194.18|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:194.15-194.18|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.clk": {
@@ -10394,7 +10486,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT Brain clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:188.16-188.19|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:188.16-188.19|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.ctrl_signals": {
@@ -10402,13 +10494,13 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x", "0", "x", "x", "x", "x", "x", "x", "0", "x", "x", "x", "x", "x", "x", "x", "x", "x", "0", "x", "x", "0", "x", "x", "x", "x", "x", "0", "x", "0", "0", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Brain ctrl_signals",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:191.26-191.38|8008_core.sv:120.15-120.87",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:191.26-191.38|i8008_core.sv:120.15-120.87",
             "wiretype": "\\ctrl_signals_t"
           }
         },
         "DUT.Brain.cycle": {
           "hide_name": 0,
-          "bits": [ 38, 35, 33 ],
+          "bits": [ 39, 35, 33 ],
           "attributes": {
             "onehot": "00000000000000000000000000000001"
           }
@@ -10419,9 +10511,9 @@
           "attributes": {
           }
         },
-        "DUT.Brain.cycle_SB_DFF_Q_1_D_SB_LUT4_O_I2": {
+        "DUT.Brain.cycle_SB_DFF_Q_1_D_SB_LUT4_O_I1": {
           "hide_name": 0,
-          "bits": [ 35, 37, 39, 3 ],
+          "bits": [ 36, 35, 37 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
@@ -10429,7 +10521,7 @@
         },
         "DUT.Brain.cycle_SB_DFF_Q_2_D": {
           "hide_name": 0,
-          "bits": [ 40 ],
+          "bits": [ 38 ],
           "attributes": {
           }
         },
@@ -10439,9 +10531,9 @@
           "attributes": {
           }
         },
-        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I1": {
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I0": {
           "hide_name": 0,
-          "bits": [ 36, 33, 37, 35 ],
+          "bits": [ 40, 3 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
@@ -10449,7 +10541,23 @@
         },
         "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3": {
           "hide_name": 0,
-          "bits": [ 41, 42 ],
+          "bits": [ 40, 3, 33, 41 ],
+          "attributes": {
+            "force_downto": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3_SB_LUT4_O_I0": {
+          "hide_name": 0,
+          "bits": [ 35, 33, 46, 47 ],
+          "attributes": {
+            "force_downto": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
+          }
+        },
+        "DUT.Brain.cycle_SB_DFF_Q_D_SB_LUT4_O_I3_SB_LUT4_O_I1": {
+          "hide_name": 0,
+          "bits": [ 46, 42, 3, 39 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
@@ -10460,7 +10568,7 @@
           "bits": [ "1", "1", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Brain flags",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:190.18-190.23|8008_core.sv:120.15-120.87",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:190.18-190.23|i8008_core.sv:120.15-120.87",
             "wiretype": "\\flags_t"
           }
         },
@@ -10469,7 +10577,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Brain instr",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:189.22-189.27|8008_core.sv:120.15-120.87"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:189.22-189.27|i8008_core.sv:120.15-120.87"
           }
         },
         "DUT.Brain.state": {
@@ -10485,43 +10593,27 @@
             "enum_value_110": "\\T1I",
             "enum_value_111": "\\T4",
             "hdlname": "DUT Brain state",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:192.19-192.24|8008_core.sv:120.15-120.87",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:192.19-192.24|i8008_core.sv:120.15-120.87",
             "wiretype": "\\state_t"
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q_D": {
           "hide_name": 0,
-          "bits": [ 44, 47, 46 ],
+          "bits": [ 49, 45, 51 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:0.0-0.0|8008_core.sv:223.12-621.12|8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/techmap.v:578.19-578.22"
-          }
-        },
-        "DUT.Brain.state_SB_DFFSS_Q_D_SB_LUT4_O_2_I3": {
-          "hide_name": 0,
-          "bits": [ 48, 49 ],
-          "attributes": {
-            "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:0.0-0.0|i8008_core.sv:223.12-624.12|i8008_core.sv:120.15-120.87|/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/techmap.v:578.19-578.22"
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q_S": {
           "hide_name": 0,
-          "bits": [ 45 ],
+          "bits": [ 50 ],
           "attributes": {
           }
         },
         "DUT.Brain.state_SB_DFFSS_Q_S_SB_LUT4_O_I2": {
           "hide_name": 0,
-          "bits": [ 48, 3 ],
-          "attributes": {
-            "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
-          }
-        },
-        "DUT.Brain.state_SB_DFFSS_Q_S_SB_LUT4_O_I2_SB_LUT4_O_I3": {
-          "hide_name": 0,
-          "bits": [ 38, 50 ],
+          "bits": [ 48, 44 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
@@ -10529,10 +10621,10 @@
         },
         "DUT.DBR.Q": {
           "hide_name": 0,
-          "bits": [ "x", "0", "0", "0", "0", "0", "0", "0" ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT DBR Q",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:708.23-708.24|8008_core.sv:96.29-96.104"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:711.23-711.24|i8008_core.sv:96.29-96.106"
           }
         },
         "DUT.DBR.clear": {
@@ -10540,7 +10632,7 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "DUT DBR clear",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.20-706.25|8008_core.sv:96.29-96.104"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.20-709.25|i8008_core.sv:96.29-96.106"
           }
         },
         "DUT.DBR.clk": {
@@ -10548,31 +10640,39 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT DBR clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.27-706.30|8008_core.sv:96.29-96.104"
-          }
-        },
-        "DUT.DBR.clock": {
-          "hide_name": 0,
-          "bits": [ "x" ],
-          "attributes": {
-            "hdlname": "DUT DBR clock",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:710.23-710.28|8008_core.sv:96.29-96.104"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.27-709.30|i8008_core.sv:96.29-96.106"
           }
         },
         "DUT.DBR.d": {
           "hide_name": 0,
-          "bits": [ 8, "0", "0", "0", "0", "0", "0", "0" ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT DBR d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:707.22-707.23|8008_core.sv:96.29-96.104"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:710.22-710.23|i8008_core.sv:96.29-96.106"
           }
         },
         "DUT.DBR_D": {
           "hide_name": 0,
-          "bits": [ 8 ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT DBR_D",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:70.33-70.38"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.50-71.55"
+          }
+        },
+        "DUT.DBR_in": {
+          "hide_name": 0,
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
+          "attributes": {
+            "hdlname": "DUT DBR_in",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.66-71.72"
+          }
+        },
+        "DUT.DBR_out": {
+          "hide_name": 0,
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
+          "attributes": {
+            "hdlname": "DUT DBR_out",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:71.57-71.64"
           }
         },
         "DUT.DBRdriver.buff": {
@@ -10580,7 +10680,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT DBRdriver buff",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:722.23-722.27|8008_core.sv:91.30-91.99"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:739.23-739.27|i8008_core.sv:91.30-91.103"
           }
         },
         "DUT.DBRdriver.bus": {
@@ -10588,7 +10688,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT DBRdriver bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:723.20-723.23|8008_core.sv:91.30-91.99"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:740.20-740.23|i8008_core.sv:91.30-91.103"
           }
         },
         "DUT.DBRdriver.data": {
@@ -10596,7 +10696,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT DBRdriver data",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:721.22-721.26|8008_core.sv:91.30-91.99"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:738.22-738.26|i8008_core.sv:91.30-91.103"
           }
         },
         "DUT.DBRdriver.en": {
@@ -10604,7 +10704,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT DBRdriver en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:720.16-720.18|8008_core.sv:91.30-91.99"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:737.16-737.18|i8008_core.sv:91.30-91.103"
           }
         },
         "DUT.D_in": {
@@ -10612,15 +10712,15 @@
           "bits": [ 8, 9, 10, 11, 12, 13, 14, 15 ],
           "attributes": {
             "hdlname": "DUT D_in",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:62.28-62.32"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:62.28-62.32"
           }
         },
         "DUT.D_out": {
           "hide_name": 0,
-          "bits": [ "x", "0", "0", "0", "0", "0", "0", "0" ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT D_out",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:64.29-64.34"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:64.29-64.34"
           }
         },
         "DUT.I.clk": {
@@ -10628,7 +10728,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT I clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:693.19-693.22|8008_core.sv:85.14-85.42"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:696.19-696.22|i8008_core.sv:85.14-85.42"
           }
         },
         "DUT.I.d": {
@@ -10636,7 +10736,7 @@
           "bits": [ 16 ],
           "attributes": {
             "hdlname": "DUT I d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:693.16-693.17|8008_core.sv:85.14-85.42"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:696.16-696.17|i8008_core.sv:85.14-85.42"
           }
         },
         "DUT.INTR": {
@@ -10644,7 +10744,7 @@
           "bits": [ 16 ],
           "attributes": {
             "hdlname": "DUT INTR",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:63.16-63.20"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:63.16-63.20"
           }
         },
         "DUT.IR.Q": {
@@ -10652,7 +10752,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT IR Q",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:708.23-708.24|8008_core.sv:97.29-97.112"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:711.23-711.24|i8008_core.sv:97.29-97.112"
           }
         },
         "DUT.IR.clear": {
@@ -10660,7 +10760,7 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "DUT IR clear",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.20-706.25|8008_core.sv:97.29-97.112"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.20-709.25|i8008_core.sv:97.29-97.112"
           }
         },
         "DUT.IR.clk": {
@@ -10668,7 +10768,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT IR clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.27-706.30|8008_core.sv:97.29-97.112"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.27-709.30|i8008_core.sv:97.29-97.112"
           }
         },
         "DUT.IR.d": {
@@ -10676,7 +10776,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT IR d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:707.22-707.23|8008_core.sv:97.29-97.112"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:710.22-710.23|i8008_core.sv:97.29-97.112"
           }
         },
         "DUT.IR.en": {
@@ -10684,15 +10784,23 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT IR en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.16-706.18|8008_core.sv:97.29-97.112"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.16-709.18|i8008_core.sv:97.29-97.112"
           }
         },
         "DUT.R.Q": {
           "hide_name": 0,
-          "bits": [ "x" ],
+          "bits": [ 43 ],
           "attributes": {
             "hdlname": "DUT R Q",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:694.17-694.18|8008_core.sv:84.14-84.44"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:697.17-697.18|i8008_core.sv:84.14-84.44"
+          }
+        },
+        "DUT.R.Q_SB_LUT4_I3_O": {
+          "hide_name": 0,
+          "bits": [ 44, 52 ],
+          "attributes": {
+            "force_downto": "00000000000000000000000000000001",
+            "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "DUT.R.clk": {
@@ -10700,15 +10808,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT R clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:693.19-693.22|8008_core.sv:84.14-84.44"
-          }
-        },
-        "DUT.R.clock": {
-          "hide_name": 0,
-          "bits": [ "x" ],
-          "attributes": {
-            "hdlname": "DUT R clock",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:697.23-697.28|8008_core.sv:84.14-84.44"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:696.19-696.22|i8008_core.sv:84.14-84.44"
           }
         },
         "DUT.R.d": {
@@ -10716,15 +10816,15 @@
           "bits": [ 17 ],
           "attributes": {
             "hdlname": "DUT R d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:693.16-693.17|8008_core.sv:84.14-84.44"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:696.16-696.17|i8008_core.sv:84.14-84.44"
           }
         },
         "DUT.R.temp": {
           "hide_name": 0,
-          "bits": [ "x" ],
+          "bits": [ 53 ],
           "attributes": {
             "hdlname": "DUT R temp",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:695.9-695.13|8008_core.sv:84.14-84.44"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:698.9-698.13|i8008_core.sv:84.14-84.44"
           }
         },
         "DUT.READY": {
@@ -10732,15 +10832,15 @@
           "bits": [ 17 ],
           "attributes": {
             "hdlname": "DUT READY",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:63.22-63.27"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:63.22-63.27"
           }
         },
         "DUT.Ready": {
           "hide_name": 0,
-          "bits": [ "x" ],
+          "bits": [ 43 ],
           "attributes": {
             "hdlname": "DUT Ready",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:70.20-70.25"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:70.20-70.25"
           }
         },
         "DUT.SP_SEL.clear": {
@@ -10748,7 +10848,7 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "DUT SP_SEL clear",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:732.20-732.25|8008_core.sv:110.43-114.38"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:749.20-749.25|i8008_core.sv:110.24-114.38"
           }
         },
         "DUT.SP_SEL.clk": {
@@ -10756,15 +10856,15 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT SP_SEL clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:732.37-732.40|8008_core.sv:110.43-114.38"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:749.37-749.40|i8008_core.sv:110.24-114.38"
           }
         },
         "DUT.SP_SEL.d": {
           "hide_name": 0,
-          "bits": [ "0", "0", "0", "0", "0", "0", "0", "0" ],
+          "bits": [ "0", "0", "0" ],
           "attributes": {
             "hdlname": "DUT SP_SEL d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:733.22-733.23|8008_core.sv:110.43-114.38"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:750.22-750.23|i8008_core.sv:110.24-114.38"
           }
         },
         "DUT.SP_SEL.load": {
@@ -10772,7 +10872,7 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "DUT SP_SEL load",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:732.27-732.31|8008_core.sv:110.43-114.38"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:749.27-749.31|i8008_core.sv:110.24-114.38"
           }
         },
         "DUT.SP_SEL.up": {
@@ -10780,7 +10880,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT SP_SEL up",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:732.33-732.35|8008_core.sv:110.43-114.38"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:749.33-749.35|i8008_core.sv:110.24-114.38"
           }
         },
         "DUT.Stack.Stack_ctrl": {
@@ -10788,7 +10888,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Stack Stack_ctrl",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:670.21-670.31|8008_core.sv:116.46-118.43",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:673.21-673.31|i8008_core.sv:116.46-118.43",
             "wiretype": "\\Stack_ctrl_t"
           }
         },
@@ -10797,7 +10897,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Stack bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:667.28-667.31|8008_core.sv:116.46-118.43"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:670.28-670.31|i8008_core.sv:116.46-118.43"
           }
         },
         "DUT.Stack.clk": {
@@ -10805,7 +10905,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT Stack clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:669.14-669.17|8008_core.sv:116.46-118.43"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:672.14-672.17|i8008_core.sv:116.46-118.43"
           }
         },
         "DUT.Sync": {
@@ -10813,7 +10913,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT Sync",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:65.17-65.21"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:65.17-65.21"
           }
         },
         "DUT.Unit.ALU_ctrl": {
@@ -10821,7 +10921,7 @@
           "bits": [ "0", "x", "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit ALU_ctrl",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:127.23-127.31|8008_core.sv:105.7-105.90",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:127.23-127.31|i8008_core.sv:105.7-105.90",
             "wiretype": "\\ALU_ctrl_t"
           }
         },
@@ -10830,7 +10930,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit a",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:126.24-126.25|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:126.24-126.25|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.b": {
@@ -10838,7 +10938,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit b",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:126.27-126.28|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:126.27-126.28|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.clk": {
@@ -10846,7 +10946,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT Unit clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:128.12-128.15|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:128.12-128.15|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.d": {
@@ -10854,7 +10954,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:129.25-129.26|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:129.25-129.26|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.flag_in": {
@@ -10862,16 +10962,16 @@
           "bits": [ "1", "1", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit flag_in",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:134.11-134.18|8008_core.sv:105.7-105.90",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:134.11-134.18|i8008_core.sv:105.7-105.90",
             "wiretype": "\\flags_t"
           }
         },
         "DUT.Unit.flag_reg.Q": {
           "hide_name": 0,
-          "bits": [ "1", "1", "x", "x", "0", "0", "0", "0" ],
+          "bits": [ "1", "1", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit flag_reg Q",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:139.5-139.94|8008_core.sv:708.23-708.24|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:139.5-139.94|i8008_core.sv:725.23-725.24|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.flag_reg.clear": {
@@ -10879,7 +10979,7 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "DUT Unit flag_reg clear",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:139.5-139.94|8008_core.sv:706.20-706.25|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:139.5-139.94|i8008_core.sv:723.20-723.25|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.flag_reg.clk": {
@@ -10887,15 +10987,15 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT Unit flag_reg clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:139.5-139.94|8008_core.sv:706.27-706.30|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:139.5-139.94|i8008_core.sv:723.27-723.30|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.flag_reg.d": {
           "hide_name": 0,
-          "bits": [ "1", "1", "x", "x", "0", "0", "0", "0" ],
+          "bits": [ "1", "1", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit flag_reg d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:139.5-139.94|8008_core.sv:707.22-707.23|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:139.5-139.94|i8008_core.sv:724.22-724.23|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.flag_reg.en": {
@@ -10903,7 +11003,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT Unit flag_reg en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:139.5-139.94|8008_core.sv:706.16-706.18|8008_core.sv:105.7-105.90"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:139.5-139.94|i8008_core.sv:723.16-723.18|i8008_core.sv:105.7-105.90"
           }
         },
         "DUT.Unit.flags": {
@@ -10911,7 +11011,7 @@
           "bits": [ "1", "1", "x", "x" ],
           "attributes": {
             "hdlname": "DUT Unit flags",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:130.21-130.26|8008_core.sv:105.7-105.90",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:130.21-130.26|i8008_core.sv:105.7-105.90",
             "wiretype": "\\flags_t"
           }
         },
@@ -10920,7 +11020,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:68.15-68.18"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:68.13-68.16"
           }
         },
         "DUT.clk": {
@@ -10928,7 +11028,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:63.29-63.32"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:63.29-63.32"
           }
         },
         "DUT.ctrl_signals": {
@@ -10936,7 +11036,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x", "0", "x", "x", "x", "x", "x", "x", "0", "x", "x", "x", "x", "x", "x", "x", "x", "x", "0", "x", "x", "0", "x", "x", "x", "x", "x", "0", "x", "0", "0", "x", "x" ],
           "attributes": {
             "hdlname": "DUT ctrl_signals",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:72.18-72.30",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:72.18-72.30",
             "wiretype": "\\ctrl_signals_t"
           }
         },
@@ -10945,7 +11045,7 @@
           "bits": [ "1", "1", "x", "x" ],
           "attributes": {
             "hdlname": "DUT flags",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:73.11-73.16",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:73.11-73.16",
             "wiretype": "\\flags_t"
           }
         },
@@ -10954,7 +11054,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT instr",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:69.15-69.20"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:69.15-69.20"
           }
         },
         "DUT.regA.Q": {
@@ -10962,7 +11062,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT regA Q",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:708.23-708.24|8008_core.sv:101.29-101.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:711.23-711.24|i8008_core.sv:101.29-101.113"
           }
         },
         "DUT.regA.clear": {
@@ -10970,7 +11070,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT regA clear",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.20-706.25|8008_core.sv:101.29-101.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.20-709.25|i8008_core.sv:101.29-101.113"
           }
         },
         "DUT.regA.clk": {
@@ -10978,7 +11078,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT regA clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.27-706.30|8008_core.sv:101.29-101.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.27-709.30|i8008_core.sv:101.29-101.113"
           }
         },
         "DUT.regA.d": {
@@ -10986,7 +11086,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT regA d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:707.22-707.23|8008_core.sv:101.29-101.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:710.22-710.23|i8008_core.sv:101.29-101.113"
           }
         },
         "DUT.regA.en": {
@@ -10994,7 +11094,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT regA en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.16-706.18|8008_core.sv:101.29-101.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.16-709.18|i8008_core.sv:101.29-101.113"
           }
         },
         "DUT.regB.Q": {
@@ -11002,7 +11102,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT regB Q",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:708.23-708.24|8008_core.sv:102.29-102.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:711.23-711.24|i8008_core.sv:102.29-102.113"
           }
         },
         "DUT.regB.clear": {
@@ -11010,7 +11110,7 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "DUT regB clear",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.20-706.25|8008_core.sv:102.29-102.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.20-709.25|i8008_core.sv:102.29-102.113"
           }
         },
         "DUT.regB.clk": {
@@ -11018,7 +11118,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT regB clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.27-706.30|8008_core.sv:102.29-102.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.27-709.30|i8008_core.sv:102.29-102.113"
           }
         },
         "DUT.regB.d": {
@@ -11026,7 +11126,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT regB d",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:707.22-707.23|8008_core.sv:102.29-102.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:710.22-710.23|i8008_core.sv:102.29-102.113"
           }
         },
         "DUT.regB.en": {
@@ -11034,7 +11134,7 @@
           "bits": [ "x" ],
           "attributes": {
             "hdlname": "DUT regB en",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:706.16-706.18|8008_core.sv:102.29-102.113"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:709.16-709.18|i8008_core.sv:102.29-102.113"
           }
         },
         "DUT.rf.bus": {
@@ -11042,7 +11142,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT rf bus",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:644.24-644.27|8008_core.sv:107.41-107.88"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:647.24-647.27|i8008_core.sv:107.41-107.88"
           }
         },
         "DUT.rf.clk": {
@@ -11050,7 +11150,7 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "DUT rf clk",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:645.14-645.17|8008_core.sv:107.41-107.88"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:648.14-648.17|i8008_core.sv:107.41-107.88"
           }
         },
         "DUT.rf.rf_ctrl": {
@@ -11058,7 +11158,7 @@
           "bits": [ "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT rf rf_ctrl",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:646.18-646.25|8008_core.sv:107.41-107.88",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:649.18-649.25|i8008_core.sv:107.41-107.88",
             "wiretype": "\\rf_ctrl_t"
           }
         },
@@ -11067,7 +11167,7 @@
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
             "hdlname": "DUT rf rs",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:649.15-649.17|8008_core.sv:107.41-107.88"
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:652.15-652.17|i8008_core.sv:107.41-107.88"
           }
         },
         "DUT.state": {
@@ -11083,7 +11183,7 @@
             "enum_value_110": "\\T1I",
             "enum_value_111": "\\T4",
             "hdlname": "DUT state",
-            "src": "8008_core.sv:51.45-52.60|8008_core.sv:66.19-66.24",
+            "src": "i8008_core.sv:51.45-52.60|i8008_core.sv:66.19-66.24",
             "wiretype": "\\state_t"
           }
         },
@@ -11091,102 +11191,103 @@
           "hide_name": 0,
           "bits": [ 8, 9, 10, 11, 12, 13, 14, 15 ],
           "attributes": {
-            "src": "8008_core.sv:24.15-24.19"
+            "src": "i8008_core.sv:24.15-24.19"
           }
         },
         "D_out": {
           "hide_name": 0,
-          "bits": [ "x" ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
+            "src": "i8008_core.sv:24.21-24.26"
           }
         },
         "INTR": {
           "hide_name": 0,
           "bits": [ 16 ],
           "attributes": {
-            "src": "8008_core.sv:25.9-25.13"
+            "src": "i8008_core.sv:25.9-25.13"
           }
         },
         "READY": {
           "hide_name": 0,
           "bits": [ 17 ],
           "attributes": {
-            "src": "8008_core.sv:25.15-25.20"
+            "src": "i8008_core.sv:25.15-25.20"
           }
         },
         "Sync": {
           "hide_name": 0,
           "bits": [ "x" ],
           "attributes": {
-            "src": "8008_core.sv:25.22-25.26"
+            "src": "i8008_core.sv:25.22-25.26"
           }
         },
         "base_led": {
           "hide_name": 0,
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
-            "src": "8008_core.sv:13.24-13.32"
+            "src": "i8008_core.sv:13.24-13.32"
           }
         },
         "chip_inputs": {
           "hide_name": 0,
           "bits": [ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, "x", "x" ],
           "attributes": {
-            "src": "8008_core.sv:23.16-23.27"
+            "src": "i8008_core.sv:23.16-23.27"
           }
         },
         "chip_outputs": {
           "hide_name": 0,
-          "bits": [ "x", "0", "0", "0", "0", "0", "0", "0", "x", 5, 6, 7 ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x", "x", 5, 6, 7 ],
           "attributes": {
-            "src": "8008_core.sv:23.29-23.41"
+            "src": "i8008_core.sv:23.29-23.41"
           }
         },
         "clk": {
           "hide_name": 0,
           "bits": [ 2 ],
           "attributes": {
-            "src": "8008_core.sv:22.9-22.12"
+            "src": "i8008_core.sv:22.9-22.12"
           }
         },
         "clk100": {
           "hide_name": 0,
           "bits": [ 2 ],
           "attributes": {
-            "src": "8008_core.sv:7.17-7.23"
+            "src": "i8008_core.sv:7.17-7.23"
           }
         },
         "display": {
           "hide_name": 0,
           "bits": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
           "attributes": {
-            "src": "8008_core.sv:19.24-19.31"
+            "src": "i8008_core.sv:19.24-19.31"
           }
         },
         "display_sel": {
           "hide_name": 0,
           "bits": [ "x", "x", "x", "x" ],
           "attributes": {
-            "src": "8008_core.sv:18.24-18.35"
+            "src": "i8008_core.sv:18.24-18.35"
           }
         },
         "led": {
           "hide_name": 0,
-          "bits": [ "x", "0", "0", "0", "0", "0", "0", "0", "x", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, "x", "x" ],
+          "bits": [ "x", "x", "x", "x", "x", "x", "x", "x", "x", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, "x", "x" ],
           "attributes": {
-            "src": "8008_core.sv:14.25-14.28"
+            "src": "i8008_core.sv:14.25-14.28"
           }
         },
         "reset_n": {
           "hide_name": 0,
           "bits": [ 3 ],
           "attributes": {
-            "src": "8008_core.sv:8.17-8.24"
+            "src": "i8008_core.sv:8.17-8.24"
           }
         },
-        "reset_n_SB_LUT4_I3_2_O": {
+        "reset_n_SB_LUT4_I3_O": {
           "hide_name": 0,
-          "bits": [ 33, 37, 38, 43 ],
+          "bits": [ 43, 33, 35, 54 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
             "src": "/Users/brendanwilhelm/Desktop/98-154/oss-cad-suite/libexec/../share/yosys/ice40/cells_map.v:6.21-6.22"
@@ -11204,7 +11305,7 @@
             "enum_value_101": "\\T5",
             "enum_value_110": "\\T1I",
             "enum_value_111": "\\T4",
-            "src": "8008_core.sv:26.11-26.16",
+            "src": "i8008_core.sv:26.11-26.16",
             "wiretype": "\\state_t"
           }
         },
@@ -11212,21 +11313,21 @@
           "hide_name": 0,
           "bits": [ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 ],
           "attributes": {
-            "src": "8008_core.sv:16.24-16.26"
+            "src": "i8008_core.sv:16.24-16.26"
           }
         },
         "uart_rx": {
           "hide_name": 0,
           "bits": [ 4 ],
           "attributes": {
-            "src": "8008_core.sv:10.17-10.24"
+            "src": "i8008_core.sv:10.17-10.24"
           }
         },
         "uart_tx": {
           "hide_name": 0,
           "bits": [ "x" ],
           "attributes": {
-            "src": "8008_core.sv:11.18-11.25"
+            "src": "i8008_core.sv:11.18-11.25"
           }
         }
       }

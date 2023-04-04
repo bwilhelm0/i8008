@@ -32,7 +32,7 @@ typedef enum logic [1:0] {
 typedef enum logic [2:0] {
     Acc = 3'd0,
     //B = 3'd1,
-   //regC = 3'd2,
+    //C = 3'd2,
     //D = 3'd3,
     //E = 3'd4,
     Hi = 3'd5,      // Upper 6 bits of external register stored here

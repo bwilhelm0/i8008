@@ -1,7 +1,7 @@
 
 
-`ifndef 8008_ISA_VH_
-`define 8008_ISA_VH_
+`ifndef I8008_ISA_VH_
+`define I8008_ISA_VH_
 
 /*----------------------------------------------------------------------------
  * Opcodes (All Instruction Types)
