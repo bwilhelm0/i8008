@@ -30,11 +30,11 @@ typedef enum logic [1:0] {
 } cycle_ctrl_t;
 
 typedef enum logic [2:0] {
-    A = 3'd0,
-    B = 3'd1,
-    C = 3'd2,
-    D = 3'd3,
-    E = 3'd4,
+    Acc = 3'd0,
+    //B = 3'd1,
+   //regC = 3'd2,
+    //D = 3'd3,
+    //E = 3'd4,
     Hi = 3'd5,      // Upper 6 bits of external register stored here
     Lo = 3'd6,      // Lower 8 bits of external register stored here
     ILLEGAL = 3'd7  // Cannot use this, reserved for instructions
@@ -47,12 +47,24 @@ typedef struct packed {
     logic PARITY;
 } flags_t;
 
+typedef enum logic [3:0] {
+    CARRY_bit = 4'b0001,
+    ZERO_bit  = 4'b0010,
+    SIGN_bit  = 4'b0100,
+    PARITY_bit  = 4'b1000
+} flag_bit_t;
+
 typedef enum logic [1:0] {
     Ca = 2'b00,
-    Z = 2'b01,
-    S = 2'b10,
-    P = 2'b11
+    Ze = 2'b01,
+    Si = 2'b10,
+    Pa = 2'b11
 } flag_enc_t;
+
+typedef enum logic {
+    PC_L = 1'b1,
+    PC_H = 1'b0
+} PC_t;
 
 typedef enum logic [2:0] {
     ADD_op = 3'b000,            // Addition

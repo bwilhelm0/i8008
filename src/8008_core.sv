@@ -21,33 +21,38 @@ module top (
 
   logic clk, rst;
   logic [11:0] chip_inputs, chip_outputs;
+  logic [7:0] D_in, D_out;
+  logic INTR, READY, Sync;
+  state_t state;
 
-  debug_harness dbg (
-      .uart_rx, .uart_tx,
+  // debug_harness dbg (
+  //     .uart_rx, .uart_tx,
 
-      .chip_inputs,
-      .chip_outputs,
+  //     .chip_inputs,
+  //     .chip_outputs,
 
-      .chip_clock(clk),
-      .chip_reset(rst),
+  //     .chip_clock(clk),
+  //     .chip_reset(rst),
       
-      .clk100
-  );
-
-  i8008_core 
-  #(.WIDTH(8), .STACK_HEIGHT(8)) DUT
-    (.D_in(sw[7:0]), .INTR(sw[8]), .READY(sw[9]), .clk, .rst,
-   .D_out(chip_outputs[7:0]),
-   .Sync(chip_outputs[8]),
-   .state(chip_outputs[11:9]));
-
-   assign chip_inputs = {'d0, sw[9:0]};
-   assign clk = clk100;
-   assign rst = reset_n;
+  //     .clk100
+  // );
 
 
-    // Mirror the chip inputs and outputs to the LEDs for debugging convenience
-    assign led = {clk, rst, chip_inputs, chip_outputs};
+  assign D_in = sw[7:0];
+  assign INTR = sw[8]; 
+  assign READY = sw[9];
+  assign clk = clk100;
+  assign rst = ~reset_n;
+  assign D_out = chip_outputs[7:0];
+  assign Sync = chip_outputs[8];
+  assign state = chip_outputs[11:9];
+  assign chip_inputs[9:0] = sw[9:0];
+
+  i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT 
+  (.D_in, .INTR, .READY, .clk, .rst, .D_out, .Sync, .state);
+
+  // Mirror the chip inputs and outputs to the LEDs for debugging convenience
+  assign led = {clk, rst, chip_inputs, chip_outputs};
     
 endmodule: top
 
@@ -60,9 +65,13 @@ module i8008_core
    output logic Sync,
    output state_t state);
 
-  logic [WIDTH-1:0] bus;
-  logic [WIDTH-1:0] instr;
-  logic enable_SP;
+  logic [7:0] bus;
+  logic [7:0] instr;
+  logic enable_SP, Ready, Intr, DBR_D, DBR_en;
+  logic [7:0] A_in, A_out, B_in, B_out, ALU_out;
+  ctrl_signals_t ctrl_signals;
+  flags_t flags;
+  logic [2:0] sel_Stack;
 
   // How does program terminate? Call END?
   // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
@@ -72,8 +81,8 @@ module i8008_core
   cycle_t cycle;
 
   // Stabilize async inputs?? Maybe only need flip flop. Maybe don't need anything since Sync signal exists
-  Stabilizer R (.D(READY), .clk, .Q(Ready));
-  Stabilizer I (.D(INTR), .clk, .Q(Intr));
+  Stabilizer R (.d(READY), .clk, .Q(Ready));
+  Stabilizer I (.d(INTR), .clk, .Q(Intr));
 
   // Shouldn't be a register, just a bus buffer
   // But since there's 8 ins and outs, use buffer for out
@@ -84,23 +93,22 @@ module i8008_core
   assign DBR_D = Ready ? D_in : bus;
   assign DBR_en = Ready | ctrl_signals.DBR.we;
 
-  Register #(.WIDTH(WIDTH)) DBR (.D(DBR_D), .Q(D_out), .clk, .en(DBR_en), .clear(ctrl_signals.DBR.clr));  // Enable is tied to ready or a ctrl signal
-  Register #(.WIDTH(WIDTH)) IR (.D(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(ctrl_signals.IR.clr));
+  Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(D_out), .clk, .en(DBR_en), .clear(ctrl_signals.DBR.clr));  // Enable is tied to ready or a ctrl signal
+  Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(ctrl_signals.IR.clr));
 
   BusDriver #(.WIDTH(WIDTH)) Adriver (.en(ctrl_signals.A.re), .data(A_out), .buff(A_in), .bus);
   BusDriver #(.WIDTH(WIDTH)) Bdriver (.en(ctrl_signals.B.re), .data(B_out), .buff(B_in), .bus);
-  Register #(.WIDTH(WIDTH)) regA (.D(A_in), .Q(A_out), .clk, .en(ctrl_signals.A.we), .clear(ctrl_signals.A.clr));
-  Register #(.WIDTH(WIDTH)) regB (.D(B_in), .Q(B_out), .clk, .en(ctrl_signals.B.we), .clear(ctrl_signals.B.clr));
+  Register #(.WIDTH(WIDTH)) regA (.d(A_in), .Q(A_out), .clk, .en(ctrl_signals.A.we), .clear(ctrl_signals.A.clr));
+  Register #(.WIDTH(WIDTH)) regB (.d(B_in), .Q(B_out), .clk, .en(ctrl_signals.B.we), .clear(ctrl_signals.B.clr));
 
   BusDriver #(.WIDTH(WIDTH)) ALUdriver (.en(ctrl_signals.ALU.re), .data(ALU_out), .buff(), .bus);
-  ALU Unit (.A(A_out), .B(B_out), .ALU_ctrl(ctrl_signals.ALU), .D(ALU_out), .flags(flag_in));
+  ALU Unit (.clk, .a(A_out), .b(B_out), .ALU_ctrl(ctrl_signals.ALU), .d(ALU_out), .flags);
 
-  reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .bus, .rf_ctrl(ctrl_signals.rf_ctrl),
-    .sel(sel_rf), .we(we_rf), .re(re_rf));
+  reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .bus, .rf_ctrl(ctrl_signals.rf_ctrl));
 
   assign enable_SP = ctrl_signals.SP_ctrl.en_SP & ~((sel_Stack == 'd0) & ~ctrl_signals.SP_ctrl.inc_SP);
   Counter #(.WIDTH($clog2(STACK_HEIGHT))) SP_SEL
-    (.load('d0), .clk, .D('d0), .Q(sel_Stack),
+    (.load('d0), .clk, .d('d0), .Q(sel_Stack),
     .en(enable_SP), 
     .clear(ctrl_signals.SP_ctrl.clr_SP), 
     .up(ctrl_signals.SP_ctrl.inc_SP));
@@ -115,63 +123,65 @@ endmodule: i8008_core
 
 module ALU
    #(parameter WIDTH = 8)
-    (input logic [WIDTH-1:0] a, b,
+    (input logic [7:0] a, b,
      input ALU_ctrl_t ALU_ctrl,
-     output logic [WIDTH-1:0] D,
+     input clk,
+     output logic [7:0] d,
      output flags_t flags);
 
-  logic [WIDTH-1:0] add_tmp;
-  logic [WIDTH-1:0] art_tmp;
+  logic [7:0] add_tmp;
+  logic [7:0] art_tmp;
+  flags_t flag_in;
 
-  logic [WIDTH-1:0] NA;
+  logic [7:0] NA;
 
   Register #(.WIDTH(4)) 
-    flag_reg (.D(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(ALU_ctrl.clr_Flag));
+    flag_reg (.d(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(ALU_ctrl.clr_Flag));
 
   always_comb begin
     flag_in.CARRY = 1'b0;
     NA = 'd0;
     if (ALU_ctrl.ARITH) begin
       unique case (ALU_ctrl.arith_op)
-        ADD1_op: {flag_in.CARRY, D} = a + 1;
-        SUB1_op: {flag_in.CARRY, D} = a - 1;
+        ADD1_op: {flag_in.CARRY, d} = a + 1;
+        SUB1_op: {flag_in.CARRY, d} = a - 1;
         RLC_op: begin
-          D = {a[6:0], a[7]};
+          d = {a[6:0], a[7]};
           flag_in.CARRY = a[7];
         end
         RRC_op: begin
-          D = {a[0], a[7:1]};
+          d = {a[0], a[7:1]};
           flag_in.CARRY = a[0];
         end
         RAL_op: begin
-          D = {a[6:0], flag_out.CARRY};
+          d = {a[6:0], flags.CARRY};
           flag_in.CARRY = a[7];
         end
         RAR_op: begin
-          D = {flag_out.CARRY, a[7:1]};
+          d = {flags.CARRY, a[7:1]};
           flag_in.CARRY = a[0];
         end
       endcase
     end
     else begin
-      D = 'd0;
+      d = 'd0;
       unique case (ALU_ctrl.alu_op)
-        ADD_op: {flag_in.CARRY, D} = a + b;
-        ADDC_op: {flag_in.CARRY, D} = a + b + (flag_out & CARRY);
-        SUB_op: {flag_in.CARRY, D} = a - b;
-        SUBC_op: {flag_in.CARRY, D} = a - b - (flag_out & CARRY);
-        AND_op: D = a & b;
-        OR_op: D = a | b;
-        XOR_op: D = a ^ b;
+        ADD_op: {flag_in.CARRY, d} = a + b;
+        ADDC_op: {flag_in.CARRY, d} = a + b + (flags & CARRY_bit);
+        SUB_op: {flag_in.CARRY, d} = a - b;
+        SUBC_op: {flag_in.CARRY, d} = a - b - (flags & CARRY_bit);
+        AND_op: d = a & b;
+        OR_op: d = a | b;
+        XOR_op: d = a ^ b;
         CMP_op: {flag_in.CARRY, NA} = a - b;
-        default: D = 0;
+        default: d = 'd0;
       endcase
     end
   end
 
-  assign flag_in.SIGN = D[7] | NA[7];
-  assign flag_in.PARITY = (^D) | (^NA);
-  assign flag_in.ZERO = (ALU_ctrl.alu_op == CMP) ? (~(|NA)) : (~(|D));
+  assign flag_in.SIGN = d[7] | NA[7];
+  assign flag_in.PARITY = (^d) | (^NA);
+  assign flag_in.ZERO = (ALU_ctrl.alu_op == CMP_op) ? (~(|NA)) : (~(|d));
 endmodule: ALU
 
 module fsm_decoder
@@ -181,9 +191,14 @@ module fsm_decoder
    output ctrl_signals_t ctrl_signals,
    output state_t state);
 
-  logic [2:0] SSS = instr[2:0];
-  logic [2:0] DDD = instr[5:3];
-  cycle_t cycle;
+  logic [2:0] SSS, DDD; 
+  logic [2:0] D5_3;
+
+  assign SSS = instr[2:0];
+  assign DDD = instr[5:3];
+  assign D5_3 = instr[5:3];
+  cycle_t cycle, next_cycle;
+  state_t next_state;
 
   logic CF;
 
@@ -192,9 +207,9 @@ module fsm_decoder
     CF = 1'b1;
     unique case (instr[4:3])
       Ca: CF = ~flags.CARRY;
-      Z: CF = ~flags.ZERO;
-      S: CF = ~flags.SIGN;
-      P: CF = flags.PARITY; // Parity of result is even
+      Ze: CF = ~flags.ZERO;
+      Si: CF = ~flags.SIGN;
+      Pa: CF = flags.PARITY; // Parity of result is even
     endcase
   end
 
@@ -204,7 +219,6 @@ module fsm_decoder
 
   always_comb begin
     next_cycle = cycle;
-    out_state = state;
     ctrl_signals = 'd0; // Should these be initialized to X's? No, apparently doesn't minimize logic
     unique case (cycle)
       CYCLE1: begin
@@ -223,7 +237,7 @@ module fsm_decoder
             ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
             ctrl_signals.Stack_ctrl.lower = PC_H;
 
-            ctrl_signals.cycle_ctrl = PCI;
+            ctrl_signals.Stack_ctrl.cycle_ctrl = PCI;
             ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
           end
           T3, WAIT, STOPPED: begin
@@ -291,7 +305,7 @@ module fsm_decoder
               RLC, RRC, RAL, RAR: begin
                 // read Accum into A alu reg
                 ctrl_signals.rf_ctrl.re = 1'b1;
-                ctrl_signals.rf_ctrl.sel = A;
+                ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.A.we = 1'b1;
               end
               RET: begin // Pop stack
@@ -307,9 +321,9 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.Stack_ctrl.we_Stack = 1'b1;
               end
-              default: begin
-                // Do nothing!
-              end
+              // default: begin
+              //   // Do nothing!
+              // end
             endcase
 
             if (instr == LMr) begin
@@ -338,9 +352,9 @@ module fsm_decoder
               end
               ALU_op: begin
                 ctrl_signals.rf_ctrl.we = 1'b1;
-                ctrl_signals.rf_ctrl.sel = A;
+                ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.ALU.alu_op = D5_3; // Enter ops for ALU commands
-                ctrl_signals.ARITH = 1'b0;
+                ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
                 ctrl_signals.flags.we = 1'b1;
               end
@@ -375,16 +389,16 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.cycle_ctrl = PCR;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
               end
               LrM, LMr, ALUM: begin
                 ctrl_signals.rf_ctrl.re = 1'b1;
-                ctrl_signals.rf_ctrl.sel = L;
-                ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
+                ctrl_signals.rf_ctrl.sel = Lo;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = (instr == LMr) ? PCW : PCR;
                 ctrl_signals.DBR.we = 1'b1;
               end
               INP, OUT: begin
-                ctrl_signals.cycle_ctrl = PCC;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCC;
                 ctrl_signals.A.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
               end
@@ -398,18 +412,18 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.cycle_ctrl = PCR;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
 
                 ctrl_signals.Stack_ctrl.inc_PC = 1'b1;  // Inc in T2 so PC_H unchanged
               end
               LrM, LMr, ALUM: begin
                 ctrl_signals.rf_ctrl.re = 1'b1;
-                ctrl_signals.rf_ctrl.sel = H;
-                ctrl_signals.cycle_ctrl = (instr == LMr) ? PCW : PCR;
+                ctrl_signals.rf_ctrl.sel = Hi;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = (instr == LMr) ? PCW : PCR;
                 ctrl_signals.DBR.we = 1'b1;
               end
               INP, OUT: begin
-                ctrl_signals.cycle_ctrl = PCC;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCC;
                 ctrl_signals.B.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
               end
@@ -460,14 +474,14 @@ module fsm_decoder
             next_cycle = CYCLE1;
 
             unique case (instr)
-              LrM, LRI, INP: begin
+              LrM, LrI, INP: begin
                 ctrl_signals.B.re = 1'b1;
-                ctrl_signals.rf_ctrl.sel = instr == INP ? A : DDD;
+                ctrl_signals.rf_ctrl.sel = (instr == INP) ? Acc : DDD;
                 ctrl_signals.rf_ctrl.we = 1'b1;
               end
               ALUM, ALUI: begin
                 // Execute alu op and affect flags
-                ctrl_signals.rf_ctrl.sel = A;
+                ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.rf_ctrl.we = 1'b1;
                 ctrl_signals.ALU.alu_op = D5_3;  // Set alu op based on instruction, add arith op?
                 ctrl_signals.ALU.ARITH = 1'b0;
@@ -488,16 +502,16 @@ module fsm_decoder
 
             unique case (instr)
               LMI: begin
-                ctrl_signals.rf_ctrl.sel = L;
+                ctrl_signals.rf_ctrl.sel = Lo;
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.cycle_ctrl = PCW;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCW;
               end
               JMP, JFc, JTc, CAL, CTc, CFc: begin
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.cycle_ctrl = PCR;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
               end
             endcase
           end
@@ -506,16 +520,16 @@ module fsm_decoder
 
             unique case (instr)
               LMI: begin
-                ctrl_signals.rf_ctrl.sel = H;
+                ctrl_signals.rf_ctrl.sel = Hi;
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.cycle_ctrl = PCW;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCW;
               end
               JMP, JFc, JTc, CAL, CTc, CFc: begin
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.cycle_ctrl = PCR;
+                ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
 
                 ctrl_signals.Stack_ctrl.inc_PC = 1'b1;  // Inc in T2 so PC_H unchanged
               end
@@ -631,12 +645,12 @@ module reg_file
  input logic clk,
  input rf_ctrl_t rf_ctrl);
 
-  logic [WIDTH-1:0] rf[HEIGHT];
-  logic [WIDTH-1:0] rs;
+  logic [7:0] rf[HEIGHT];
+  logic [7:0] rs;
 
   assign bus = (rf_ctrl.re) ? rs : 'bz;
 
-  always_ff @(posedge clock)
+  always_ff @(posedge clk)
     if (rf_ctrl.we)
       rf[rf_ctrl.sel] <= bus;
 
@@ -653,20 +667,20 @@ module stack
 (inout tri [BUS_WIDTH-1:0] bus,
  input logic [SEL-1:0] sel,
  input logic clk,
- input logic Stack_ctrl);
+ input Stack_ctrl_t Stack_ctrl);
 
-  logic [WIDTH-1:0] rf[HEIGHT];
-  logic [WIDTH-1:0] rs;
+  logic [13:0] rf[8];
+  logic [13:0] rs;
 
   assign bus = (Stack_ctrl.re_Stack) ? 
-    (Stack_ctrl.lower ? rs[BUS_WIDTH-1:0] : {Stack_ctrl.cycle_ctrl, rs[WIDTH-1:BUS_WIDTH]}) 
+    (Stack_ctrl.lower ? rs[7:0] : {Stack_ctrl.cycle_ctrl, rs[13:8]}) 
     : 'bz;
 
-  always_ff @(posedge clock)
-    if (Stack_ctrl.we && Stack_ctrl.lower)
-      rf[sel][BUS_WIDTH-1:0] <= Stack_ctrl.D5_3 ? bus[5:3] : bus;
-    else if (Stack_ctrl.we && ~Stack_ctrl.lower)
-      rf[sel][WIDTH-1:BUS_WIDTH] <= bus[WIDTH-BUS_WIDTH-1:0];
+  always_ff @(posedge clk)
+    if (Stack_ctrl.we_Stack && Stack_ctrl.lower)
+      rf[sel][13:0] <= Stack_ctrl.D5_3 ? bus[5:3] : bus;
+    else if (Stack_ctrl.we_Stack && ~Stack_ctrl.lower)
+      rf[sel][13:8] <= bus[3:0];
     else if (Stack_ctrl.inc_PC)
       rf[sel] <= rf[sel] + 1;
 
@@ -676,12 +690,12 @@ module stack
 endmodule: stack
 
 module Stabilizer
-  (input logic D, clock,
+  (input logic d, clk,
    output logic Q);
   logic temp;
 
   always_ff @(posedge clock) begin
-    temp <= D;
+    temp <= d;
     Q <= temp;
   end
 
@@ -689,13 +703,13 @@ endmodule: Stabilizer
 
 module Register
  #(parameter WIDTH = 8)
-  (input logic en, clear, clock,
-   input logic [WIDTH-1:0] D,
-   output logic [WIDTH-1:0] Q);
+  (input logic en, clear, clk,
+   input logic [7:0] d,
+   output logic [7:0] Q);
 
   always_ff @(posedge clock) begin
     if (en)
-      Q <= D;
+      Q <= d;
     else if (clear)
       Q <= 'd0;
   end
@@ -704,13 +718,31 @@ endmodule: Register
 module BusDriver
  #(parameter WIDTH = 8)
   (input logic en,
-   input logic [WIDTH-1:0] data,
-   output logic [WIDTH-1:0] buff,
-   inout tri [WIDTH-1:0] bus);
+   input logic [7:0] data,
+   output logic [7:0] buff,
+   inout tri [7:0] bus);
 
   assign buff = bus;
   assign bus = en ? data : 'bz;
 
 endmodule: BusDriver
+
+module Counter
+ #(parameter WIDTH = 8)
+  (input logic en, clear, load, up, clk,
+   input logic [7:0] d,
+   output logic [7:0] Q);
+
+   always_ff @(posedge clock) begin
+     if (clear)
+       Q <= 'd0;
+     else if (load)
+       Q <= d;
+     else if (en && up)
+       Q <= Q + 1;
+     else if (en && ~up)
+       Q <= Q - 1;
+   end
+endmodule: Counter
 
 `default_nettype wire
