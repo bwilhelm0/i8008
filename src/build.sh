@@ -7,7 +7,7 @@ rm -r build
 mkdir build
 
 # Synthesis (can add more SV files, space-separated, if desired)
-yosys -p 'read_verilog -sv debugbus.sv 8008_core.sv; synth_ice40 -json build/synthesis.json -top top'
+yosys -p 'read_verilog -sv debugbus.sv i8008_core.sv; synth_ice40 -json build/synthesis.json -top top' > output.txt
 
 # Place-and-route
 nextpnr-ice40 --hx8k --json build/synthesis.json --asc build/pnr.asc --package cb132 --pcf constraints.pcf --freq 32
