@@ -73,7 +73,7 @@ module i8008_core
 
   logic [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, Intr, DBR_en;
+  logic enable_SP, Ready, Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst;
   logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
@@ -89,6 +89,9 @@ module i8008_core
   // Stabilize async inputs?? Maybe only need flip flop. Maybe don't need anything since Sync signal exists
   Stabilizer R (.d(READY), .clk, .Q(Ready));
   Stabilizer I (.d(INTR), .clk, .Q(Intr));
+  assign Sync = 1'b0;
+
+  assign D_out = DBR_out;
 
   // Shouldn't be a register, just a bus buffer
   // But since there's 8 ins and outs, use buffer for out
@@ -126,15 +129,20 @@ module i8008_core
   assign DBR_D = Ready ? DBR_in : bus;
   assign DBR_en = Ready | ctrl_signals.DBR.we;
 
-  Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(ctrl_signals.DBR.clr));  // Enable is tied to ready or a ctrl signal
-  Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(ctrl_signals.IR.clr));
+  assign DBR_rst = ctrl_signals.DBR.clr | rst;
+  assign IR_rst = ctrl_signals.IR.clr | rst;
 
-  Register #(.WIDTH(WIDTH)) regA (.d(A_in), .Q(A_out), .clk, .en(ctrl_signals.A.we), .clear(ctrl_signals.A.clr));
-  Register #(.WIDTH(WIDTH)) regB (.d(B_in), .Q(B_out), .clk, .en(ctrl_signals.B.we), .clear(ctrl_signals.B.clr));
+  Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(DBR_rst));  // Enable is tied to ready or a ctrl signal
+  Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(IR_rst));
 
-  ALU Unit (.clk, .a(A_out), .b(B_out), .ALU_ctrl(ctrl_signals.ALU), .d(ALU_out), .flags);
+  assign A_rst = ctrl_signals.A.clr | rst;
+  assign B_rst = ctrl_signals.B.clr | rst;
+  Register #(.WIDTH(WIDTH)) regA (.d(A_in), .Q(A_out), .clk, .en(ctrl_signals.A.we), .clear(A_rst));
+  Register #(.WIDTH(WIDTH)) regB (.d(B_in), .Q(B_out), .clk, .en(ctrl_signals.B.we), .clear(B_rst));
 
-  reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .bus, .rf_out, .rf_ctrl(ctrl_signals.rf_ctrl));
+  ALU Unit (.clk, .rst, .a(A_out), .b(B_out), .ALU_ctrl(ctrl_signals.ALU), .d(ALU_out), .flags);
+
+  reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .rst, .bus, .rf_out, .rf_ctrl(ctrl_signals.rf_ctrl));
 
   assign enable_SP = ctrl_signals.SP_ctrl.en_SP & ~((sel_Stack == 3'd0) & ~ctrl_signals.SP_ctrl.inc_SP);
   Counter #(.WIDTH(3)) SP_SEL
@@ -144,7 +152,7 @@ module i8008_core
     .up(ctrl_signals.SP_ctrl.inc_SP));
 
   stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack 
-    (.clk, .PC_out, .bus, .sel(sel_Stack), 
+    (.clk, .rst, .PC_out, .bus, .sel(sel_Stack), 
      .Stack_ctrl(ctrl_signals.Stack_ctrl));
 
   fsm_decoder Brain (.clk, .Ready, .Intr, .rst, .instr, .flags, .ctrl_signals, .state);
@@ -155,7 +163,7 @@ module ALU
    #(parameter WIDTH = 8)
     (input logic [7:0] a, b,
      input ALU_ctrl_t ALU_ctrl,
-     input clk,
+     input clk, rst,
      output logic [7:0] d,
      output flags_t flags);
 
@@ -165,8 +173,11 @@ module ALU
 
   logic [7:0] NA;
 
+  logic Flag_rst;
+  assign Flag_rst = rst | ALU_ctrl.clr_Flag;
+
   FlagRegister #(.WIDTH(4)) 
-    flag_reg (.d(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(ALU_ctrl.clr_Flag));
+    flag_reg (.d(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(Flag_rst));
 
   always_comb begin
     flag_in.CARRY = 1'b0;
@@ -212,8 +223,6 @@ module ALU
     flag_in.PARITY = (^d) | (^NA);
     flag_in.ZERO = (ALU_ctrl.alu_op == CMP_op) ? (~(|NA)) : (~(|d));
   end
-
-
 endmodule: ALU
 
 module fsm_decoder
@@ -236,12 +245,12 @@ module fsm_decoder
 
   // Should flags be one hot, or fully encoded?
   always_comb begin
-    CF = 1'b1;
     unique case (instr[4:3])
       Ca: CF = ~flags.CARRY;
       Ze: CF = ~flags.ZERO;
       Si: CF = ~flags.SIGN;
       Pa: CF = flags.PARITY; // Parity of result is even
+      default: CF = 1'b1;
     endcase
   end
 
@@ -385,8 +394,8 @@ module fsm_decoder
               ALU_op: begin
                 ctrl_signals.rf_ctrl.we = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Acc;
-                //ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for ALU commands
-                ctrl_signals.ALU.alu_op = D5_3; // Enter ops for ALU commands
+                ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for ALU commands
+                //ctrl_signals.ALU.alu_op = D5_3; // Enter ops for ALU commands
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
                 ctrl_signals.flags.we = 1'b1;
@@ -394,8 +403,8 @@ module fsm_decoder
               RLC, RRC, RAL, RAR: begin
                 ctrl_signals.rf_ctrl.we = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Acc;
-                //ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for rotate commands
-                ctrl_signals.ALU.alu_op = D5_3; // Enter ops for rotate commands
+                ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for rotate commands
+                //ctrl_signals.ALU.alu_op = D5_3; // Enter ops for rotate commands
                 ctrl_signals.ALU.ARITH = 1'b1;
                 ctrl_signals.ALU.re = 1'b1;
                 ctrl_signals.flags.we = 1'b1;
@@ -517,8 +526,8 @@ module fsm_decoder
                 // Execute alu op and affect flags
                 ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.rf_ctrl.we = 1'b1;
-                //ctrl_signals.ALU.alu_op = alu_op_t'(D5_3);  // Set alu op based on instruction, add arith op?
-                ctrl_signals.ALU.alu_op = D5_3;  // Set alu op based on instruction, add arith op?
+                ctrl_signals.ALU.alu_op = alu_op_t'(D5_3);  // Set alu op based on instruction, add arith op?
+                //ctrl_signals.ALU.alu_op = D5_3;  // Set alu op based on instruction, add arith op?
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
               end
@@ -677,7 +686,7 @@ module reg_file
             HEIGHT = 8,
             SEL = $clog2(HEIGHT))
 (input logic [7:0] bus,
- input logic clk,
+ input logic clk, rst,
  input rf_ctrl_t rf_ctrl,
  output logic [7:0] rf_out);
 
@@ -686,8 +695,17 @@ module reg_file
 
   assign rf_out = rs;
 
-  always_ff @(posedge clk) begin
-    if (rf_ctrl.we)
+  always_ff @(posedge clk, posedge rst) begin
+    if (rst) begin
+      rf[3'd0] <= 8'd0;
+      rf[3'd1] <= 8'd0;
+      rf[3'd2] <= 8'd0;
+      rf[3'd3] <= 8'd0;
+      rf[3'd4] <= 8'd0;
+      rf[3'd5] <= 8'd0;
+      rf[3'd6] <= 8'd0;
+    end
+    else if (rf_ctrl.we)
       rf[rf_ctrl.sel] <= bus;
   end
 
@@ -703,7 +721,7 @@ module stack
             SEL = $clog2(HEIGHT))
 (input logic [7:0] bus,
  input logic [SEL-1:0] sel,
- input logic clk,
+ input logic clk, rst,
  input Stack_ctrl_t Stack_ctrl,
  output logic [7:0] PC_out);
 
@@ -722,8 +740,18 @@ module stack
   assign bus_H[5:0] = bus[5:0];
   assign bus_H[7:6] = 2'd0;
 
-  always_ff @(posedge clk) begin
-    if (Stack_ctrl.we_Stack && Stack_ctrl.lower)
+  always_ff @(posedge clk, posedge rst) begin
+    if (rst) begin
+      rf[3'd0] <= 14'd0;
+      rf[3'd1] <= 14'd0;
+      rf[3'd2] <= 14'd0;
+      rf[3'd3] <= 14'd0;
+      rf[3'd4] <= 14'd0;
+      rf[3'd5] <= 14'd0;
+      rf[3'd6] <= 14'd0;
+      rf[3'd7] <= 14'd0;
+    end
+    else if (Stack_ctrl.we_Stack && Stack_ctrl.lower)
       rf[sel][13:0] <= Stack_ctrl.D5_3 ? RST_AAA : bus;
     else if (Stack_ctrl.we_Stack && ~Stack_ctrl.lower)
       rf[sel][13:8] <= bus_H;
