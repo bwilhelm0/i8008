@@ -22,10 +22,11 @@ module i8008_system();
   
   initial begin
     $monitor($time,,
-      "\nINPUTS: rst = %b, D_in = %b, INTR = %b, READY = %b, \nOUTPUTS: Sync = %b, state = %b, \nD_out = %b:\n\tPC_out = %b, rf_out = %b, ALU_out = %b, flags = %b, A_out = %b, B_out = %b, DBR_out = %b\n",
-      rst, D_in, INTR, READY, Sync, state, D_out, DUT.PC_out, DUT.rf_out, DUT.ALU_out, DUT.flags, DUT.A_out, DUT.B_out, DUT.DBR_out);
+      "\nINPUTS: rst = %b, D_in = %b, intr = %b, ready = %b, \nOUTPUTS: Sync = %b, state = %b, \nD_out = %b:\n\tPC_out = %b, rf_out = %b, ALU_out = %b, flags = %b, A_out = %b, B_out = %b, DBR_out = %b\nSIGNALS: IR = %b, DBR.re = %b, DBR.we = %b\n",
+      rst, D_in, DUT.Intr, DUT.Ready, Sync, state, D_out, DUT.PC_out, DUT.rf_out, DUT.ALU_out, DUT.flags, DUT.A_out, DUT.B_out, DUT.DBR_out, DUT.instr, DUT.ctrl_signals.DBR.re, DUT.ctrl_signals.DBR.we);
 
     rst <= 1;
+    @(posedge clk)
     @(posedge clk)
     @(posedge clk)
     
@@ -37,6 +38,18 @@ module i8008_system();
 
     @(posedge clk)
     @(posedge clk)
+    READY <= 1;
+
+    @(posedge clk)
+    READY <= 0;
+    @(posedge clk)
+    @(posedge clk)
+    @(posedge clk)
+    INTR <= 1;
+    @(posedge clk)
+    INTR <= 0;
+    @(posedge clk)
+    D_in <= 8'b11_111_111;
     @(posedge clk)
     @(posedge clk)
     @(posedge clk)

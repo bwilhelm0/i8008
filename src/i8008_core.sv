@@ -65,9 +65,9 @@ endmodule: top
 module i8008_core
   #(parameter WIDTH = 8,
               STACK_HEIGHT = 8)
-  (input logic [WIDTH-1:0] D_in,
+  (input logic [7:0] D_in,
    input logic INTR, READY, clk, rst,
-   output logic [WIDTH-1:0] D_out,
+   output logic [7:0] D_out,
    output logic Sync,
    output state_t state);
 
@@ -79,6 +79,9 @@ module i8008_core
   flags_t flags;
   logic [2:0] sel_Stack;
 
+  // TODO: Rewrite FSM because state transitions and ctrl_signals are off by a cycle
+  // TODO: Write testbenches using yosys to figure out why synthesis is optimizing everything away
+
   // How does program terminate? Call END?
   // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
   // How does proc reset? Will need to reset PC and Stack_sel
@@ -87,11 +90,14 @@ module i8008_core
   cycle_t cycle;
 
   // Stabilize async inputs?? Maybe only need flip flop. Maybe don't need anything since Sync signal exists
-  Stabilizer R (.d(READY), .clk, .Q(Ready));
-  Stabilizer I (.d(INTR), .clk, .Q(Intr));
-  assign Sync = 1'b0;
+  // Stabilizer R (.d(READY), .clk, .Q(Ready));
+  // Stabilizer I (.d(INTR), .clk, .Q(Intr));
+  assign Ready = READY;
+  assign Intr = INTR;
 
-  assign D_out = DBR_out;
+  assign Sync = ctrl_signals.DBR.we;
+
+  assign D_out = bus;
 
   // Shouldn't be a register, just a bus buffer
   // But since there's 8 ins and outs, use buffer for out
@@ -119,20 +125,20 @@ module i8008_core
       bus = B_out;
     end
     else if (ctrl_signals.DBR.re) begin
-      bus = DBR_out;
+      bus = D_in;
     end
     else begin
       bus = 8'd0;
     end
   end
 
-  assign DBR_D = Ready ? DBR_in : bus;
-  assign DBR_en = Ready | ctrl_signals.DBR.we;
+  assign DBR_D = bus; //Ready ? D_in : bus;
+  assign DBR_en = ctrl_signals.DBR.we; //Ready | ctrl_signals.DBR.we;
 
   assign DBR_rst = ctrl_signals.DBR.clr | rst;
   assign IR_rst = ctrl_signals.IR.clr | rst;
 
-  Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(DBR_rst));  // Enable is tied to ready or a ctrl signal
+  //Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(DBR_rst));  // Enable is tied to ready or a ctrl signal
   Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(IR_rst));
 
   assign A_rst = ctrl_signals.A.clr | rst;
@@ -291,9 +297,9 @@ module fsm_decoder
               ctrl_signals.DBR.re = 1'b1;
             end
             else begin
-              ctrl_signals.IR.we = 1'b1;
-              ctrl_signals.B.we = 1'b1;
-              ctrl_signals.DBR.re = 1'b1;
+              ctrl_signals.IR.we = Ready;
+              ctrl_signals.B.we = Ready;
+              ctrl_signals.DBR.re = Ready;
             end
 
             unique case (instr) 
@@ -363,9 +369,9 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.Stack_ctrl.we_Stack = 1'b1;
               end
-              // default: begin
-              //   // Do nothing!
-              // end
+              default: begin
+                // Do nothing!
+              end
             endcase
 
             if (instr == LMr) begin
@@ -491,12 +497,12 @@ module fsm_decoder
             unique case (instr)
               INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin 
                 // For control flow instructions, this is the lower address
-                ctrl_signals.DBR.re = 1'b1;
-                ctrl_signals.B.we = 1'b1;
+                ctrl_signals.DBR.re = Ready;
+                ctrl_signals.B.we = Ready;
               end
               LMr: begin
-                ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.B.re = 1'b1;
+                ctrl_signals.DBR.we = Ready;
+                ctrl_signals.B.re = Ready;
               end
               // OUT: begin
               //   // do nothing!
@@ -609,12 +615,12 @@ module fsm_decoder
 
             unique case (instr)
               LMI: begin
-                ctrl_signals.B.re = 1'b1;
-                ctrl_signals.DBR.we = 1'b1;
+                ctrl_signals.B.re = Ready;
+                ctrl_signals.DBR.we = Ready;
               end
               JMP, JFc, JTc, CAL, CTc, CFc: begin
-                ctrl_signals.A.we = 1'b1;
-                ctrl_signals.DBR.re = 1'b1;
+                ctrl_signals.A.we = Ready;
+                ctrl_signals.DBR.re = Ready;
               end
             endcase
           end
@@ -762,18 +768,6 @@ module stack
   end
 
 endmodule: stack
-
-module Stabilizer
-  (input logic d, clk,
-   output logic Q);
-  logic temp;
-
-  always_ff @(posedge clk) begin
-    temp <= d;
-    Q <= temp;
-  end
-
-endmodule: Stabilizer
 
 module Register
  #(parameter WIDTH = 8)
