@@ -89,11 +89,24 @@ module i8008_core
   // // State logic
   cycle_t cycle;
 
-  // Stabilize async inputs?? Maybe only need flip flop. Maybe don't need anything since Sync signal exists
-  // Stabilizer R (.d(READY), .clk, .Q(Ready));
-  // Stabilizer I (.d(INTR), .clk, .Q(Intr));
-  assign Ready = READY;
-  assign Intr = INTR;
+  assign Ready = READY; // Supposed to be active low?
+
+  always_ff @(posedge clk) begin
+    //if (state != WAIT) begin
+    //  Ready <= Ready | READY;
+    //end
+    //else begin
+    //  Ready <= 1'b0;
+    //end
+
+    if (state != T1I) begin
+      Intr <= Intr | INTR;
+    end
+    else begin
+      Intr <= 1'b0;
+    end
+  end
+
 
   assign Sync = ctrl_signals.DBR.we;
 
@@ -105,7 +118,7 @@ module i8008_core
   // I think add an in, and out buffer for ease of use
 
   always_comb begin
-    if (ctrl_signals.Stack_ctrl.we_Stack) begin
+    if (ctrl_signals.Stack_ctrl.re_Stack) begin
       bus = PC_out;
     end
     else if (ctrl_signals.rf_ctrl.re) begin
@@ -139,7 +152,8 @@ module i8008_core
   assign IR_rst = ctrl_signals.IR.clr | rst;
 
   //Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(DBR_rst));  // Enable is tied to ready or a ctrl signal
-  Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(ctrl_signals.IR.we), .clear(IR_rst));
+  assign IR_en = ctrl_signals.IR.we | Ready;
+  Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(IR_en), .clear(IR_rst));
 
   assign A_rst = ctrl_signals.A.clr | rst;
   assign B_rst = ctrl_signals.B.clr | rst;
@@ -150,7 +164,9 @@ module i8008_core
 
   reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .rst, .bus, .rf_out, .rf_ctrl(ctrl_signals.rf_ctrl));
 
-  assign enable_SP = ctrl_signals.SP_ctrl.en_SP & ~((sel_Stack == 3'd0) & ~ctrl_signals.SP_ctrl.inc_SP);
+  assign enable_SP = ctrl_signals.SP_ctrl.en_SP &
+                     ~((sel_Stack == 3'd0) & ~ctrl_signals.SP_ctrl.inc_SP) &
+                     ~((sel_stack == 3'd7) & ctrl_signals.SP_ctrl.inc_SP);
   assign SP_rst = ctrl_signals.SP_ctrl.clr_SP | rst;
   Counter #(.WIDTH(3)) SP_SEL
     (.load(1'd0), .clk, .d(3'd0), .Q(sel_Stack),
@@ -226,9 +242,9 @@ module ALU
       endcase
     end
 
-    flag_in.SIGN = d[7] | NA[7];
-    flag_in.PARITY = (^d) | (^NA);
-    flag_in.ZERO = (ALU_ctrl.alu_op == CMP_op) ? (~(|NA)) : (~(|d));
+    flag_in.SIGN = ALU_ctrl.ARITH ? flags.SIGN : d[7] | NA[7];
+    flag_in.PARITY = ALU_ctrl.ARITH ? flags.PARITY : (^d) | (^NA);
+    flag_in.ZERO = ALU_ctrl.ARITH ? flags.ZERO : (ALU_ctrl.alu_op == CMP_op) ? (~(|NA)) : (~(|d));
   end
 endmodule: ALU
 
@@ -262,7 +278,7 @@ module fsm_decoder
   end
 
   // Make sure all internal states are represented. Should be
-  // How does T1I work? Why no PC increment?
+  // How does T1I work? Why no PC increment? I think maybe it can happen any time and is just recorded?
   // Fix Conditional instruction logic. I think it's fixed
 
   always_comb begin
@@ -279,16 +295,20 @@ module fsm_decoder
             ctrl_signals.Stack_ctrl.lower = PC_L;
           end
           T2: begin 
-            next_state = T3;
+            next_state = Ready ? T3 : WAIT;
 
             ctrl_signals.DBR.we = 1'b1;
             ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
             ctrl_signals.Stack_ctrl.lower = PC_H;
 
             ctrl_signals.Stack_ctrl.cycle_ctrl = PCI;
+
             ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
           end
-          T3, WAIT, STOPPED: begin
+          WAIT: begin
+            next_state = Ready ? T3 : WAIT;
+          end
+          T3, STOPPED: begin
             if (instr == RST) begin
               ctrl_signals.B.we = 1'b1;
               ctrl_signals.A.clr = 1'b1;
@@ -297,9 +317,8 @@ module fsm_decoder
               ctrl_signals.DBR.re = 1'b1;
             end
             else begin
-              ctrl_signals.IR.we = Ready;
-              ctrl_signals.B.we = Ready;
-              ctrl_signals.DBR.re = Ready;
+              ctrl_signals.B.we = 1'b1;
+              ctrl_signals.DBR.re = 1'b1;
             end
 
             unique case (instr) 
@@ -314,7 +333,7 @@ module fsm_decoder
               end
               RFc, RTc: begin  // Conditional return only?
                 if (((instr == RTc) & ~CF) | ((instr == RFc) & CF)) begin
-                  next_state = Ready ? T4 : WAIT; // WAIT state
+                  next_state =  T4; // WAIT state
                 end
                 else begin
                   next_cycle = CYCLE1;
@@ -326,7 +345,7 @@ module fsm_decoder
                 next_state = T1;
               end
               default: begin
-                next_state = Ready ? T4 : WAIT; // WAIT state
+                next_state = T4; // WAIT state
               end
             endcase
           end
@@ -455,7 +474,9 @@ module fsm_decoder
             endcase
           end
           T2: begin 
-            next_state = T3;
+            next_state = Ready ? T3 : WAIT;
+
+            ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
 
             unique case (instr)
               LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
@@ -463,8 +484,6 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
-
-                ctrl_signals.Stack_ctrl.inc_PC = 1'b1;  // Inc in T2 so PC_H unchanged
               end
               LrM, LMr, ALUM: begin
                 ctrl_signals.rf_ctrl.re = 1'b1;
@@ -479,30 +498,33 @@ module fsm_decoder
               end
             endcase
           end
-          T3, WAIT, STOPPED: begin 
+          WAIT: begin
+            next_state = Ready ? T3 : WAIT;
+          end
+          T3, STOPPED: begin 
             unique case (instr)
               OUT, LMr: begin
-                next_cycle = Ready ? CYCLE1 : CYCLE2;
-                next_state = Ready ? T1 : WAIT;
+                next_cycle = CYCLE1;
+                next_state = T1;
               end
               LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin
-                next_state = Ready ? T1 : WAIT;
-                next_cycle = Ready ? CYCLE3 : CYCLE2;
+                next_state = T1;
+                next_cycle = CYCLE3;
               end
               default: begin
-                next_state = Ready ? T4 : WAIT; // WAIT state
+                next_state = T4; // WAIT state
               end
             endcase
 
             unique case (instr)
               INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin 
                 // For control flow instructions, this is the lower address
-                ctrl_signals.DBR.re = Ready;
-                ctrl_signals.B.we = Ready;
+                ctrl_signals.DBR.re = 1'b1;
+                ctrl_signals.B.we = 1'b1;
               end
               LMr: begin
-                ctrl_signals.DBR.we = Ready;
-                ctrl_signals.B.re = Ready;
+                ctrl_signals.DBR.we = 1'b1;
+                ctrl_signals.B.re = 1'b1;
               end
               // OUT: begin
               //   // do nothing!
@@ -567,7 +589,9 @@ module fsm_decoder
             endcase
           end
           T2: begin 
-            next_state = T3;
+            next_state = Ready ? T3 : WAIT;
+
+            ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
 
             unique case (instr)
               LMI: begin
@@ -581,12 +605,13 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
-
-                ctrl_signals.Stack_ctrl.inc_PC = 1'b1;  // Inc in T2 so PC_H unchanged
               end
             endcase
           end
-          T3, WAIT, STOPPED: begin 
+          WAIT: begin
+            next_state = Ready ? T3 : WAIT;
+          end
+          T3, STOPPED: begin 
             unique case (instr)
               LMI: begin
                 next_state = T1;
@@ -598,7 +623,7 @@ module fsm_decoder
                   next_cycle = CYCLE1;
                 end
                 else begin
-                  next_state = Ready ? T4 : WAIT; // WAIT state
+                  next_state = T4; // WAIT state
                 end
               end
               JTc, CTc: begin
@@ -607,20 +632,20 @@ module fsm_decoder
                   next_cycle = CYCLE1;
                 end
                 else begin
-                  next_state = Ready ? T4 : WAIT; // WAIT state
+                  next_state = T4; // WAIT state
                 end
               end
-              default: next_state = Ready ? T4 : WAIT; // WAIT state
+              default: next_state = T4; // WAIT state
             endcase
 
             unique case (instr)
               LMI: begin
-                ctrl_signals.B.re = Ready;
-                ctrl_signals.DBR.we = Ready;
+                ctrl_signals.B.re = 1'b1;
+                ctrl_signals.DBR.we = 1'b1;
               end
               JMP, JFc, JTc, CAL, CTc, CFc: begin
-                ctrl_signals.A.we = Ready;
-                ctrl_signals.DBR.re = Ready;
+                ctrl_signals.A.we = 1'b1;
+                ctrl_signals.DBR.re = 1'b1;
               end
             endcase
           end
