@@ -22,8 +22,8 @@ module i8008_system();
 
   initial begin
     $monitor($time,,
-      "\nINPUTS: rst = %b, D_in = %b, intr = %b, ready = %b, \nOUTPUTS: Sync = %b, state = %s, \nD_out = %b:\n\tPC_out = %b, rf_out = %b, ALU_out = %b, flags = %b, A_out = %b, B_out = %b, DBR_out = %b\nSIGNALS: IR = %b, DBR.re = %b, DBR.we = %b\n",
-      rst, D_in, DUT.Intr, DUT.Ready, Sync, state.name, D_out, DUT.PC_out, DUT.rf_out, DUT.ALU_out, DUT.flags, DUT.A_out, DUT.B_out, DUT.DBR_out, DUT.instr, DUT.ctrl_signals.DBR.re, DUT.ctrl_signals.DBR.we);
+      "\nINPUTS: rst = %b, D_in = %b, intr = %b, ready = %b, \nOUTPUTS: Sync = %b, state = %s, \nD_out = %b:\n\tPC_out = %b, rf_out = %b, ALU_out = %b, flags = %b, A_out = %b, B_out = %b, DBR_out = %b\nSIGNALS: IR = %b, DBR.re = %b, DBR.we = %b, ALU_ctrl.arith_op = %b, rf_ctrl.sel = %d, rf_ctrl.we = %b, rf_ctrl.re = %b\n",
+      rst, D_in, DUT.Intr, DUT.Ready, Sync, state.name, D_out, DUT.PC_out, DUT.rf_out, DUT.ALU_out, DUT.flags, DUT.A_out, DUT.B_out, DUT.DBR_out, DUT.instr, DUT.ctrl_signals.DBR.re, DUT.ctrl_signals.DBR.we, DUT.ctrl_signals.ALU.arith_op, DUT.ctrl_signals.rf_ctrl.sel, DUT.ctrl_signals.rf_ctrl.we, DUT.ctrl_signals.rf_ctrl.re);
 
     rst <= 1;
     @(posedge clk)

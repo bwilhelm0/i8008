@@ -82,8 +82,8 @@ typedef enum logic [2:0] {
     RRC_op = 3'b001,
     RAL_op = 3'b010,
     RAR_op = 3'b011,
-    ADD1_op,
-    SUB1_op
+    ADD1_op = 3'b100,
+    SUB1_op = 3'b101
 } arith_op_t;
 
 typedef struct packed {
