@@ -108,7 +108,9 @@ module i8008_core (
 	wire [1:0] cycle;
 	assign Ready = READY;
 	always @(posedge clk)
-		if (state != 3'b110)
+		if (rst)
+			Intr <= 1'b0;
+		else if (state != 3'b110)
 			Intr <= Intr | INTR;
 		else
 			Intr <= 1'b0;

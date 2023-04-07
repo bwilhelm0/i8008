@@ -9,6 +9,9 @@ mkdir build
 # Create verilog representations of system verilog
 sv2v i8008_isa.vh internal_defines.vh i8008_core.sv > i8008_core.v
 
+# Creates Simulation Files
+yosys -p 'read_verilog -sv i8008_core.v; write_cxxrtl i8008_core.cpp'
+
 # Synthesis (can add more SV files, space-separated, if desired)
 yosys -p 'read_verilog -sv i8008_core.v; synth_ice40 -json build/synthesis.json -top top' > output.txt
 
