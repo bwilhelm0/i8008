@@ -77,8 +77,8 @@
         LMr = 8'b11_111_xxx,        // Load Mem with r
         LrI = 8'b00_xxx_110,        // Load r with Immediate
         LMI = 8'b00_111_110,        // Load Mem with Immediate
-        INr = 8'b00_xxx_000,        // Increment r (r != A)
-        DCr = 8'b00_xxx_001,        // Decrement r (r != A)
+        INr = 8'b00_???_000,        // Increment r (r != A)
+        DCr = 8'b00_???_001,        // Decrement r (r != A)
 
         ALU_op = 8'b10_xxx_xxx,
         ALUM = 8'b10_xxx_111,

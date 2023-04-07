@@ -33,13 +33,13 @@ module top (
 
   //     .chip_clock(clk),
   //     .chip_reset(rst),
-      
+
   //     .clk100
   // );
 
 
   assign D_in = sw[7:0];
-  assign INTR = sw[8]; 
+  assign INTR = sw[8];
   assign READY = sw[9];
   assign clk = clk100;
   assign rst = ~reset_n;
@@ -73,7 +73,7 @@ module i8008_core
 
   logic [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst;
+  logic enable_SP, Ready, Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en;
   logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
@@ -153,7 +153,13 @@ module i8008_core
 
   //Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(DBR_rst));  // Enable is tied to ready or a ctrl signal
   assign IR_en = ctrl_signals.IR.we | Ready;
-  Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(IR_en), .clear(IR_rst));
+  //Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(IR_en), .clear(IR_rst));
+  always_ff @(posedge Ready) begin
+    if (Ready)
+      instr <= D_in;
+    else if (IR_rst)
+      instr <= 'd0;
+  end
 
   assign A_rst = ctrl_signals.A.clr | rst;
   assign B_rst = ctrl_signals.B.clr | rst;
@@ -166,16 +172,16 @@ module i8008_core
 
   assign enable_SP = ctrl_signals.SP_ctrl.en_SP &
                      ~((sel_Stack == 3'd0) & ~ctrl_signals.SP_ctrl.inc_SP) &
-                     ~((sel_stack == 3'd7) & ctrl_signals.SP_ctrl.inc_SP);
+                     ~((sel_Stack == 3'd7) & ctrl_signals.SP_ctrl.inc_SP);
   assign SP_rst = ctrl_signals.SP_ctrl.clr_SP | rst;
   Counter #(.WIDTH(3)) SP_SEL
     (.load(1'd0), .clk, .d(3'd0), .Q(sel_Stack),
-    .en(enable_SP), 
-    .clear(SP_rst), 
+    .en(enable_SP),
+    .clear(SP_rst),
     .up(ctrl_signals.SP_ctrl.inc_SP));
 
-  stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack 
-    (.clk, .rst, .PC_out, .bus, .sel(sel_Stack), 
+  stack #(.WIDTH(14), .HEIGHT(STACK_HEIGHT)) Stack
+    (.clk, .rst, .PC_out, .bus, .sel(sel_Stack),
      .Stack_ctrl(ctrl_signals.Stack_ctrl));
 
   fsm_decoder Brain (.clk, .Ready, .Intr, .rst, .instr, .flags, .ctrl_signals, .state);
@@ -199,7 +205,7 @@ module ALU
   logic Flag_rst;
   assign Flag_rst = rst | ALU_ctrl.clr_Flag;
 
-  FlagRegister #(.WIDTH(4)) 
+  FlagRegister #(.WIDTH(4))
     flag_reg (.d(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(Flag_rst));
 
   always_comb begin
@@ -255,7 +261,7 @@ module fsm_decoder
    output ctrl_signals_t ctrl_signals,
    output state_t state);
 
-  logic [2:0] SSS, DDD; 
+  logic [2:0] SSS, DDD;
   logic [2:0] D5_3;
 
   assign SSS = instr[2:0];
@@ -281,6 +287,7 @@ module fsm_decoder
   // How does T1I work? Why no PC increment? I think maybe it can happen any time and is just recorded?
   // Fix Conditional instruction logic. I think it's fixed
 
+  // TODO: Verify Ready logic, add flip flop for it?
   always_comb begin
     next_cycle = cycle;
     ctrl_signals = 'd0; // Should these be initialized to X's? No, apparently doesn't minimize logic
@@ -294,7 +301,7 @@ module fsm_decoder
             ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
             ctrl_signals.Stack_ctrl.lower = PC_L;
           end
-          T2: begin 
+          T2: begin
             next_state = Ready ? T3 : WAIT;
 
             ctrl_signals.DBR.we = 1'b1;
@@ -321,8 +328,8 @@ module fsm_decoder
               ctrl_signals.DBR.re = 1'b1;
             end
 
-            unique case (instr) 
-              HLT0, HLT1: begin 
+            unique case (instr)
+              HLT0, HLT1: begin
                 if (Intr) begin
                   next_state = T1I; // Go to "T1I" next
                   next_cycle = CYCLE1;
@@ -338,7 +345,7 @@ module fsm_decoder
                 else begin
                   next_cycle = CYCLE1;
                   next_state = T1;
-                end 
+                end
               end
               LrM, ALUM, ALUI, INP, OUT, LrI, JMP, JFc, JTc, CAL, CTc, CFc: begin
                 next_cycle = CYCLE2;
@@ -363,7 +370,7 @@ module fsm_decoder
                   ctrl_signals.DBR.we = 1'b1;
                 end
               end
-              INr, DCr: begin 
+              INr, DCr: begin
                 // Deal with HALT case and mem case for INr/DCr? No, shouldn't get here
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.rf_ctrl.sel = DDD;
@@ -450,7 +457,7 @@ module fsm_decoder
       end
       CYCLE2: begin
         unique case (state)
-          T1, T1I: begin 
+          T1, T1I: begin
             next_state = T2;
 
             unique case (instr)
@@ -473,7 +480,7 @@ module fsm_decoder
               end
             endcase
           end
-          T2: begin 
+          T2: begin
             next_state = Ready ? T3 : WAIT;
 
             ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
@@ -501,7 +508,7 @@ module fsm_decoder
           WAIT: begin
             next_state = Ready ? T3 : WAIT;
           end
-          T3, STOPPED: begin 
+          T3, STOPPED: begin
             unique case (instr)
               OUT, LMr: begin
                 next_cycle = CYCLE1;
@@ -517,7 +524,7 @@ module fsm_decoder
             endcase
 
             unique case (instr)
-              INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin 
+              INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin
                 // For control flow instructions, this is the lower address
                 ctrl_signals.DBR.re = 1'b1;
                 ctrl_signals.B.we = 1'b1;
@@ -532,7 +539,7 @@ module fsm_decoder
               //default: // do nothing!
             endcase
           end
-          T4: begin 
+          T4: begin
             next_state = T5;
 
             if (instr == INP) begin
@@ -541,7 +548,7 @@ module fsm_decoder
             end
             // else do nothing!
           end
-          T5: begin 
+          T5: begin
             next_state = T1;
             next_cycle = CYCLE1;
 
@@ -570,7 +577,7 @@ module fsm_decoder
       end
       CYCLE3: begin
         unique case (state)
-          T1, T1I: begin 
+          T1, T1I: begin
             next_state = T2;
 
             unique case (instr)
@@ -588,7 +595,7 @@ module fsm_decoder
               end
             endcase
           end
-          T2: begin 
+          T2: begin
             next_state = Ready ? T3 : WAIT;
 
             ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
@@ -611,7 +618,7 @@ module fsm_decoder
           WAIT: begin
             next_state = Ready ? T3 : WAIT;
           end
-          T3, STOPPED: begin 
+          T3, STOPPED: begin
             unique case (instr)
               LMI: begin
                 next_state = T1;
@@ -654,15 +661,15 @@ module fsm_decoder
 
             unique case (instr)
               CAL, CTc, CFc: begin // Is there an issue where the stack isn't pushed early enough?
-                
-                
+
+
                 ctrl_signals.A.re = 1'b1;
-                ctrl_signals.Stack_ctrl.we_Stack = 
+                ctrl_signals.Stack_ctrl.we_Stack =
                   ((instr == CAL) | ((instr == CTc) & ~CF) | ((instr == CFc) & CF));
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
 
                 ctrl_signals.SP_ctrl.inc_SP = 1'b1;
-                ctrl_signals.SP_ctrl.en_SP = 
+                ctrl_signals.SP_ctrl.en_SP =
                   ((instr == CAL) | ((instr == CTc) & ~CF) | ((instr == CFc) & CF));
               end
               JMP, JFc, JTc: begin
@@ -672,7 +679,7 @@ module fsm_decoder
               end
             endcase
           end
-          T5: begin 
+          T5: begin
             next_state = T1;
             next_cycle = CYCLE1;
 
