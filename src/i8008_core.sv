@@ -802,7 +802,7 @@ module stack
       rf[3'd7] <= 14'd0;
     end
     else if (Stack_ctrl.we_Stack && Stack_ctrl.lower)
-      rf[sel][13:0] <= (Stack_ctrl.D5_3 ? RST_AAA : bus);
+      rf[sel][7:0] <= (Stack_ctrl.D5_3 ? RST_AAA : bus);
     else if (Stack_ctrl.we_Stack && ~Stack_ctrl.lower)
       rf[sel][13:8] <= bus[5:0];
     else if (Stack_ctrl.inc_PC)
