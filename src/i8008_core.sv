@@ -99,7 +99,10 @@ module i8008_core
     //  Ready <= 1'b0;
     //end
 
-    if (state != T1I) begin
+    if (rst) begin
+      Intr <= 1'b0;
+    end
+    else if (state != T1I) begin
       Intr <= Intr | INTR;
     end
     else begin
