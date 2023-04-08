@@ -1,0 +1,43 @@
+{
+    "Modules": {
+        "i8008_system": {
+            "Compiled": "Yes",
+            "Compiled Times": 17
+        },
+        "...MASTER...": {},
+        "i8008_core": {},
+        "_vcs_unit__2143635466": {},
+        "std": {},
+        "top": {}
+    },
+    "CompUnits": {
+        "amcQw_d": {
+            "out": "objs/amcQw_d.o",
+            "mod": "...MASTER...",
+            "bytes": 8610,
+            "mode": 4,
+            "checksum": 4294967295
+        },
+        "M9NRs_d": {
+            "out": "M9NRs_d.o",
+            "mod": "i8008_system",
+            "bytes": 39001,
+            "mode": 4,
+            "checksum": 4294967295,
+            "archive": "archive.29/_18109_archive_1.a"
+        }
+    },
+    "ObjArchives": [
+        {
+            "archive": "archive.29/_18109_archive_1.a",
+            "objects": [
+                [
+                    "M9NRs_d.o",
+                    39001
+                ]
+            ],
+            "size": 39001
+        }
+    ],
+    "reusePaths": {}
+}

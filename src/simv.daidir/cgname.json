@@ -1,7 +1,7 @@
 {
-    "std": [
-        "std",
-        "reYIK",
+    "i8008_core": [
+        "i8008_core",
+        "YTNRb",
         "module"
     ],
     "_vcs_unit__2143635466": [
@@ -9,9 +9,9 @@
         "EKuY9",
         "module"
     ],
-    "i8008_system": [
-        "i8008_system",
-        "M9NRs",
+    "std": [
+        "std",
+        "reYIK",
         "module"
     ],
     "top": [
@@ -19,14 +19,14 @@
         "Emx8S",
         "module"
     ],
-    "i8008_core": [
-        "i8008_core",
-        "YTNRb",
-        "module"
-    ],
     "...MASTER...": [
         "SIM",
         "amcQw",
+        "module"
+    ],
+    "i8008_system": [
+        "i8008_system",
+        "M9NRs",
         "module"
     ]
 }
