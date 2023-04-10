@@ -30,7 +30,7 @@ no_proxy=localhost,127.0.0.1,.cmu.edu,.cmu.local
 https_proxy=http://proximus.ece.cmu.edu:3128/
 http_proxy=http://proximus.ece.cmu.edu:3128/
 ftp_proxy=http://proximus.ece.cmu.edu:3128/
-XDG_SESSION_ID=6093
+XDG_SESSION_ID=6403
 XDG_RUNTIME_DIR=/run/user/2673394
 XDG_DATA_DIRS=/afs/andrew.cmu.edu/usr18/bwilhelm/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
 VMR_MODE_FLAG=32
@@ -50,9 +50,9 @@ UNAME=/bin/uname
 TOOL_HOME=/afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64
 SYNOPSYS_LICENSE=/afs/ece.cmu.edu/support/synopsys/license.dat
 SYNOPSYS_HOME=/afs/ece.cmu.edu/support/synopsys/synopsys.release
-SSH_TTY=/dev/pts/139
-SSH_CONNECTION=128.2.13.175 59014 172.19.136.194 22
-SSH_CLIENT=128.2.13.175 59014 22
+SSH_TTY=/dev/pts/145
+SSH_CONNECTION=128.2.13.177 56636 172.19.136.194 22
+SSH_CLIENT=128.2.13.177 56636 22
 SSH_ASKPASS=/usr/libexec/openssh/gnome-ssh-askpass
 SELINUX_USE_CURRENT_RANGE=
 SELINUX_ROLE_REQUESTED=
@@ -85,8 +85,8 @@ BASH_FUNC_module()=() {  eval `/usr/bin/modulecmd bash $*`_}
 AKLOG=/usr/bin/aklog
 0
 4
-1680974200 i8008_tb.sv
-1680909513 i8008_core.sv
+1681103684 i8008_tb.sv
+1681105074 i8008_core.sv
 1680845642 internal_defines.vh
 1680845264 i8008_isa.vh
 4
@@ -94,4 +94,4 @@ AKLOG=/usr/bin/aklog
 1440563255 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/lib/libvirsim.so
 1440562843 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/lib/liberrorinf.so
 1440562824 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/lib/libsnpsmalloc.so
-1680974202 simv.daidir
+1681105077 simv.daidir

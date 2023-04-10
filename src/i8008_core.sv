@@ -78,9 +78,11 @@ module i8008_core
   ctrl_signals_t ctrl_signals;
   flags_t flags;
   logic [2:0] sel_Stack;
+  cycle_t cycle;
 
   // TODO: Rewrite FSM because state transitions and ctrl_signals are off by a cycle
   // TODO: Write testbenches using yosys to figure out why synthesis is optimizing everything away
+  // TODO: Fix problem with writes to IR outside of CYCLE1
 
   // How does program terminate? Call END?
   // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
@@ -154,11 +156,10 @@ module i8008_core
   assign DBR_rst = ctrl_signals.DBR.clr | rst;
   assign IR_rst = ctrl_signals.IR.clr | rst;
 
-  //Register #(.WIDTH(WIDTH)) DBR (.d(DBR_D), .Q(DBR_out), .clk, .en(DBR_en), .clear(DBR_rst));  // Enable is tied to ready or a ctrl signal
-  assign IR_en = ctrl_signals.IR.we | Ready;
-  //Register #(.WIDTH(WIDTH)) IR (.d(bus), .Q(instr), .clk, .en(IR_en), .clear(IR_rst));
+  assign IR_en = ctrl_signals.IR.we | (Ready && cycle == CYCLE1);
+
   always_ff @(posedge Ready) begin
-    if (Ready)
+    if (IR_en)
       instr <= D_in;
     else if (IR_rst)
       instr <= 'd0;
@@ -187,7 +188,7 @@ module i8008_core
     (.clk, .rst, .PC_out, .bus, .sel(sel_Stack),
      .Stack_ctrl(ctrl_signals.Stack_ctrl));
 
-  fsm_decoder Brain (.clk, .Ready, .Intr, .rst, .instr(instr_t'(instr)), .flags, .ctrl_signals, .state);
+  fsm_decoder Brain (.clk, .Ready, .Intr, .rst, .instr(instr_t'(instr)), .flags, .ctrl_signals, .state, .cycle);
 
 endmodule: i8008_core
 
@@ -262,7 +263,8 @@ module fsm_decoder
    input instr_t instr,
    input flags_t flags,
    output ctrl_signals_t ctrl_signals,
-   output state_t state);
+   output state_t state,
+   output cycle_t cycle);
 
   logic [2:0] SSS, DDD;
   logic [2:0] D5_3;
@@ -270,7 +272,7 @@ module fsm_decoder
   assign SSS = instr[2:0];
   assign DDD = instr[5:3];
   assign D5_3 = instr[5:3];
-  cycle_t cycle, next_cycle;
+  cycle_t next_cycle;
   state_t next_state;
 
   logic CF;
@@ -333,7 +335,7 @@ module fsm_decoder
 
             unique casez (instr)
               HLT0, HLT1, LrM: begin
-                if (D5_3 != 3'b111) begin
+                if (instr[7] && D5_3 != 3'b111) begin
                   next_cycle = CYCLE2;
                   next_state = T1;
                 end
@@ -361,7 +363,7 @@ module fsm_decoder
                 next_state = T1;
               end
               default: begin
-                next_state = T4; // WAIT state
+                next_state = T4;
               end
             endcase
           end
@@ -450,7 +452,8 @@ module fsm_decoder
                 ctrl_signals.flags.we = 1'b1;
               end
               //RET, RFc, RTc: // do nothing!
-              //default: // do nothing!
+              default: begin // do nothing!
+              end
             endcase
 
             next_state = T1;
@@ -485,6 +488,8 @@ module fsm_decoder
                 ctrl_signals.A.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
               end
+              default: begin
+              end
             endcase
           end
           T2: begin
@@ -510,6 +515,8 @@ module fsm_decoder
                 ctrl_signals.B.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
               end
+              default: begin
+              end
             endcase
           end
           WAIT: begin
@@ -531,7 +538,7 @@ module fsm_decoder
             endcase
 
             unique casez (instr)
-              INP, ALUM, ALUI, LrM, LMr, LMI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+              INP, ALUM, ALUI, LrM, LMr, LMI, LrI, JMP, JFc, JTc, CAL, CTc, CFc: begin
                 // For control flow instructions, this is the lower address
                 ctrl_signals.DBR.re = 1'b1;
                 ctrl_signals.B.we = 1'b1;
@@ -543,7 +550,8 @@ module fsm_decoder
               // OUT: begin
               //   // do nothing!
               // end
-              //default: // do nothing!
+              default: begin // do nothing!
+              end
             endcase
           end
           T4: begin
@@ -574,6 +582,8 @@ module fsm_decoder
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
               end
+              default: begin
+              end
             endcase
           end
           default: begin
@@ -600,6 +610,8 @@ module fsm_decoder
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
               end
+              default: begin
+              end
             endcase
           end
           T2: begin
@@ -619,6 +631,8 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
+              end
+              default: begin
               end
             endcase
           end
@@ -661,6 +675,8 @@ module fsm_decoder
                 ctrl_signals.A.we = 1'b1;
                 ctrl_signals.DBR.re = 1'b1;
               end
+              default: begin
+              end
             endcase
           end
           T4: begin
@@ -691,6 +707,8 @@ module fsm_decoder
                   ((instr[7:5] == 3'b010 && instr[2:0] == 3'b000) & CF));    // JFc case
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
               end
+              default: begin
+              end
             endcase
           end
           T5: begin
@@ -702,6 +720,8 @@ module fsm_decoder
                 ctrl_signals.B.re = 1'b1;
                 ctrl_signals.Stack_ctrl.we_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b1;
+              end
+              default: begin
               end
             endcase
           end

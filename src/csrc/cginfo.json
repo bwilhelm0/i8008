@@ -1,78 +1,86 @@
 {
     "MlibObjs": {},
-    "CompileProcesses": [
-        "cgproc.18109.json"
-    ],
+    "CompileStrategy": "fullobj",
     "PrevCompiledModules": {
-        "_vcs_unit__2143635466": {
-            "EKuY9_d": {
-                "bytes": 20909,
-                "out": "EKuY9_d.o",
-                "mod": "_vcs_unit__2143635466",
+        "std": {
+            "reYIK_d": {
+                "out": "reYIK_d.o",
+                "bytes": 28470,
+                "archive": "archive.25/_prev_archive_1.a",
+                "mod": "std",
                 "mode": 4,
-                "checksum": 4294967295,
-                "archive": "archive.29/_prev_archive_1.a"
+                "checksum": 4294967295
             }
         },
         "i8008_core": {
             "YTNRb_d": {
-                "bytes": 104358,
                 "out": "YTNRb_d.o",
+                "bytes": 96504,
+                "archive": "archive.25/_142225_archive_1.a",
                 "mod": "i8008_core",
                 "mode": 4,
-                "checksum": 4294967295,
-                "archive": "archive.29/_prev_archive_1.a"
-            }
-        },
-        "std": {
-            "reYIK_d": {
-                "bytes": 28470,
-                "out": "reYIK_d.o",
-                "mod": "std",
-                "mode": 4,
-                "checksum": 4294967295,
-                "archive": "archive.29/_prev_archive_1.a"
+                "checksum": 4294967295
             }
         },
         "top": {
             "Emx8S_d": {
-                "bytes": 10939,
                 "out": "Emx8S_d.o",
+                "bytes": 10939,
+                "archive": "archive.25/_prev_archive_1.a",
                 "mod": "top",
                 "mode": 4,
-                "checksum": 4294967295,
-                "archive": "archive.29/_prev_archive_1.a"
+                "checksum": 4294967295
             }
         },
         "i8008_system": {
             "M9NRs_d": {
-                "bytes": 39001,
                 "out": "M9NRs_d.o",
+                "bytes": 36533,
+                "archive": "archive.25/_prev_archive_1.a",
                 "mod": "i8008_system",
                 "mode": 4,
-                "checksum": 4294967295,
-                "archive": "archive.29/_18109_archive_1.a"
+                "checksum": 4294967295
             }
         },
         "...MASTER...": {
             "amcQw_d": {
-                "bytes": 8610,
                 "out": "objs/amcQw_d.o",
+                "bytes": 8610,
                 "mod": "...MASTER...",
+                "mode": 4,
+                "checksum": 4294967295
+            }
+        },
+        "_vcs_unit__2143635466": {
+            "EKuY9_d": {
+                "out": "EKuY9_d.o",
+                "bytes": 20909,
+                "archive": "archive.25/_prev_archive_1.a",
+                "mod": "_vcs_unit__2143635466",
                 "mode": 4,
                 "checksum": 4294967295
             }
         }
     },
     "NameTable": {
-        "i8008_core": [
-            "i8008_core",
-            "YTNRb",
+        "...MASTER...": [
+            "SIM",
+            "amcQw",
+            "module"
+        ],
+        "i8008_system": [
+            "i8008_system",
+            "M9NRs",
             "module"
         ],
         "_vcs_unit__2143635466": [
             "_vcs_unit__2143635466",
             "EKuY9",
+            "module"
+        ],
+        "i8008_core": [
+            "i8008_core",
+            "YTNRb",
             "module"
         ],
         "std": [
@@ -84,87 +92,79 @@
             "top",
             "Emx8S",
             "module"
-        ],
-        "...MASTER...": [
-            "SIM",
-            "amcQw",
-            "module"
-        ],
-        "i8008_system": [
-            "i8008_system",
-            "M9NRs",
-            "module"
         ]
     },
-    "CompileStrategy": "fullobj",
-    "CurCompileUdps": {},
     "stat": {
-        "mopSpeed": 99508.226580049784,
+        "outputSizePerQuad": 52.0,
         "ru_self_cgstart": {
-            "ru_nivcsw": 5,
-            "ru_utime_sec": 0.087288000000000004,
-            "ru_stime_sec": 0.027817000000000001,
-            "ru_maxrss_kb": 53464,
-            "ru_minflt": 13000,
+            "ru_minflt": 13013,
+            "ru_utime_sec": 0.100274,
+            "ru_stime_sec": 0.020053999999999999,
+            "ru_maxrss_kb": 53496,
             "ru_majflt": 0,
-            "ru_nvcsw": 109
+            "ru_nivcsw": 6,
+            "ru_nvcsw": 112
+        },
+        "Frontend(%)": 69.899758807701431,
+        "ru_childs_cgstart": {
+            "ru_minflt": 0,
+            "ru_utime_sec": 0.0,
+            "ru_stime_sec": 0.0,
+            "ru_maxrss_kb": 0,
+            "ru_majflt": 0,
+            "ru_nivcsw": 0,
+            "ru_nvcsw": 0
+        },
+        "nMops": 11999,
+        "totalObjSize": 193396,
+        "nQuads": 3706,
+        "ru_self_end": {
+            "ru_minflt": 15576,
+            "ru_utime_sec": 0.143454,
+            "ru_stime_sec": 0.042430000000000002,
+            "ru_maxrss_kb": 61780,
+            "ru_majflt": 0,
+            "ru_nivcsw": 7,
+            "ru_nvcsw": 196
         },
         "ru_childs_end": {
-            "ru_nivcsw": 0,
+            "ru_minflt": 0,
             "ru_utime_sec": 0.0,
             "ru_stime_sec": 0.0,
             "ru_maxrss_kb": 0,
-            "ru_minflt": 0,
             "ru_majflt": 0,
-            "ru_nvcsw": 0
-        },
-        "quadSpeed": 46505.980207637665,
-        "ru_childs_cgstart": {
             "ru_nivcsw": 0,
-            "ru_utime_sec": 0.0,
-            "ru_stime_sec": 0.0,
-            "ru_maxrss_kb": 0,
-            "ru_minflt": 0,
-            "ru_majflt": 0,
             "ru_nvcsw": 0
         },
-        "ru_self_end": {
-            "ru_nivcsw": 5,
-            "ru_utime_sec": 0.103759,
-            "ru_stime_sec": 0.043788000000000001,
-            "ru_maxrss_kb": 60460,
-            "ru_minflt": 15183,
-            "ru_majflt": 0,
-            "ru_nvcsw": 187
-        },
-        "nMops": 1639,
-        "nQuads": 766,
-        "totalObjSize": 148452,
-        "mop/quad": 2.1396866840731072,
-        "outputSizePerQuad": 193.0,
-        "Frontend(%)": 84.125714395859632,
-        "CodeGen(%)": 15.874285604140363
+        "CodeGen(%)": 30.100241192298576,
+        "mopSpeed": 277883.27929597039,
+        "quadSpeed": 85826.771653543314,
+        "mop/quad": 3.2377226119805722
     },
-    "PEModules": [],
-    "SIMBData": {
-        "out": "amcQwB.o",
-        "bytes": 100841
-    },
+    "CurCompileUdps": {},
     "CurCompileModules": [
         "...MASTER...",
-        "i8008_system"
+        "i8008_core"
     ],
+    "SIMBData": {
+        "bytes": 87932,
+        "out": "amcQwB.o"
+    },
     "LVLData": [
         "SIM"
     ],
     "Misc": {
-        "cwd": "/afs/andrew.cmu.edu/usr18/bwilhelm/private/98154/i8008/src",
-        "daidir": "simv.daidir",
-        "csrc": "csrc",
-        "archive_dir": "archive.29",
-        "csrc_abs": "/afs/andrew.cmu.edu/usr18/bwilhelm/private/98154/i8008/src/csrc",
         "daidir_abs": "/afs/andrew.cmu.edu/usr18/bwilhelm/private/98154/i8008/src/simv.daidir",
-        "default_output_dir": "csrc"
+        "cwd": "/afs/andrew.cmu.edu/usr18/bwilhelm/private/98154/i8008/src",
+        "csrc": "csrc",
+        "archive_dir": "archive.25",
+        "csrc_abs": "/afs/andrew.cmu.edu/usr18/bwilhelm/private/98154/i8008/src/csrc",
+        "default_output_dir": "csrc",
+        "daidir": "simv.daidir"
     },
+    "PEModules": [],
+    "CompileProcesses": [
+        "cgproc.142225.json"
+    ],
     "CompileStatus": "Successful"
 }
