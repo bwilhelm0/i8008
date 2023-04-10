@@ -73,8 +73,8 @@ module i8008_core
 
   logic [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en;
-  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out;
+  logic enable_SP, Ready, Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
+  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out, ACC, A_in;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
   logic [2:0] sel_Stack;
@@ -87,9 +87,6 @@ module i8008_core
   // How does program terminate? Call END?
   // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
   // How does proc reset? Will need to reset PC and Stack_sel
-
-  // // State logic
-  cycle_t cycle;
 
   assign Ready = READY; // Supposed to be active low?
 
@@ -167,12 +164,14 @@ module i8008_core
 
   assign A_rst = ctrl_signals.A.clr | rst;
   assign B_rst = ctrl_signals.B.clr | rst;
-  Register #(.WIDTH(WIDTH)) regA (.d(bus), .Q(A_out), .clk, .en(ctrl_signals.A.we), .clear(A_rst));
+  assign A_en = ctrl_signals.A.we | (cycle == CYCLE1 && (state == T1 || state == T1I));
+  assign A_in = (cycle == CYCLE1 && (state == T1 || state == T1I)) ? ACC : bus;
+  Register #(.WIDTH(WIDTH)) regA (.d(A_in), .Q(A_out), .clk, .en(A_en), .clear(A_rst));
   Register #(.WIDTH(WIDTH)) regB (.d(bus), .Q(B_out), .clk, .en(ctrl_signals.B.we), .clear(B_rst));
 
   ALU Unit (.clk, .rst, .a(A_out), .b(B_out), .ALU_ctrl(ctrl_signals.ALU), .d(ALU_out), .flags);
 
-  reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .rst, .bus, .rf_out, .rf_ctrl(ctrl_signals.rf_ctrl));
+  reg_file #(.WIDTH(WIDTH), .HEIGHT(7)) rf (.clk, .rst, .bus, .ACC, .rf_out, .rf_ctrl(ctrl_signals.rf_ctrl));
 
   assign enable_SP = ctrl_signals.SP_ctrl.en_SP &
                      ~((sel_Stack == 3'd0) & ~ctrl_signals.SP_ctrl.inc_SP) &
@@ -217,8 +216,8 @@ module ALU
     NA = 'd0;
     if (ALU_ctrl.ARITH) begin
       unique case (ALU_ctrl.arith_op)
-        ADD1_op: {flag_in.CARRY, d} = a + 1;
-        SUB1_op: {flag_in.CARRY, d} = a - 1;
+        ADD1_op: d = a + 1;
+        SUB1_op: d = a - 1;
         RLC_op: begin
           d = {a[6:0], a[7]};
           flag_in.CARRY = a[7];
@@ -241,9 +240,9 @@ module ALU
       d = 'd0;
       unique case (ALU_ctrl.alu_op)
         ADD_op: {flag_in.CARRY, d} = a + b;
-        ADDC_op: {flag_in.CARRY, d} = a + b + (flags & CARRY_bit);
+        ADDC_op: {flag_in.CARRY, d} = a + b + flags.CARRY;
         SUB_op: {flag_in.CARRY, d} = a - b;
-        SUBC_op: {flag_in.CARRY, d} = a - b - (flags & CARRY_bit);
+        SUBC_op: {flag_in.CARRY, d} = a - b - flags.CARRY;
         AND_op: d = a & b;
         OR_op: d = a | b;
         XOR_op: d = a ^ b;
@@ -440,16 +439,16 @@ module fsm_decoder
                 //ctrl_signals.ALU.alu_op = D5_3; // Enter ops for ALU commands
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
-                ctrl_signals.flags.we = 1'b1;
+                ctrl_signals.ALU.en_Flag = 1'b1;
               end
               RLC, RRC, RAL, RAR: begin
                 ctrl_signals.rf_ctrl.we = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Acc;
-                ctrl_signals.ALU.alu_op = alu_op_t'(D5_3); // Enter ops for rotate commands
-                //ctrl_signals.ALU.alu_op = D5_3; // Enter ops for rotate commands
+                ctrl_signals.ALU.arith_op = arith_op_t'(D5_3); // Enter ops for rotate commands
+                //ctrl_signals.ALU.arith_op = D5_3; // Enter ops for rotate commands
                 ctrl_signals.ALU.ARITH = 1'b1;
                 ctrl_signals.ALU.re = 1'b1;
-                ctrl_signals.flags.we = 1'b1;
+                ctrl_signals.ALU.en_Flag = 1'b1;
               end
               //RET, RFc, RTc: // do nothing!
               default: begin // do nothing!
@@ -761,12 +760,13 @@ module reg_file
 (input logic [7:0] bus,
  input logic clk, rst,
  input rf_ctrl_t rf_ctrl,
- output logic [7:0] rf_out);
+ output logic [7:0] rf_out, ACC);
 
   logic [7:0] rf[7];
   logic [7:0] rs;
 
   assign rf_out = rs;
+  assign ACC = rf[0];
 
   always_ff @(posedge clk) begin
     if (rst) begin
