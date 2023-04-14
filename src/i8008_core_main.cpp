@@ -7,11 +7,18 @@ int main() {
     printf("Beginning i8008 Verification\n");
     p_top mod;
 
-    mod.p_sw.set<24>(0);
-    mod.p_reset__n.set<bool>(1);
+    mod.p_sw.set<uint32_t>(0);
+    mod.p_reset__n.set<bool>(0);
     mod.p_uart__rx.set<bool>(0);
+
+    mod.step();
     mod.step();
 
-    printf("Finished verification run");
+    mod.p_reset__n.set<bool>(1);
+    mod.step();
+
+    mod.p_sw.set<uint32_t>();
+
+    printf("Finished verification run\n");
 	return 0;
 }

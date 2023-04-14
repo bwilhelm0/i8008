@@ -24,42 +24,55 @@ module top (
   logic [7:0] D_in, D_out;
   logic INTR, READY, Sync;
   state_t state;
+  logic [1:0] display_cnt;
+  logic [3:0] disp_arr [4];
 
-  // debug_harness dbg (
-  //     .uart_rx, .uart_tx,
+  debug_harness dbg (
+      .uart_rx, .uart_tx,
 
-  //     .chip_inputs,
-  //     .chip_outputs,
+      .chip_inputs,
+      .chip_outputs,
 
-  //     .chip_clock(clk),
-  //     .chip_reset(rst),
+      .chip_clock(clk),
+      .chip_reset(rst),
 
-  //     .clk100
-  // );
+      .clk100
+  );
 
+  always_ff @(posedge clk100) begin
+    if (rst)
+      display_cnt <= 2'd0;
+    else
+      display_cnt <= display_cnt + 1;
+  end
 
-  assign D_in = sw[7:0];
-  assign INTR = sw[8];
-  assign READY = sw[9];
-  assign clk = clk100;
-  assign rst = ~reset_n;
+  assign display_sel = ~(1 << display_cnt);
+
+  hex_to_sevenseg convert (.hexdigit(disp_arr[display_cnt]), .seg(display));
+  assign disp_arr[0] = chip_inputs[3:0];
+  assign disp_arr[1] = chip_inputs[7:4];
+  assign disp_arr[2] = chip_outputs[3:0];
+  assign disp_arr[3] = chip_outputs[7:4];
+
+  // assign D_in = sw[7:0];
+  // assign INTR = sw[8];
+  // assign READY = sw[9];
+  //assign clk = sw[10];
+  //assign rst = ~reset_n;
+  //assign rst = sw[11];
+
   assign chip_outputs[7:0] = D_out;
-  assign chip_outputs[8] = Sync;
-  assign chip_outputs[11:9] = state;
-  assign chip_inputs[9:0] = sw[9:0];
+  assign chip_outputs[8] = 0; //Sync;
+  assign chip_outputs[10:8] = state;
+  assign D_in = chip_inputs[7:0] ;
+  assign INTR = chip_inputs[8];
+  assign READY = chip_inputs[9];
 
-  i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT (.D_in(D_in), .INTR(INTR), .READY(READY), .clk(clk100), .rst(~reset_n), .D_out(D_out), .Sync(Sync), .state(state));
+
+  i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT (.D_in(D_in), .INTR(INTR), .READY(READY), .clk(clk), .rst(rst), .D_out(D_out), .Sync(Sync), .state(state));
 
   // Mirror the chip inputs and outputs to the LEDs for debugging convenience
-  // assign led = {clk, rst, chip_inputs, chip_outputs};
-  always_comb begin
-    led[7:0] = D_out;
-    led[8] = Sync;
-    led[11:9] = state;
-    led[21:12] = sw[9:0];
-    led[22] = ~reset_n;
-    led[23] = clk100;
-  end
+  assign led = {rst, clk, chip_outputs[10:0], chip_inputs[9:0]};
 endmodule: top
 
 module i8008_core
@@ -73,7 +86,7 @@ module i8008_core
 
   logic [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
+  logic enable_SP, Ready, Intr, S_Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
   logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out, ACC, A_in;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
@@ -88,21 +101,15 @@ module i8008_core
   // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
   // How does proc reset? Will need to reset PC and Stack_sel
 
-  assign Ready = READY; // Supposed to be active low?
+  Stabilizer Steady_Ready (.D(READY), .Q(Ready), .clk);
 
   always_ff @(posedge clk) begin
-    //if (state != WAIT) begin
-    //  Ready <= Ready | READY;
-    //end
-    //else begin
-    //  Ready <= 1'b0;
-    //end
-
     if (rst) begin
       Intr <= 1'b0;
     end
     else if (state != T1I) begin
-      Intr <= Intr | INTR;
+      S_Intr <= INTR;
+      Intr <= Intr | S_Intr;
     end
     else begin
       Intr <= 1'b0;
@@ -147,20 +154,14 @@ module i8008_core
     end
   end
 
-  assign DBR_D = bus; //Ready ? D_in : bus;
-  assign DBR_en = ctrl_signals.DBR.we; //Ready | ctrl_signals.DBR.we;
+  assign DBR_D = bus; 
+  assign DBR_en = ctrl_signals.DBR.we; 
 
   assign DBR_rst = ctrl_signals.DBR.clr | rst;
   assign IR_rst = ctrl_signals.IR.clr | rst;
 
   assign IR_en = ctrl_signals.IR.we | (Ready && cycle == CYCLE1);
-
-  always_ff @(posedge Ready) begin
-    if (IR_en)
-      instr <= D_in;
-    else if (IR_rst)
-      instr <= 'd0;
-  end
+  Register #(.WIDTH(WIDTH)) IR (.d(D_in), .Q(instr), .clk, .en(IR_en), .clear(IR_rst));
 
   assign A_rst = ctrl_signals.A.clr | rst;
   assign B_rst = ctrl_signals.B.clr | rst;
@@ -880,5 +881,16 @@ module Counter
        Q <= Q - 1;
    end
 endmodule: Counter
+
+module Stabilizer
+  (input logic D, clk,
+   output logic Q);
+  logic temp;
+
+  always_ff @(posedge clk) begin
+    temp <= D;
+    Q <= temp;
+  end
+endmodule: Stabilizer
 
 `default_nettype wire

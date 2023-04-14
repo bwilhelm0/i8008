@@ -7,7 +7,7 @@ rm -r build
 mkdir build
 
 # Create verilog representations of system verilog
-sv2v i8008_isa.vh internal_defines.vh i8008_core.sv > i8008_core.v
+sv2v i8008_isa.vh internal_defines.vh hex_to_sevenseg.sv debugbus.sv i8008_core.sv > i8008_core.v
 
 # Creates Simulation Files
 yosys -p 'read_verilog -sv i8008_core.v; write_cxxrtl i8008_core.cpp'
