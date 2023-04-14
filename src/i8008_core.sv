@@ -39,6 +39,21 @@ module top (
       .clk100
   );
 
+      // 100MHz -> 25MHz
+    SB_PLL40_CORE #(
+        .FEEDBACK_PATH("SIMPLE"),
+        .DIVR(4'b0000),         // DIVR =  0
+        .DIVF(7'b0000111),      // DIVF =  7
+        .DIVQ(3'b100),          // DIVQ =  4
+        .FILTER_RANGE(3'b101)   // FILTER_RANGE = 5
+    ) pll (
+        .LOCK(),
+        .RESETB(1'b1),
+        .BYPASS(1'b0),
+        .REFERENCECLK(clk100),
+        .PLLOUTCORE(clk)
+    );
+
   always_ff @(posedge clk100) begin
     if (rst)
       display_cnt <= 2'd0;
@@ -87,7 +102,7 @@ module i8008_core
   logic [7:0] bus;
   logic [7:0] instr;
   logic enable_SP, Ready, Intr, S_Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
-  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out, ACC, A_in;
+  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out, ACC;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
   logic [2:0] sel_Stack;
