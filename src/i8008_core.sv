@@ -119,6 +119,7 @@ module i8008_core
   always_ff @(posedge clk) begin
     if (rst) begin
       Ready <= 1'b0;
+      tempR <= 1'b0;
     end
     else begin
       tempR <= READY;
@@ -127,7 +128,7 @@ module i8008_core
 
     if (rst) begin
       Intr <= 1'b0;
-      Ready <= 1'b0;
+      S_Intr <= 1'b0;
     end
     else if (state != T1I) begin
       S_Intr <= INTR;
@@ -560,7 +561,7 @@ module fsm_decoder
             endcase
 
             unique casez (instr)
-              INP, ALUM, ALUI, LrM, LMr, LMI, LrI, JMP, JFc, JTc, CAL, CTc, CFc: begin
+              INP, ALUM, ALUI, LrM, LMI, LrI, JMP, JFc, JTc, CAL, CTc, CFc: begin
                 // For control flow instructions, this is the lower address
                 ctrl_signals.DBR.re = 1'b1;
                 ctrl_signals.B.we = 1'b1;
