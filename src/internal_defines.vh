@@ -12,7 +12,8 @@ typedef enum logic [2:0] {
     T3 = 3'b001,
     STOPPED = 3'b011,
     T4 = 3'b111,
-    T5 = 3'b101
+    T5 = 3'b101,
+    INVALID_STATE = 3'bxxx
 } state_t;
 
 // The memory cycle number, needed to determine state transitions

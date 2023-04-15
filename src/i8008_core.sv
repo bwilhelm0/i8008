@@ -77,9 +77,9 @@ module top (
   //assign rst = sw[11];
 
   assign chip_outputs[7:0] = D_out;
-  assign chip_outputs[8] = 0; //Sync;
   assign chip_outputs[10:8] = state;
-  assign D_in = chip_inputs[7:0] ;
+  //assign chip_outputs[11] = 0; //Sync;
+  assign D_in = chip_inputs[7:0];
   assign INTR = chip_inputs[8];
   assign READY = chip_inputs[9];
 
@@ -101,7 +101,7 @@ module i8008_core
 
   logic [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, Intr, S_Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
+  logic enable_SP, Ready, tempR, Intr, S_Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
   logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out, ACC;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
@@ -116,11 +116,18 @@ module i8008_core
   // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
   // How does proc reset? Will need to reset PC and Stack_sel
 
-  Stabilizer Steady_Ready (.D(READY), .Q(Ready), .clk);
-
   always_ff @(posedge clk) begin
     if (rst) begin
+      Ready <= 1'b0;
+    end
+    else begin
+      tempR <= READY;
+      Ready <= tempR;
+    end
+
+    if (rst) begin
       Intr <= 1'b0;
+      Ready <= 1'b0;
     end
     else if (state != T1I) begin
       S_Intr <= INTR;
