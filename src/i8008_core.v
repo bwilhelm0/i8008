@@ -1949,7 +1949,6 @@ module top (
 	assign disp_arr[2] = chip_outputs[3:0];
 	assign disp_arr[3] = chip_outputs[7:4];
 	assign chip_outputs[7:0] = D_out;
-	assign chip_outputs[8] = 0;
 	assign chip_outputs[10:8] = state;
 	assign D_in = chip_inputs[7:0];
 	assign INTR = chip_inputs[8];
@@ -1967,7 +1966,7 @@ module top (
 		.Sync(Sync),
 		.state(state)
 	);
-	assign led = {rst, clk, chip_outputs[10:0], chip_inputs[9:0]};
+	assign led = {rst, clk, chip_inputs[9:8], chip_outputs[10:0], chip_inputs[7:0]};
 endmodule
 module i8008_core (
 	D_in,
@@ -1992,7 +1991,8 @@ module i8008_core (
 	reg [7:0] bus;
 	wire [7:0] instr;
 	wire enable_SP;
-	wire Ready;
+	reg Ready;
+	reg tempR;
 	reg Intr;
 	reg S_Intr;
 	wire DBR_en;
@@ -2018,20 +2018,26 @@ module i8008_core (
 	wire [3:0] flags;
 	wire [2:0] sel_Stack;
 	wire [1:0] cycle;
-	Stabilizer Steady_Ready(
-		.D(READY),
-		.Q(Ready),
-		.clk(clk)
-	);
-	always @(posedge clk)
-		if (rst)
+	always @(posedge clk) begin
+		if (rst) begin
+			Ready <= 1'b0;
+			tempR <= 1'b0;
+		end
+		else begin
+			tempR <= READY;
+			Ready <= tempR;
+		end
+		if (rst) begin
 			Intr <= 1'b0;
+			S_Intr <= 1'b0;
+		end
 		else if (state != 3'b110) begin
 			S_Intr <= INTR;
 			Intr <= Intr | S_Intr;
 		end
 		else
 			Intr <= 1'b0;
+	end
 	assign Sync = ctrl_signals[38];
 	assign D_out = bus;
 	always @(*)
@@ -2456,7 +2462,7 @@ module fsm_decoder (
 							default: next_state = 3'b111;
 						endcase
 						casez (instr)
-							8'b0100zzz1, 8'b10zzz111, 8'b10zzz100, 8'b11zzz111, 8'b11111zzz, 8'b00111110, 8'b00zzz110, 8'b01zzz100, 8'b010zz000, 8'b011zz000, 8'b01zzz110, 8'b011zz010, 8'b010zz010: begin
+							8'b0100zzz1, 8'b10zzz111, 8'b10zzz100, 8'b11zzz111, 8'b00111110, 8'b00zzz110, 8'b01zzz100, 8'b010zz000, 8'b011zz000, 8'b01zzz110, 8'b011zz010, 8'b010zz010: begin
 								ctrl_signals[39] = 1'b1;
 								ctrl_signals[29] = 1'b1;
 							end

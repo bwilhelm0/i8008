@@ -34,20 +34,48 @@ print("Resetting...")
 chip.set_reset(1)
 chip.step_clock()
 chip.set_reset(0)
-
-for _ in range(10):
-    print("{:012b}".format(chip.get_all_outputs()))
-    chip.step_clock()
-    time.sleep(0.5)
-
-
-print("Set inputs to 0b0000_1001_0110. Expect low bits of output to be 0b1111")
-chip.set_all_inputs(0b000010010110)
 print("{:012b}".format(chip.get_all_outputs()))
+chip.step_clock()
 
-print("Set inputs to 0b0000_0011_0011. Expect low bits of output to be 0b110")
-chip.set_all_inputs(0b000000110011)
+#   assign D_in = chip_inputs[7:0];
+#   assign INTR = chip_inputs[8];
+#   assign READY = chip_inputs[9];
+
 print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_10_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
+print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_10_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
+print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_10_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
+print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_00_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
+print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_00_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
+print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_00_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
+print("{:012b}".format(chip.get_all_outputs()))
+chip.set_all_inputs(0b00_00_00001000)
+chip.step_clock()
+time.sleep(0.5)
+
 
 # Other useful commands:
 # print(chip.get_output(0)) - gets the lowest bit of the chip's outputs

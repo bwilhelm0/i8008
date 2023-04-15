@@ -39,20 +39,20 @@ module top (
       .clk100
   );
 
-      // 100MHz -> 25MHz
-    SB_PLL40_CORE #(
-        .FEEDBACK_PATH("SIMPLE"),
-        .DIVR(4'b0000),         // DIVR =  0
-        .DIVF(7'b0000111),      // DIVF =  7
-        .DIVQ(3'b100),          // DIVQ =  4
-        .FILTER_RANGE(3'b101)   // FILTER_RANGE = 5
-    ) pll (
-        .LOCK(),
-        .RESETB(1'b1),
-        .BYPASS(1'b0),
-        .REFERENCECLK(clk100),
-        .PLLOUTCORE(clk)
-    );
+  //   // 100MHz -> 25MHz
+  // SB_PLL40_CORE #(
+  //     .FEEDBACK_PATH("SIMPLE"),
+  //     .DIVR(4'b0000),         // DIVR =  0
+  //     .DIVF(7'b0000111),      // DIVF =  7
+  //     .DIVQ(3'b100),          // DIVQ =  4
+  //     .FILTER_RANGE(3'b101)   // FILTER_RANGE = 5
+  // ) pll (
+  //     .LOCK(),
+  //     .RESETB(1'b1),
+  //     .BYPASS(1'b0),
+  //     .REFERENCECLK(clk100),
+  //     .PLLOUTCORE(clk)
+  // );
 
   always_ff @(posedge clk100) begin
     if (rst)
@@ -87,7 +87,8 @@ module top (
   i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT (.D_in(D_in), .INTR(INTR), .READY(READY), .clk(clk), .rst(rst), .D_out(D_out), .Sync(Sync), .state(state));
 
   // Mirror the chip inputs and outputs to the LEDs for debugging convenience
-  assign led = {rst, clk, chip_outputs[10:0], chip_inputs[9:0]};
+  //assign led = {rst, clk, chip_outputs[10:0], chip_inputs[9:0]};
+  assign led = {rst, clk, chip_inputs[9:8], chip_outputs[10:0], chip_inputs[7:0]};
 endmodule: top
 
 module i8008_core
