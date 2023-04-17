@@ -13,6 +13,7 @@ from cocotb.triggers import RisingEdge
 # if cocotb.simulator.is_running():
 #     from adder_model import adder_model
 
+# State defines
 T1 = 2 #0b010
 T1I = 6 #0b110
 T2 = 4 #0b100
@@ -21,6 +22,8 @@ T3 = 1 # 0b001
 STOPPED = 3 # 0b011
 T4 = 7 # 0b111
 T5 = 5 # 0b101
+
+verbose = False
 
 @cocotb.test()
 async def i8008_basic_test(dut):
@@ -103,9 +106,13 @@ async def i8008_basic_test(dut):
 
 
 @cocotb.test()
-async def ALU_random_test(dut)
+async def ALU_add_test(dut):
     """Test for random alu ops"""
-    prog = [0b10_001_001, 0b10_011_001]
+    prog = [0b00_001_110, # B <- Imm. (LrI)
+            0b00_011_011, # Arbitrary Imm.
+            0b00_001_000, # B++ (INr)
+            0b10_001_001, # A <- A + B + (Carry) (ACr)
+            0b10_011_001] # A <- A - B - (Carry) (SBr)
 
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
@@ -117,16 +124,57 @@ async def ALU_random_test(dut)
     dut.READY.value = 0
     dut.rst.value = 1
     await RisingEdge(dut.clk)
+    dut.rst.value = 0
     await RisingEdge(dut.clk)
 
     assert dut.state.value == T1, "Basic test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
     assert dut.D_out.value == 0b00000000, "Basic test failed with: {D_out} != {actual}".format(D_out=0b00000000, actual=dut.D_out.value)
 
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
+    # await RisingEdge(dut.clk)
+    # await RisingEdge(dut.clk)
+    # assert dut.state.value == T1, "Basic test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
 
-    for instr in prog:
-        asdf
+    ind = 0
+    while ind <= len(prog):
+        if dut.state.value == T1:
+            ind += 1
+            if verbose:
+                print("\nRegDump:");
+                for sel in range(7):
+                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value));
+                print("PC_L = {D_out}".format(D_out=dut.Stack.PC_out.value));
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T2:
+            if verbose: print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=(dut.D_out.value>>6)));
+            dut.READY.value = 1;
+            dut.D_in.value = prog[ind-1];
+            await RisingEdge(dut.clk)
+        elif dut.state.value == WAIT:
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T3:
+            if verbose: print("Instr: %b", dut.instr.value);
+            dut.READY.value = 0;
+            await RisingEdge(dut.clk)
+        elif dut.state.value == STOPPED:
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T4:
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T5:
+            await RisingEdge(dut.clk)
+        else:
+            assert 1==0, "Invalid state!"
+
+    if verbose:
+        print("\nRegDump:");
+        for sel in range(7):
+            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value));
+
+    for sel in range(7):
+        if sel != 1:
+            assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0
+        else:
+            assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0b00011100
+    
 
 
 # @cocotb.test()
