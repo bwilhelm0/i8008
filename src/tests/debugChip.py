@@ -76,6 +76,7 @@ chip.set_all_inputs(0b00_00_00001000)
 chip.step_clock()
 time.sleep(0.5)
 
+# TODO: Modify to accept input every cycle and print formatted outputs
 
 # Other useful commands:
 # print(chip.get_output(0)) - gets the lowest bit of the chip's outputs
