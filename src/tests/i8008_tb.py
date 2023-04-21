@@ -110,6 +110,16 @@ class i8008_model:
     def update_flags(self, flags):
         self.flags = flags #CZSP?
 
+    def gen_flags(self, res):
+        carry = (res & 0b100000000) >> 5
+        res = res & 0b11111111
+        zero = (res == 0) << 2
+        sign = res >> 6
+        parity = (res >> 4) ^ (res & 0b1111)
+        parity = (parity >> 2) ^ (parity & 0b11)
+        parity = parity == 0 or parity == 3
+        self.flags = carry | zero | sign | parity
+
     def update_carry(self, carry):
         self.flags = (self.flags & 0b0111) | (carry << 3)
 
@@ -164,7 +174,7 @@ class i8008_model:
 
     def state_check(self, actual_state):
         for i in range(7):
-            assert self.reg_file[i] == actual_state[i]
+            assert self.reg_file[i] == actual_state[i], "Model failed with: {sel}, {state} != {actual}".format(sel=i, state=self.reg_file[i], actual=actual_state[i])
 
     def alu_op(self, D2_0, imm, I):
         Acc = self.read_rf(0)
@@ -173,36 +183,45 @@ class i8008_model:
             Bcc = imm
         
         if D2_0 == ADx:
-            res = (Acc + Bcc) & 0b11111111
-            self.write_rf(0, res)
-            #self.update_flags()
+            res = (Acc + Bcc)
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == ACx:
-            res = (Acc + Bcc + self.get_carry()) & 0b11111111
-            self.write_rf(0, res)
+            res = (Acc + Bcc + self.get_carry())
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == SUx:
-            res = (Acc - Bcc) & 0b11111111
-            self.write_rf(0, res)
+            res = (Acc - Bcc)
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == SBx:
-            res = (Acc - Bcc - self.get_carry()) & 0b11111111
-            self.write_rf(0, res)
+            res = (Acc - Bcc - self.get_carry())
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == NDx:
             res = (Acc & Bcc)
-            self.write_rf(0, res)
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == XRx:
             res = (Acc ^ Bcc)
-            self.write_rf(0, res)
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == ORx:
             res = (Acc | Bcc)
-            self.write_rf(0, res)
+            self.gen_flags(res)
+            self.write_rf(0, res & 0b11111111)
         elif D2_0 == CPx:
             res = (Acc - Bcc) & 0b11111111
-            #TODO: update flags
+            self.gen_flags(res)
     
     def gen_reg_state(self, prog, ind):
         if ind == 0: return 
 
         instr = prog[ind - 1] #This is wrong because of 3 byte instructions
         imm = prog[ind]
+        PC_L = prog[ind]
+        PC_H = prog[ind + 1]
+
         if instr == HLT1 or instr == HLT0 or instr == HLT0_1:
             return
         
@@ -222,10 +241,12 @@ class i8008_model:
                 self.write_mem(addr, imm)
             elif D2_0 == 0b000:
                 #INr
-                self.write_rf(D5_3, self.read_rf(D5_3)+1)
+                res = (self.read_rf(D5_3)+1) & 0b11111111
+                self.write_rf(D5_3, res)
             elif D2_0 == 0b001:
                 #DCr
-                self.write_rf(D5_3, self.read_rf(D5_3)-1)
+                res = (self.read_rf(D5_3)-1) & 0b11111111
+                self.write_rf(D5_3, res)
             elif D2_0 == 0b100:
                 #ALU OP I
                 self.alu_op(0, imm, 1)
@@ -518,8 +539,10 @@ async def ALU_add_test(dut):
 async def ALU_rand_test(dut):
     verbose = True
     """Test for random alu ops"""
-    prog = init_reg_file()
-    prog += gen_rand_alu_prog(10)
+    prog = []
+    for _ in range(2):
+        prog += init_reg_file()
+    prog += gen_rand_alu_prog(3)
 
     model = i8008_model()
 
@@ -539,10 +562,10 @@ async def ALU_rand_test(dut):
     assert dut.state.value == T1, "Rand ALU test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
     assert dut.D_out.value == 0b00000000, "Rand ALU test failed with: {D_out} != {actual}".format(D_out=0b00000000, actual=dut.D_out.value)
 
-    last_reg_state = [0, 0, 0, 0, 0, 0, 0]
     reg_state = [0, 0, 0, 0, 0, 0, 0]
     ind = 0
     last_instr = 0
+    last_instr_ind = 0
     while ind <= len(prog):
         if dut.state.value == T1:
             ind += 1
@@ -559,11 +582,13 @@ async def ALU_rand_test(dut):
             dut.READY.value = 1
             dut.D_in.value = prog[ind-1]
             if AddrType == PCI:
-                if (0b11_000_000 & last_instr == alu_r_M_op) and (last_instr & 0b00_000_111 != 0b00_000_111):
-                    model.gen_reg_state(prog, ind)
-                    model.state_check(reg_state)
-                last_reg_state = reg_state
+                # update model
+                model.gen_reg_state(prog, last_instr_ind)
+                model.state_check(reg_state)
+
+                # update for new instruction
                 last_instr = prog[ind-1]
+                last_instr_ind = ind
             await RisingEdge(dut.clk)
         elif dut.state.value == WAIT:
             await RisingEdge(dut.clk)
