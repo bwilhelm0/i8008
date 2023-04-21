@@ -271,8 +271,11 @@ module ALU
         AND_op: d = a & b;
         OR_op: d = a | b;
         XOR_op: d = a ^ b;
-        CMP_op: {flag_in.CARRY, NA} = a - b;
-        default: d = 'd0;
+        CMP_op: begin
+          {flag_in.CARRY, NA} = a - b;
+          d = a;
+        end
+        default: d = 'b0;
       endcase
     end
 

@@ -172,45 +172,45 @@ class i8008_model:
         else:
             self.reg_file[rf_ind] = data
 
-    def state_check(self, actual_state):
+    def state_check(self, actual_state, instr):
         for i in range(7):
-            assert self.reg_file[i] == actual_state[i], "Model failed with: {sel}, {state} != {actual}".format(sel=i, state=self.reg_file[i], actual=actual_state[i])
+            assert self.reg_file[i] == actual_state[i], "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.reg_file[i]), actual_state[i])
 
-    def alu_op(self, D2_0, imm, I):
+    def alu_op(self, D5_3, D2_0, imm, I):
         Acc = self.read_rf(0)
         Bcc = self.read_rf(D2_0)
         if I != 0:
             Bcc = imm
         
-        if D2_0 == ADx:
+        if D5_3 == ADx:
             res = (Acc + Bcc)
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == ACx:
+        elif D5_3 == ACx:
             res = (Acc + Bcc + self.get_carry())
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == SUx:
+        elif D5_3 == SUx:
             res = (Acc - Bcc)
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == SBx:
+        elif D5_3 == SBx:
             res = (Acc - Bcc - self.get_carry())
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == NDx:
+        elif D5_3 == NDx:
             res = (Acc & Bcc)
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == XRx:
+        elif D5_3 == XRx:
             res = (Acc ^ Bcc)
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == ORx:
+        elif D5_3 == ORx:
             res = (Acc | Bcc)
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
-        elif D2_0 == CPx:
+        elif D5_3 == CPx:
             res = (Acc - Bcc) & 0b11111111
             self.gen_flags(res)
     
@@ -218,9 +218,15 @@ class i8008_model:
         if ind == 0: return 
 
         instr = prog[ind - 1] #This is wrong because of 3 byte instructions
-        imm = prog[ind]
-        PC_L = prog[ind]
-        PC_H = prog[ind + 1]
+        imm = 0
+        PC_L = 0
+        PC_H = 0
+        
+        if ind < len(prog):
+            imm = prog[ind]
+            PC_L = prog[ind]
+        if ind + 1 < len(prog):
+            PC_H = prog[ind + 1]
 
         if instr == HLT1 or instr == HLT0 or instr == HLT0_1:
             return
@@ -249,7 +255,7 @@ class i8008_model:
                 self.write_rf(D5_3, res)
             elif D2_0 == 0b100:
                 #ALU OP I
-                self.alu_op(0, imm, 1)
+                self.alu_op(D5_3, D2_0, imm, 1)
             elif D2_0 == 0b010: #rot ops
                 if D5_3 == RLC:
                     rf_val = self.read_rf(0)
@@ -320,7 +326,7 @@ class i8008_model:
             #         #OUT
         elif op_class == 0b10:
             # alu ops
-            self.alu_op(D2_0, 0, 0)
+            self.alu_op(D5_3, D2_0, imm, 0)
         else:
             # Load case
             if D5_3 == Mem:
@@ -539,10 +545,11 @@ async def ALU_add_test(dut):
 async def ALU_rand_test(dut):
     verbose = True
     """Test for random alu ops"""
+    random.seed(1)
     prog = []
     for _ in range(2):
         prog += init_reg_file()
-    prog += gen_rand_alu_prog(3)
+    prog += gen_rand_alu_prog(30)
 
     model = i8008_model()
 
@@ -584,7 +591,7 @@ async def ALU_rand_test(dut):
             if AddrType == PCI:
                 # update model
                 model.gen_reg_state(prog, last_instr_ind)
-                model.state_check(reg_state)
+                model.state_check(reg_state, last_instr)
 
                 # update for new instruction
                 last_instr = prog[ind-1]
