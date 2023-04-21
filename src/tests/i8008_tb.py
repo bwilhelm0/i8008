@@ -22,6 +22,25 @@ CYCLE1 = 0b00
 CYCLE2 = 0b01
 CYCLE3 = 0b10
 
+Carry_bit = 0b1000
+Zero_bit = 0b0100
+Sign_bit = 0b0010
+Parity_bit = 0b0001
+
+Ca = 0b00
+Ze  = 0b01
+Si  = 0b10
+Pa = 0b11
+
+A = 0
+B = 1
+C = 2
+D = 3
+E = 4
+Hi = 5
+Lo = 6
+Mem = 0b111
+
 # State defines
 T1 = 2 #0b010
 T1I = 6 #0b110
@@ -64,6 +83,239 @@ HLT0_1 = 0b00_000_001
 HLT1 = 0b11_111_111
 
 verbose = False
+
+class i8008_model:
+    def __init__(self):
+        self.reg_file = [0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000] 
+        self.pc = [0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000] 
+        self.stack_ind = 0
+        self.flags = 0b0000
+        self.mem = dict()
+
+    def update_pc(self, pc):
+        self.pc[self.stack_ind] = pc
+
+    def push_pc(self, new_pc):
+        if self.stack_ind != 7:
+            self.stack_ind = self.stack_ind + 1
+            self.pc[self.stack_ind] = new_pc
+
+    def pop_pc(self):
+        if self.stack_ind != 0:
+            self.stack_ind = self.stack_ind - 1
+
+    def next_pc(self):
+        self.pc[self.stack_ind] = self.pc[self.stack_ind] + 1
+
+    def update_flags(self, flags):
+        self.flags = flags #CZSP?
+
+    def update_carry(self, carry):
+        self.flags = (self.flags & 0b0111) | (carry << 3)
+
+    def get_carry(self):
+        return self.flags >> 3
+    
+    def get_zero(self):
+        return (self.flags & 0b0100) >> 2
+
+    def get_sign(self):
+        return (self.flags & 0b0010) >> 1
+    
+    def get_parity(self):
+        return (self.flags & 0b0001)
+    
+    def cond_met(self, cond):
+        if cond == Ca:
+            return self.get_carry()
+        elif cond == Ze:
+            return self.get_zero()
+        elif cond == Si:
+            return self.get_sign()
+        elif cond == Pa:
+            return self.get_parity()
+        else:
+            return 0
+
+    def read_mem(self, addr):
+        if addr in self.mem:
+            return self.mem[addr]
+        else:
+            self.mem[addr] = 0b00000000
+            return 0b00000000
+    
+    def write_mem(self, addr, data):
+        self.mem[addr] = data
+    
+    def get_rf_addr(self):
+        return self.reg_file[Hi] << 6 | self.reg_file[Lo]
+
+    def read_rf(self, rf_ind):
+        if rf_ind == 0b111:
+            return self.read_mem(self.get_rf_addr())
+        else:
+            return self.reg_file[rf_ind]
+    
+    def write_rf(self, rf_ind, data):
+        if rf_ind == 0b111:
+            self.write_mem(self.get_rf_addr(), data)
+        else:
+            self.reg_file[rf_ind] = data
+
+    def state_check(self, actual_state):
+        for i in range(7):
+            assert self.reg_file[i] == actual_state[i]
+
+    def alu_op(self, D2_0, imm, I):
+        Acc = self.read_rf(0)
+        Bcc = self.read_rf(D2_0)
+        if I != 0:
+            Bcc = imm
+        
+        if D2_0 == ADx:
+            res = (Acc + Bcc) & 0b11111111
+            self.write_rf(0, res)
+            #self.update_flags()
+        elif D2_0 == ACx:
+            res = (Acc + Bcc + self.get_carry()) & 0b11111111
+            self.write_rf(0, res)
+        elif D2_0 == SUx:
+            res = (Acc - Bcc) & 0b11111111
+            self.write_rf(0, res)
+        elif D2_0 == SBx:
+            res = (Acc - Bcc - self.get_carry()) & 0b11111111
+            self.write_rf(0, res)
+        elif D2_0 == NDx:
+            res = (Acc & Bcc)
+            self.write_rf(0, res)
+        elif D2_0 == XRx:
+            res = (Acc ^ Bcc)
+            self.write_rf(0, res)
+        elif D2_0 == ORx:
+            res = (Acc | Bcc)
+            self.write_rf(0, res)
+        elif D2_0 == CPx:
+            res = (Acc - Bcc) & 0b11111111
+            #TODO: update flags
+    
+    def gen_reg_state(self, prog, ind):
+        if ind == 0: return 
+
+        instr = prog[ind - 1] #This is wrong because of 3 byte instructions
+        imm = prog[ind]
+        if instr == HLT1 or instr == HLT0 or instr == HLT0_1:
+            return
+        
+
+        op_class = (instr & 0b11_000_000) >> 6
+        D5_3 = (instr & 0b00_111_000) >> 3
+        D2_0 = (instr & 0b00_000_111)
+
+
+        if op_class == 0b00:
+            if D2_0 == 0b110 and D5_3 != 0b111:
+                #LrI
+                self.write_rf(D5_3, imm)
+            elif D2_0 == 0b110 and D5_3 == 0b111:
+                #LMI
+                addr = self.get_rf_addr()
+                self.write_mem(addr, imm)
+            elif D2_0 == 0b000:
+                #INr
+                self.write_rf(D5_3, self.read_rf(D5_3)+1)
+            elif D2_0 == 0b001:
+                #DCr
+                self.write_rf(D5_3, self.read_rf(D5_3)-1)
+            elif D2_0 == 0b100:
+                #ALU OP I
+                self.alu_op(0, imm, 1)
+            elif D2_0 == 0b010: #rot ops
+                if D5_3 == RLC:
+                    rf_val = self.read_rf(0)
+                    write_val = ((rf_val << 1) & (0b11111110)) | (rf_val >> 7)
+                    self.write_rf(0, write_val)
+                    self.update_carry(rf_val >> 7)
+                elif D5_3 == RRC:
+                    rf_val = self.read_rf(0)
+                    write_val = (rf_val >> 1) | ((rf_val << 7) & 0b10000000)
+                    self.write_rf(0, write_val)
+                    self.update_carry(rf_val & 0b00000001)
+                elif D5_3 == RAL:
+                    rf_val = self.read_rf(0)
+                    write_val = ((rf_val << 1) & (0b11111110)) | (self.get_carry())
+                    self.write_rf(0, write_val)
+                    self.update_carry(rf_val >> 7)
+                elif D5_3 == RAR:
+                    rf_val = self.read_rf(0)
+                    write_val = (rf_val >> 1) | ((self.get_carry() << 7) & 0b10000000)
+                    self.write_rf(0, write_val)
+                    self.update_carry(rf_val & 0b00000001)
+            elif D2_0 == 0b111:
+                #RET
+                self.pop_pc()
+            elif D2_0 == 0b011 and D5_3 >> 2 == 1:
+                #RTc
+                if self.cond_met(D5_3 & 0b011):
+                    self.pop_pc()
+            elif D2_0 == 0b011 and D5_3 >> 2 == 0:
+                #RFc
+                if not(self.cond_met(D5_3 & 0b011)):
+                    self.pop_pc()
+            elif D2_0 == 0b101:
+                #RST
+                self.push_pc(D5_3 << 3)
+        elif op_class == 0b01:
+            new_pc = PC_L | (PC_H << 8)
+            if D2_0 == 0b100:
+                #JMP
+                self.update_pc(new_pc)
+            elif D2_0 == 0b000 and (D5_3 >> 2 == 1):
+                #JTc
+                cond = (0b011 & D5_3)
+                if (self.cond_met(cond)):
+                    self.update_pc(new_pc)
+            elif D2_0 == 0b000 and (D5_3 >> 2 == 0):
+                #JFc
+                cond = (0b011 & D5_3)
+                if (not(self.cond_met(cond))):
+                    self.update_pc(new_pc)
+            elif D2_0 == 0b110:
+                #CAL
+                self.push_pc(new_pc)
+            elif D2_0 == 0b010 and (D5_3 >> 2 == 1):
+                #CTc
+                cond = (0b011 & D5_3)
+                if (self.cond_met(cond)):
+                    self.push_pc(new_pc)
+            elif D2_0 == 0b010 and (D5_3 >> 2 == 0):
+                #CFc
+                cond = (0b011 & D5_3)
+                if (not(self.cond_met(cond))):
+                    self.push_pc(new_pc)
+            # elif D2_0 & 0b001 == 1:
+            #     if D5_3 >> 1 == 0:
+            #         #INP
+            #     else:
+            #         #OUT
+        elif op_class == 0b10:
+            # alu ops
+            self.alu_op(D2_0, 0, 0)
+        else:
+            # Load case
+            if D5_3 == Mem:
+                #LMr
+                self.write_mem(self.get_rf_addr(), self.read_rf(D2_0))
+            elif D2_0 == 0b111:
+                #LrM
+                self.write_rf(D5_3, self.read_rf(D2_0))
+                #self.reg_file[D5_3] = self.read_mem(self.get_rf_addr())
+            else:
+                #Lr1r2
+                self.write_rf(D5_3, self.read_rf(D2_0))
+                # self.reg_file[D5_3] = self.reg_file[D2_0]
+
+        return
+
 
 def rand_imm():
     return random.randint(0, 0b11111111)
@@ -109,64 +361,6 @@ def gen_rand_alu_prog(length):
             prog.append(rand_imm())
 
     return prog
-
-def gen_reg_state(last_reg_state, prog, ind):
-    if ind == 0: return last_reg_state
-
-    instr = prog[ind - 1] #This is wrong because of 3 byte instructions
-    if instr == HLT1 or instr == HLT0 or instr == HLT0_1:
-        return last_reg_state
-    
-
-    op_class = (instr & 0b11_000_000) >> 6
-    D5_3 = (instr & 0b00_111_000) >> 3
-    D2_0 = (instr & 0b00_000_111)
-
-
-    reg_state = last_reg_state
-    if op_class == 0b00:
-        if D2_0 == 0b110 and D5_3 != 0b111:
-            #LrI
-            reg_state[D5_3] = prog[ind-1]
-        elif D2_0 == 0b110 and D5_3 == 0b111:
-            #LMI
-            return reg_state
-        elif D2_0 == 0b000:
-            #INr
-            reg_state[D5_3] = reg_state[D5_3]+1
-        elif D2_0 == 0b001:
-            #DCr
-            reg_state[D5_3] = reg_state[D5_3]-1
-        elif D2_0 == 0b100:
-            #ALU OP I
-        elif D2_0 == 0b010: #rot ops, TODO: input flag state
-            if D5_3 == RLC:
-                reg_state[0] = reg_state[0] << 1
-            elif D5_3 == RRC:
-                reg_state[0] = reg_state[0] >> 1
-            elif D5_3 == RAL:
-                reg_state[0] = reg_state[0] << 1
-            elif D5_3 == RAR:
-                reg_state[0] = reg_state[0] >> 1
-    elif op_class == 0b01:
-        return last_reg_state
-    elif op_class == 0b10:
-        # alu ops
-    else:
-        # Load case
-        if D5_3 == 0b111:
-            #LMr
-            # nothing for now
-            return reg_state
-        elif D2_0 == 0b111:
-            #LrM
-            reg_state[D5_3] = prog[ind-1] # replace with memory access
-        else:
-            #Lr1r2
-            reg_state[D5_3] = reg_state[D2_0]
-
-
-    return reg_state
 
 @cocotb.test()
 async def i8008_basic_test(dut):
@@ -327,6 +521,8 @@ async def ALU_rand_test(dut):
     prog = init_reg_file()
     prog += gen_rand_alu_prog(10)
 
+    model = i8008_model()
+
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
 
@@ -364,8 +560,8 @@ async def ALU_rand_test(dut):
             dut.D_in.value = prog[ind-1]
             if AddrType == PCI:
                 if (0b11_000_000 & last_instr == alu_r_M_op) and (last_instr & 0b00_000_111 != 0b00_000_111):
-                    actual_state = gen_reg_state(last_reg_state, prog, ind)
-                    assert actual_state == reg_state
+                    model.gen_reg_state(prog, ind)
+                    model.state_check(reg_state)
                 last_reg_state = reg_state
                 last_instr = prog[ind-1]
             await RisingEdge(dut.clk)
