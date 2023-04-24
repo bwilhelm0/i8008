@@ -822,6 +822,9 @@ module reg_file
   logic [7:0] rf[7];
   logic [7:0] rs;
 
+  logic [2:0] sel;
+  assign sel = rf_ctrl.sel == 3'b111 ? 3'd0 : rf_ctrl.sel;
+
   assign rf_out = rs;
   assign ACC = rf[0];
 
@@ -835,12 +838,12 @@ module reg_file
       rf[3'd5] <= 8'd0;
       rf[3'd6] <= 8'd0;
     end
-    else if (rf_ctrl.we)
+    else if (rf_ctrl.we && rf_ctrl.sel != 3'b111)
       rf[rf_ctrl.sel] <= bus;
   end
 
   always_comb
-    rs = rf[rf_ctrl.sel];
+    rs = rf[sel];
 
 endmodule: reg_file
 

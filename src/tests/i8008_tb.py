@@ -208,20 +208,10 @@ class i8008_model:
         elif D5_3 == SUx:
             res = (Acc + ((~Bcc + 1)))
             self.gen_flags(res)
-            #if (not(Bcc >> 7) and not(Acc >> 7) and (res >> 7)) or ((Bcc >> 7) and (Acc >> 7) and not(res >> 8)):# Update for borrowing
-            #    borrow = 0b1
-            #else:
-            #    borrow = 0b0
-            #self.update_carry(borrow)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == SBx:
             res = (Acc + ((~Bcc + 1)) + ((~self.get_carry() + 1)))
             self.gen_flags(res)
-            #if (not(Bcc >> 7) and not(Acc >> 7) and (res >> 7)) or ((Bcc >> 7) and (Acc >> 7) and not(res >> 8)):# Update for borrowing
-            #    borrow = 0b1
-            #else:
-            #    borrow = 0b0
-            #self.update_carry(borrow)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == NDx:
             res = (Acc & Bcc)
@@ -238,15 +228,6 @@ class i8008_model:
         elif D5_3 == CPx:
             res = (Acc + ((~Bcc + 1)))
             self.gen_flags(res)
-            #if (not(Bcc >> 7) and not(Acc >> 7) and (res >> 7)) or ((Bcc >> 7) and (Acc >> 7) and not(res >> 8)):# Update for borrowing
-            #    borrow = 0b1
-            #else:
-            #    borrow = 0b0
-            #self.update_carry(borrow)
-            print("HEREHERE:")
-            print(bin(Acc))
-            print(bin(Bcc))
-            print(bin(res))
 
     
     def gen_reg_state(self, prog, ind):
@@ -282,18 +263,21 @@ class i8008_model:
                 self.write_mem(addr, imm)
             elif D2_0 == 0b000:
                 #INr
-                res = (self.read_rf(D5_3)+1) & 0b11111111
-                cbit = self.get_carry()
-                self.gen_flags(res)
-                self.update_carry(cbit)
-                self.write_rf(D5_3, res)
+                if (D5_3 != 0b111):
+                    res = (self.read_rf(D5_3)+1) & 0b11111111
+                    cbit = self.get_carry()
+                    self.gen_flags(res)
+                    self.update_carry(cbit)
+                    self.write_rf(D5_3, res)
             elif D2_0 == 0b001:
                 #DCr
-                res = (self.read_rf(D5_3)+0b11111111) & 0b11111111
-                cbit = self.get_carry()
-                self.gen_flags(res)
-                self.update_carry(cbit)
-                self.write_rf(D5_3, res)
+                assert D5_3 != 0b000
+                if (D5_3 != 0b111):
+                    res = (self.read_rf(D5_3)+0b11111111) & 0b11111111
+                    cbit = self.get_carry()
+                    self.gen_flags(res)
+                    self.update_carry(cbit)
+                    self.write_rf(D5_3, res)
             elif D2_0 == 0b100:
                 #ALU OP I
                 self.write_mem(self.get_rf_addr(), imm)
@@ -369,6 +353,8 @@ class i8008_model:
             #     else:
             #         #OUT
         elif op_class == 0b10:
+            if D2_0 == 0b111:
+                self.write_mem(self.get_rf_addr(), imm)
             # alu ops
             self.alu_op(D5_3, D2_0, imm, 0)
         else:
@@ -406,12 +392,19 @@ def rand_alu_op():
         op = alu_r_M_op | (a_uop << 3) | rrr
     elif (op_type == 3): 
         op = alu_I_op | (a_uop << 3)
+        if op >> 1 == 0b0000000:
+            op |= alu_r_M_op
     else:
         if random.randint(0, 1) == 0:
+            if rrr == 0b111:
+                rrr -= 1
+            if rrr == 0b000:
+                rrr += 1
             op = alu_inr_op | (rrr << 3) | random.randint(0, 1)
         else:
             op = alu_rot_op | (r_uop << 3)
 
+    assert op != HLT0 and op != HLT1 and op != HLT0_1 and op & 0b11_000_111 != LrI, "{op_type}".format(op_type=op_type)
     return op
 
 def init_reg_file():
@@ -591,13 +584,13 @@ async def ALU_add_test(dut):
 
 @cocotb.test()
 async def ALU_rand_test(dut):
-    verbose = True
     """Test for random alu ops"""
-    random.seed(1)
+    random.seed()
     prog = []
     for _ in range(2):
         prog += init_reg_file()
-    prog += gen_rand_alu_prog(50)
+    prog += gen_rand_alu_prog(300)
+    verbose = True
 
     model = i8008_model()
 
@@ -631,8 +624,8 @@ async def ALU_rand_test(dut):
                     print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
                     reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
                 print("\tFlags: ", dut.Unit.flags.value)
-
-                
+                print("\tREG_a = ", dut.A_out.value)
+                print("\tREG_b = ", dut.B_out.value)
                 print("PC_L = {D_out}".format(D_out=dut.Stack.PC_out.value))
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
@@ -643,7 +636,7 @@ async def ALU_rand_test(dut):
             if AddrType == PCI:
                 # update model
                 model.gen_reg_state(prog, last_instr_ind)
-                model.dump_reg()
+                if verbose: model.dump_reg()
                 model.state_check(reg_state, dut.Unit.flags.value, last_instr)
 
                 # update for new instruction
