@@ -108,32 +108,39 @@ class i8008_model:
         self.pc[self.stack_ind] = self.pc[self.stack_ind] + 1
 
     def update_flags(self, flags):
-        self.flags = flags #CZSP?
+        self.flags = flags #PSZC
 
     def gen_flags(self, res):
-        carry = (res & 0b100000000) >> 5
+        carry = (res & 0b100000000) >> 8
         res = res & 0b11111111
-        zero = (res == 0) << 2
-        sign = res >> 6
+        zero = 0b0000
+        if res == 0b00000000:
+            zero = 0b0010
+
+        sign = (res >> 7) << 2
         parity = (res >> 4) ^ (res & 0b1111)
         parity = (parity >> 2) ^ (parity & 0b11)
-        parity = parity == 0 or parity == 3
+        if (parity == 0 or parity == 3):
+            parity = 0b1000
+        else:
+            parity = 0b0000
+
         self.flags = carry | zero | sign | parity
 
     def update_carry(self, carry):
-        self.flags = (self.flags & 0b0111) | (carry << 3)
+        self.flags = (self.flags & 0b1110) | (carry & 0b1)
 
     def get_carry(self):
-        return self.flags >> 3
+        return self.flags & 0b0001
     
     def get_zero(self):
-        return (self.flags & 0b0100) >> 2
+        return (self.flags & 0b0010) >> 1
 
     def get_sign(self):
-        return (self.flags & 0b0010) >> 1
+        return (self.flags & 0b0100) >> 2
     
     def get_parity(self):
-        return (self.flags & 0b0001)
+        return self.flags >> 3
     
     def cond_met(self, cond):
         if cond == Ca:
@@ -163,8 +170,9 @@ class i8008_model:
     def read_rf(self, rf_ind):
         if rf_ind == 0b111:
             return self.read_mem(self.get_rf_addr())
-        else:
+        elif rf_ind >= 0b000 or rf_ind <= 0b110:
             return self.reg_file[rf_ind]
+        else: assert 1 == 0, "BAD READ"
     
     def write_rf(self, rf_ind, data):
         if rf_ind == 0b111:
@@ -172,10 +180,17 @@ class i8008_model:
         else:
             self.reg_file[rf_ind] = data
 
-    def state_check(self, actual_state, instr):
+    def state_check(self, actual_state, actual_flags, instr):
         for i in range(7):
             assert self.reg_file[i] == actual_state[i], "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.reg_file[i]), actual_state[i])
+        assert self.flags == actual_flags, "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.flags), actual_flags)
 
+    def dump_reg(self):
+        print("ModelDump:")
+        for sel in range(7):
+            print("\tREG_{reg} = {val}".format(reg=sel, val=bin(self.reg_file[sel])))
+        print("\tFlags: ", bin(self.flags))
+    
     def alu_op(self, D5_3, D2_0, imm, I):
         Acc = self.read_rf(0)
         Bcc = self.read_rf(D2_0)
@@ -191,12 +206,22 @@ class i8008_model:
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == SUx:
-            res = (Acc - Bcc)
+            res = (Acc + ((~Bcc + 1) & 0b11111111))
             self.gen_flags(res)
+            if (Bcc > Acc and Bcc >> 7) or (not(Bcc >> 7) and Bcc < Acc):# Update for borrowing
+                borrow = 0b1
+            else:
+                borrow = 0b0
+            self.update_carry(borrow)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == SBx:
-            res = (Acc - Bcc - self.get_carry())
+            res = (Acc + ((~Bcc + 1) & 0b11111111) + ((~self.get_carry() + 1) & 0b11111111))
             self.gen_flags(res)
+            if (Bcc > Acc and Bcc >> 7) or (not(Bcc >> 7) and Bcc < Acc):# Update for borrowing
+                borrow = 0b1
+            else:
+                borrow = 0b0
+            self.update_carry(borrow)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == NDx:
             res = (Acc & Bcc)
@@ -211,8 +236,18 @@ class i8008_model:
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == CPx:
-            res = (Acc - Bcc) & 0b11111111
+            res = (Acc + ((~Bcc + 1) & 0b11111111)) & 0b11111111
             self.gen_flags(res)
+            if (Bcc > Acc and Bcc >> 7) or (not(Bcc >> 7) and Bcc < Acc):# Update for borrowing
+                borrow = 0b1
+            else:
+                borrow = 0b0
+            self.update_carry(borrow)
+            print("HEREHERE:")
+            print(bin(Acc))
+            print(bin(Bcc))
+            print(bin(res))
+
     
     def gen_reg_state(self, prog, ind):
         if ind == 0: return 
@@ -248,10 +283,16 @@ class i8008_model:
             elif D2_0 == 0b000:
                 #INr
                 res = (self.read_rf(D5_3)+1) & 0b11111111
+                cbit = self.get_carry()
+                self.gen_flags(res)
+                self.update_carry(cbit)
                 self.write_rf(D5_3, res)
             elif D2_0 == 0b001:
                 #DCr
-                res = (self.read_rf(D5_3)-1) & 0b11111111
+                res = (self.read_rf(D5_3)+0b11111111) & 0b11111111
+                cbit = self.get_carry()
+                self.gen_flags(res)
+                self.update_carry(cbit)
                 self.write_rf(D5_3, res)
             elif D2_0 == 0b100:
                 #ALU OP I
@@ -360,7 +401,7 @@ def rand_alu_op():
     rrr = random.randint(0, 7)
     if (op_type <= 2):
         op = alu_r_M_op | (a_uop << 3) | rrr
-    elif (op_type == 3):
+    elif (op_type == 3): 
         op = alu_I_op | (a_uop << 3) | rrr
     else:
         if random.randint(0, 1) == 0:
@@ -581,6 +622,10 @@ async def ALU_rand_test(dut):
                 for sel in range(7):
                     print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
                     reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+                print("\tFlags: ", dut.Unit.flags.value)
+
+
+                
                 print("PC_L = {D_out}".format(D_out=dut.Stack.PC_out.value))
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
@@ -591,26 +636,43 @@ async def ALU_rand_test(dut):
             if AddrType == PCI:
                 # update model
                 model.gen_reg_state(prog, last_instr_ind)
-                model.state_check(reg_state, last_instr)
+                model.dump_reg()
+                model.state_check(reg_state, dut.Unit.flags.value, last_instr)
 
                 # update for new instruction
                 last_instr = prog[ind-1]
                 last_instr_ind = ind
+            print(dut.regB.en.value)
+            print(dut.B_out.value)
             await RisingEdge(dut.clk)
         elif dut.state.value == WAIT:
+            print(dut.regB.en.value)
+            print(dut.B_out.value)
+            dut.READY.value = 0
             await RisingEdge(dut.clk)
         elif dut.state.value == T3:
+            print(dut.regB.en.value)
+            print(dut.B_out.value)
             if verbose: 
                 print("Instr: %b", dut.instr.value)
                 print("D_in: %b", dut.D_in.value)
 
-            dut.READY.value = 0
             await RisingEdge(dut.clk)
         elif dut.state.value == STOPPED:
+            print(dut.regB.en.value)
+            print(dut.B_out.value)
             await RisingEdge(dut.clk)
         elif dut.state.value == T4:
+            print(dut.bus.value)
+            print(dut.regB.en.value)
+            print(dut.B_out.value)
             await RisingEdge(dut.clk)
         elif dut.state.value == T5:
+            #print(dut.A_out.value)
+            print(dut.regB.en.value)
+            print(dut.B_out.value)
+            #print(dut.Unit.NA.value)
+            #print(dut.Unit.flag_in)
             await RisingEdge(dut.clk)
         else:
             assert 1==0, "Invalid state!"

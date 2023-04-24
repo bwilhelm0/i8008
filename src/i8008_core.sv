@@ -102,8 +102,8 @@ module i8008_core
 
   logic [7:0] bus;
   logic [7:0] instr;
-  logic enable_SP, Ready, tempR, Intr, S_Intr, DBR_en, A_rst, B_rst, DBR_rst, IR_rst, SP_rst, IR_en, A_en;
-  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_D, DBR_out, DBR_in, PC_out, rf_out, ACC;
+  logic enable_SP, Ready, tempR, Intr, S_Intr, A_rst, B_rst, IR_rst, SP_rst, IR_en, A_en;
+  logic [7:0] A_in, A_out, B_in, B_out, ALU_out, DBR_out, DBR_in, PC_out, rf_out, ACC;
   ctrl_signals_t ctrl_signals;
   flags_t flags;
   logic [2:0] sel_Stack;
@@ -178,18 +178,13 @@ module i8008_core
     end
   end
 
-  assign DBR_D = bus; 
-  assign DBR_en = ctrl_signals.DBR.we; 
-
-  assign DBR_rst = ctrl_signals.DBR.clr | rst;
   assign IR_rst = ctrl_signals.IR.clr | rst;
-
   assign IR_en = ctrl_signals.IR.we | (Ready && cycle == CYCLE1);
   Register #(.WIDTH(WIDTH)) IR (.d(D_in), .Q(instr), .clk, .en(IR_en), .clear(IR_rst));
 
   assign A_rst = ctrl_signals.A.clr | rst;
   assign B_rst = ctrl_signals.B.clr | rst;
-  assign A_en = ctrl_signals.A.we | (cycle == CYCLE1 && (state == T1 || state == T1I));
+  assign A_en = ctrl_signals.A.we;
   assign A_in = (cycle == CYCLE1 && (state == T1 || state == T1I)) ? ACC : bus;
   Register #(.WIDTH(WIDTH)) regA (.d(A_in), .Q(A_out), .clk, .en(A_en), .clear(A_rst));
   Register #(.WIDTH(WIDTH)) regB (.d(bus), .Q(B_out), .clk, .en(ctrl_signals.B.we), .clear(B_rst));
@@ -237,51 +232,76 @@ module ALU
     flag_reg (.d(flag_in), .Q(flags), .clk, .en(ALU_ctrl.en_Flag), .clear(Flag_rst));
 
   always_comb begin
-    flag_in.CARRY = 1'b0;
+    flag_in[0] = 1'b0;
     NA = 'd0;
     if (ALU_ctrl.ARITH) begin
       unique case (ALU_ctrl.arith_op)
-        ADD1_op: d = a + 1;
-        SUB1_op: d = a - 1;
+        ADD1_op: begin
+          d = a + 1;
+          flag_in[0] = flags[0];
+        end
+        SUB1_op: begin
+          d = a - 1;
+          flag_in[0] = flags[0];
+        end
         RLC_op: begin
           d = {a[6:0], a[7]};
-          flag_in.CARRY = a[7];
+          flag_in[0] = a[7];
         end
         RRC_op: begin
           d = {a[0], a[7:1]};
-          flag_in.CARRY = a[0];
+          flag_in[0] = a[0];
         end
         RAL_op: begin
-          d = {a[6:0], flags.CARRY};
-          flag_in.CARRY = a[7];
+          d = {a[6:0], flags[0]};
+          flag_in[0] = a[7];
         end
         RAR_op: begin
-          d = {flags.CARRY, a[7:1]};
-          flag_in.CARRY = a[0];
+          d = {flags[0], a[7:1]};
+          flag_in[0] = a[0];
         end
       endcase
     end
     else begin
       d = 'd0;
       unique case (ALU_ctrl.alu_op)
-        ADD_op: {flag_in.CARRY, d} = a + b;
-        ADDC_op: {flag_in.CARRY, d} = a + b + flags.CARRY;
-        SUB_op: {flag_in.CARRY, d} = a - b;
-        SUBC_op: {flag_in.CARRY, d} = a - b - flags.CARRY;
+        ADD_op: begin
+          {flag_in[0], d} = a + b;
+        end
+        ADDC_op: begin
+          {flag_in[0], d} = a + b + flags[0];
+        end
+        SUB_op: begin
+          {flag_in[0], d} = a - b;
+        end
+        SUBC_op: begin
+          {flag_in[0], d} = a - b - flags[0];
+        end
         AND_op: d = a & b;
         OR_op: d = a | b;
         XOR_op: d = a ^ b;
         CMP_op: begin
-          {flag_in.CARRY, NA} = a - b;
+          {flag_in[0], NA} = a - b; // Will set borrow bit on some subtractions
           d = a;
         end
         default: d = 'b0;
       endcase
     end
 
-    flag_in.SIGN = ALU_ctrl.ARITH ? flags.SIGN : d[7] | NA[7];
-    flag_in.PARITY = ALU_ctrl.ARITH ? flags.PARITY : (^d) | (^NA);
-    flag_in.ZERO = ALU_ctrl.ARITH ? flags.ZERO : (ALU_ctrl.alu_op == CMP_op) ? (~(|NA)) : (~(|d));
+    if (ALU_ctrl.ARITH) begin
+      flag_in[1] = (ALU_ctrl.arith_op == ADD1_op || ALU_ctrl.arith_op == SUB1_op) ? 
+                   (~(|d)) : flags[1];
+      flag_in[2] = (ALU_ctrl.arith_op == ADD1_op || ALU_ctrl.arith_op == SUB1_op) ? 
+                   d[7] : flags[2];
+      flag_in[3] = (ALU_ctrl.arith_op == ADD1_op || ALU_ctrl.arith_op == SUB1_op) ? 
+                   ~(^d) : flags[3];
+    end
+    else begin
+      flag_in[1] = (ALU_ctrl.alu_op != CMP_op) ? (~(|d)) : (~(|NA));
+      flag_in[2] = (ALU_ctrl.alu_op != CMP_op) ? d[7] : NA[7];
+      flag_in[3] = (ALU_ctrl.alu_op != CMP_op) ? ~(^d) : ~(^NA);
+    end
+
   end
 endmodule: ALU
 
@@ -307,10 +327,10 @@ module fsm_decoder
   // Should flags be one hot, or fully encoded?
   always_comb begin
     unique case (instr[4:3])
-      Ca: CF = ~flags.CARRY;
-      Ze: CF = ~flags.ZERO;
-      Si: CF = ~flags.SIGN;
-      Pa: CF = flags.PARITY; // Parity of result is even
+      Ca: CF = ~flags[0];
+      Ze: CF = ~flags[1];
+      Si: CF = ~flags[2];
+      Pa: CF = flags[3]; // Parity of result is even
       default: CF = 1'b1;
     endcase
   end
@@ -332,6 +352,8 @@ module fsm_decoder
             ctrl_signals.DBR.we = 1'b1;
             ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
             ctrl_signals.Stack_ctrl.lower = PC_L;
+
+            ctrl_signals.A.we = 1'b1;
           end
           T2: begin
             next_state = Ready ? T3 : WAIT;
@@ -399,12 +421,12 @@ module fsm_decoder
               Lr1r2, LMr, ALU_op: begin
                 // Deal with LrM case? No, it shouldn't get here
                 // Deal with other ALU cases? Nope, shouldn't get here
-                if (SSS != 3'b111) begin
+                // if (SSS != 3'b111) begin
                   ctrl_signals.B.we = 1'b1;
                   ctrl_signals.rf_ctrl.re = 1'b1;
                   ctrl_signals.rf_ctrl.sel = SSS;
-                  ctrl_signals.DBR.we = 1'b1;
-                end
+                  // ctrl_signals.DBR.we = 1'b1;
+                // end
               end
               INr, DCr: begin
                 // Deal with HALT case and mem case for INr/DCr? No, shouldn't get here
@@ -414,6 +436,7 @@ module fsm_decoder
               end
               RLC, RRC, RAL, RAR: begin
                 // read Accum into A alu reg
+                // TODO: Remove A.we, should already be there
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.A.we = 1'b1;
