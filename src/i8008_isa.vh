@@ -82,7 +82,7 @@
 
         ALU_op = 8'b10_???_???,
         ALUM = 8'b10_???_111,
-        ALUI = 8'b10_???_100,
+        ALUI = 8'b00_???_100,
 
         // Accumulator group instructions
         ADr = 8'b10_000_???,        // Add contents to A, set carry
