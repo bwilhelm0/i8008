@@ -330,7 +330,7 @@ module fsm_decoder
       Ca: CF = ~flags[0];
       Ze: CF = ~flags[1];
       Si: CF = ~flags[2];
-      Pa: CF = flags[3]; // Parity of result is even
+      Pa: CF = ~flags[3]; // Parity of result is even
       default: CF = 1'b1;
     endcase
   end
@@ -456,6 +456,11 @@ module fsm_decoder
               end
               default: begin
                 // Do nothing!
+                // if (instr[7:6] == 2'b10) begin
+                //   ctrl_signals.B.we = 1'b1;
+                //   ctrl_signals.rf_ctrl.re = 1'b1;
+                //   ctrl_signals.rf_ctrl.sel = SSS;
+                // end
               end
             endcase
 
@@ -631,6 +636,7 @@ module fsm_decoder
                 //ctrl_signals.ALU.alu_op = D5_3;  // Set alu op based on instruction, add arith op?
                 ctrl_signals.ALU.ARITH = 1'b0;
                 ctrl_signals.ALU.re = 1'b1;
+                ctrl_signals.ALU.en_Flag = 1'b1;
               end
               default: begin
               end
@@ -873,11 +879,11 @@ module stack
       rf[3'd7] <= 14'd0;
     end
     else if (Stack_ctrl.we_Stack && Stack_ctrl.lower)
-      rf[sel][7:0] <= (Stack_ctrl.D5_3 ? RST_AAA : bus);
+      rf[sel] <= Stack_ctrl.D5_3 ? {8'd0, RST_AAA} : {rf[sel][13:8], bus};
     else if (Stack_ctrl.we_Stack && ~Stack_ctrl.lower)
-      rf[sel][13:8] <= bus[5:0];
+      rf[sel] <= {bus[5:0], rf[sel][7:0]};
     else if (Stack_ctrl.inc_PC)
-      rf[sel][13:0] <= rf[sel][13:0] + 1;
+      rf[sel] <= rf[sel] + 1;
   end
 
   always_comb begin

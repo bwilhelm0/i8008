@@ -206,22 +206,22 @@ class i8008_model:
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == SUx:
-            res = (Acc + ((~Bcc + 1) & 0b11111111))
+            res = (Acc + ((~Bcc + 1)))
             self.gen_flags(res)
-            if (Bcc > Acc and Bcc >> 7) or (not(Bcc >> 7) and Bcc < Acc):# Update for borrowing
-                borrow = 0b1
-            else:
-                borrow = 0b0
-            self.update_carry(borrow)
+            #if (not(Bcc >> 7) and not(Acc >> 7) and (res >> 7)) or ((Bcc >> 7) and (Acc >> 7) and not(res >> 8)):# Update for borrowing
+            #    borrow = 0b1
+            #else:
+            #    borrow = 0b0
+            #self.update_carry(borrow)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == SBx:
-            res = (Acc + ((~Bcc + 1) & 0b11111111) + ((~self.get_carry() + 1) & 0b11111111))
+            res = (Acc + ((~Bcc + 1)) + ((~self.get_carry() + 1)))
             self.gen_flags(res)
-            if (Bcc > Acc and Bcc >> 7) or (not(Bcc >> 7) and Bcc < Acc):# Update for borrowing
-                borrow = 0b1
-            else:
-                borrow = 0b0
-            self.update_carry(borrow)
+            #if (not(Bcc >> 7) and not(Acc >> 7) and (res >> 7)) or ((Bcc >> 7) and (Acc >> 7) and not(res >> 8)):# Update for borrowing
+            #    borrow = 0b1
+            #else:
+            #    borrow = 0b0
+            #self.update_carry(borrow)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == NDx:
             res = (Acc & Bcc)
@@ -236,13 +236,13 @@ class i8008_model:
             self.gen_flags(res)
             self.write_rf(0, res & 0b11111111)
         elif D5_3 == CPx:
-            res = (Acc + ((~Bcc + 1) & 0b11111111)) & 0b11111111
+            res = (Acc + ((~Bcc + 1)))
             self.gen_flags(res)
-            if (Bcc > Acc and Bcc >> 7) or (not(Bcc >> 7) and Bcc < Acc):# Update for borrowing
-                borrow = 0b1
-            else:
-                borrow = 0b0
-            self.update_carry(borrow)
+            #if (not(Bcc >> 7) and not(Acc >> 7) and (res >> 7)) or ((Bcc >> 7) and (Acc >> 7) and not(res >> 8)):# Update for borrowing
+            #    borrow = 0b1
+            #else:
+            #    borrow = 0b0
+            #self.update_carry(borrow)
             print("HEREHERE:")
             print(bin(Acc))
             print(bin(Bcc))
@@ -296,6 +296,9 @@ class i8008_model:
                 self.write_rf(D5_3, res)
             elif D2_0 == 0b100:
                 #ALU OP I
+                self.write_mem(self.get_rf_addr(), imm)
+                assert self.read_mem(self.get_rf_addr()) == imm
+                print("Immediate ", bin(imm))
                 self.alu_op(D5_3, D2_0, imm, 1)
             elif D2_0 == 0b010: #rot ops
                 if D5_3 == RLC:
@@ -402,7 +405,7 @@ def rand_alu_op():
     if (op_type <= 2):
         op = alu_r_M_op | (a_uop << 3) | rrr
     elif (op_type == 3): 
-        op = alu_I_op | (a_uop << 3) | rrr
+        op = alu_I_op | (a_uop << 3)
     else:
         if random.randint(0, 1) == 0:
             op = alu_inr_op | (rrr << 3) | random.randint(0, 1)
@@ -517,7 +520,9 @@ async def ALU_add_test(dut):
             0b00_011_011, # Arbitrary Imm.
             0b00_001_000, # B++ (INr)
             0b10_001_001, # A <- A + B + (Carry) (ACr)
-            0b10_011_001] # A <- A - B - (Carry) (SBr)
+            0b10_011_001, # A <- A - B - (Carry) (SBr)
+            0b10_000_111, # A <- A + Mem
+            0b00_000_111] # "Mem"
 
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
@@ -575,10 +580,12 @@ async def ALU_add_test(dut):
             print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
 
     for sel in range(7):
-        if sel != 1:
-            assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0
-        else:
+        if sel == 0:
+            assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0b00000111
+        elif sel == 1:
             assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0b00011100
+        else:
+            assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0
     
 
 
@@ -590,7 +597,7 @@ async def ALU_rand_test(dut):
     prog = []
     for _ in range(2):
         prog += init_reg_file()
-    prog += gen_rand_alu_prog(30)
+    prog += gen_rand_alu_prog(50)
 
     model = i8008_model()
 
@@ -619,11 +626,11 @@ async def ALU_rand_test(dut):
             ind += 1
             if verbose:
                 print("\nRegDump:")
+                print("\tPC: ", dut.Stack.rs.value)
                 for sel in range(7):
                     print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
                     reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
                 print("\tFlags: ", dut.Unit.flags.value)
-
 
                 
                 print("PC_L = {D_out}".format(D_out=dut.Stack.PC_out.value))
@@ -642,37 +649,25 @@ async def ALU_rand_test(dut):
                 # update for new instruction
                 last_instr = prog[ind-1]
                 last_instr_ind = ind
-            print(dut.regB.en.value)
-            print(dut.B_out.value)
             await RisingEdge(dut.clk)
         elif dut.state.value == WAIT:
-            print(dut.regB.en.value)
-            print(dut.B_out.value)
             dut.READY.value = 0
             await RisingEdge(dut.clk)
         elif dut.state.value == T3:
-            print(dut.regB.en.value)
-            print(dut.B_out.value)
             if verbose: 
                 print("Instr: %b", dut.instr.value)
                 print("D_in: %b", dut.D_in.value)
 
             await RisingEdge(dut.clk)
         elif dut.state.value == STOPPED:
-            print(dut.regB.en.value)
-            print(dut.B_out.value)
             await RisingEdge(dut.clk)
         elif dut.state.value == T4:
-            print(dut.bus.value)
-            print(dut.regB.en.value)
-            print(dut.B_out.value)
             await RisingEdge(dut.clk)
         elif dut.state.value == T5:
-            #print(dut.A_out.value)
-            print(dut.regB.en.value)
-            print(dut.B_out.value)
-            #print(dut.Unit.NA.value)
-            #print(dut.Unit.flag_in)
+            # print(dut.Unit.d.value)
+            # print(dut.Unit.flag_in)
+            # print(dut.Unit.flags)
+            # print(dut.Unit.flag_reg.en)
             await RisingEdge(dut.clk)
         else:
             assert 1==0, "Invalid state!"
