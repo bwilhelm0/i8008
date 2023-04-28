@@ -55,6 +55,8 @@ op_mask = 0b11_000_111
 reg_mask = 0b00_111_000
 
 LrI = 0b00_000_110
+LrM = 0b11_000_111
+LMr = 0b11_111_000
 
 # ALU uops
 ADx = 0b000
@@ -81,18 +83,19 @@ alu_inr_op = 0b00_000_000
 HLT0 = 0b00_000_000
 HLT0_1 = 0b00_000_001
 HLT1 = 0b11_111_111
+RST = 0b00_000_101
 
 verbose = False
 
 class i8008_model:
     def __init__(self):
         self.reg_file = [0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000] 
-        self.pc = [0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000] 
+        self.pc = [0b00_0000_0000_0000, 0b00_0000_0000_0000, 0b00_0000_0000_0000, 0b00_0000_0000_0000, 0b00_0000_0000_0000, 0b00_0000_0000_0000, 0b00_0000_0000_0000, 0b00_0000_0000_0000] 
         self.stack_ind = 0
         self.flags = 0b0000
-        self.mem = dict()
+        self.prog = dict()
 
-    def update_pc(self, pc):
+    def write_pc(self, pc):
         self.pc[self.stack_ind] = pc
 
     def push_pc(self, new_pc):
@@ -104,8 +107,11 @@ class i8008_model:
         if self.stack_ind != 0:
             self.stack_ind = self.stack_ind - 1
 
-    def next_pc(self):
+    def incr_pc(self):
         self.pc[self.stack_ind] = self.pc[self.stack_ind] + 1
+
+    def get_pc(self):
+        return self.pc[self.stack_ind]
 
     def update_flags(self, flags):
         self.flags = flags #PSZC
@@ -155,14 +161,14 @@ class i8008_model:
             return 0
 
     def read_mem(self, addr):
-        if addr in self.mem:
-            return self.mem[addr]
+        if addr in self.prog:
+            return self.prog[addr]
         else:
-            self.mem[addr] = 0b00000000
+            self.prog[addr] = 0b00000000
             return 0b00000000
     
     def write_mem(self, addr, data):
-        self.mem[addr] = data
+        self.prog[addr] = data
     
     def get_rf_addr(self):
         return self.reg_file[Hi] << 6 | self.reg_file[Lo]
@@ -180,13 +186,15 @@ class i8008_model:
         else:
             self.reg_file[rf_ind] = data
 
-    def state_check(self, actual_state, actual_flags, instr):
+    def state_check(self, dut, instr):
+        assert self.pc[self.stack_ind] == dut.Stack.rs.value, "Model failed with: %r, %r != %r" % (bin(instr), bin(self.pc[self.stack_ind]), dut.Stack.rs.value)
         for i in range(7):
-            assert self.reg_file[i] == actual_state[i], "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.reg_file[i]), actual_state[i])
-        assert self.flags == actual_flags, "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.flags), actual_flags)
+            assert self.reg_file[i] == dut.rf._id(f"rf[{i}]", extended=False).value, "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.reg_file[i]), dut.rf._id(f"rf[{i}]", extended=False).value)
+        assert self.flags == dut.Unit.flags.value, "Model failed with: %r, %r != %r" % (bin(instr), bin(self.flags), dut.Unit.flags.value)
 
     def dump_reg(self):
         print("ModelDump:")
+        print("\tPC: ", bin(self.get_pc()))
         for sel in range(7):
             print("\tREG_{reg} = {val}".format(reg=sel, val=bin(self.reg_file[sel])))
         print("\tFlags: ", bin(self.flags))
@@ -194,6 +202,8 @@ class i8008_model:
     def alu_op(self, D5_3, D2_0, imm, I):
         Acc = self.read_rf(0)
         Bcc = self.read_rf(D2_0)
+
+        # Set to immediate/memory mode
         if I != 0:
             Bcc = imm
         
@@ -230,19 +240,10 @@ class i8008_model:
             self.gen_flags(res)
 
     
-    def gen_reg_state(self, prog, ind):
-        if ind == 0: return 
-
-        instr = prog[ind - 1] #This is wrong because of 3 byte instructions
-        imm = 0
-        PC_L = 0
-        PC_H = 0
-        
-        if ind < len(prog):
-            imm = prog[ind]
-            PC_L = prog[ind]
-        if ind + 1 < len(prog):
-            PC_H = prog[ind + 1]
+    def gen_reg_state(self, prog, instr, mem_read):        
+        imm = mem_read
+        # PC_L = mem_read
+        # PC_H = prog[ind + 1]
 
         if instr == HLT1 or instr == HLT0 or instr == HLT0_1:
             return
@@ -269,6 +270,8 @@ class i8008_model:
                     self.gen_flags(res)
                     self.update_carry(cbit)
                     self.write_rf(D5_3, res)
+                else:
+                    assert False, "Invalid instruction"
             elif D2_0 == 0b001:
                 #DCr
                 assert D5_3 != 0b000
@@ -278,11 +281,12 @@ class i8008_model:
                     self.gen_flags(res)
                     self.update_carry(cbit)
                     self.write_rf(D5_3, res)
+                else:
+                    assert False, "Invalid instruction"
             elif D2_0 == 0b100:
                 #ALU OP I
                 self.write_mem(self.get_rf_addr(), imm)
                 assert self.read_mem(self.get_rf_addr()) == imm
-                print("Immediate ", bin(imm))
                 self.alu_op(D5_3, D2_0, imm, 1)
             elif D2_0 == 0b010: #rot ops
                 if D5_3 == RLC:
@@ -320,46 +324,47 @@ class i8008_model:
                 #RST
                 self.push_pc(D5_3 << 3)
         elif op_class == 0b01:
-            new_pc = PC_L | (PC_H << 8)
-            if D2_0 == 0b100:
-                #JMP
-                self.update_pc(new_pc)
-            elif D2_0 == 0b000 and (D5_3 >> 2 == 1):
-                #JTc
-                cond = (0b011 & D5_3)
-                if (self.cond_met(cond)):
-                    self.update_pc(new_pc)
-            elif D2_0 == 0b000 and (D5_3 >> 2 == 0):
-                #JFc
-                cond = (0b011 & D5_3)
-                if (not(self.cond_met(cond))):
-                    self.update_pc(new_pc)
-            elif D2_0 == 0b110:
-                #CAL
-                self.push_pc(new_pc)
-            elif D2_0 == 0b010 and (D5_3 >> 2 == 1):
-                #CTc
-                cond = (0b011 & D5_3)
-                if (self.cond_met(cond)):
-                    self.push_pc(new_pc)
-            elif D2_0 == 0b010 and (D5_3 >> 2 == 0):
-                #CFc
-                cond = (0b011 & D5_3)
-                if (not(self.cond_met(cond))):
-                    self.push_pc(new_pc)
+            return
+        #     new_pc = PC_L | (PC_H << 8)
+        #     if D2_0 == 0b100:
+        #         #JMP
+        #         self.update_pc(new_pc)
+        #     elif D2_0 == 0b000 and (D5_3 >> 2 == 1):
+        #         #JTc
+        #         cond = (0b011 & D5_3)
+        #         if (self.cond_met(cond)):
+        #             self.update_pc(new_pc)
+        #     elif D2_0 == 0b000 and (D5_3 >> 2 == 0):
+        #         #JFc
+        #         cond = (0b011 & D5_3)
+        #         if (not(self.cond_met(cond))):
+        #             self.update_pc(new_pc)
+        #     elif D2_0 == 0b110:
+        #         #CAL
+        #         self.push_pc(new_pc)
+        #     elif D2_0 == 0b010 and (D5_3 >> 2 == 1):
+        #         #CTc
+        #         cond = (0b011 & D5_3)
+        #         if (self.cond_met(cond)):
+        #             self.push_pc(new_pc)
+        #     elif D2_0 == 0b010 and (D5_3 >> 2 == 0):
+        #         #CFc
+        #         cond = (0b011 & D5_3)
+        #         if (not(self.cond_met(cond))):
+        #             self.push_pc(new_pc)
             # elif D2_0 & 0b001 == 1:
             #     if D5_3 >> 1 == 0:
             #         #INP
+            #         self.write_rf(0, )
             #     else:
             #         #OUT
+            #         return
         elif op_class == 0b10:
-            if D2_0 == 0b111:
-                self.write_mem(self.get_rf_addr(), imm)
             # alu ops
-            self.alu_op(D5_3, D2_0, imm, 0)
+            self.alu_op(D5_3, D2_0, imm, D2_0 == 0b111)
         else:
             # Load case
-            if D5_3 == Mem:
+            if D5_3 == 0b111:
                 #LMr
                 self.write_mem(self.get_rf_addr(), self.read_rf(D2_0))
             elif D2_0 == 0b111:
@@ -372,6 +377,37 @@ class i8008_model:
                 # self.reg_file[D5_3] = self.reg_file[D2_0]
 
         return
+    
+    def gen_rand_alu_prog(self, length):
+        self.prog = dict()
+        addr = 0b00_0000_0000_0000
+
+        # randomly initialize reg file
+        for i in range(7):
+            self.prog[addr] = (LrI | (i << 3))
+            addr += 1
+            self.prog[addr] = rand_imm()
+            addr += 1
+
+        # populate rest of addresses with alu instruction
+        for _ in range(length):
+            new_op = rand_alu_op()
+            self.prog[addr] = new_op
+            addr += 1
+            if (new_op & 0b11_000_111) == alu_I_op:
+                # Add a value to be read in I case
+                self.prog[addr] = rand_imm()
+                addr += 1
+            #elif (new_op & 0b11_000_111) == 0b10_000_111:
+                # what to do in this case?
+
+        self.prog[addr] = HLT0
+            
+        # for i in range(len(self.prog)):
+        #     print(bin(self.prog[i]))
+        #     assert self.prog[i] != 0b00_001_101, "Model failed with: {i}".format(i=i)
+
+        return self.prog
 
 
 def rand_imm():
@@ -404,7 +440,7 @@ def rand_alu_op():
         else:
             op = alu_rot_op | (r_uop << 3)
 
-    assert op != HLT0 and op != HLT1 and op != HLT0_1 and op & 0b11_000_111 != LrI, "{op_type}".format(op_type=op_type)
+    assert op != HLT0 and op != HLT1 and op != HLT0_1 and op & 0b11_000_111 != LrI and op & 0b11_000_111 != RST and op != 0b00_110_101, "{op_type}".format(op_type=op_type)
     return op
 
 def init_reg_file():
@@ -415,16 +451,7 @@ def init_reg_file():
 
     return prog
 
-def gen_rand_alu_prog(length):
-    prog = []
-    for _ in range(length):
-        new_op = rand_alu_op()
-        prog.append(new_op)
-        if (new_op & 0b11_000_111) == alu_I_op or (new_op & 0b11_000_111) == 0b10_000_111:
-            # Add a value to be read in M or I case
-            prog.append(rand_imm())
 
-    return prog
 
 @cocotb.test()
 async def i8008_basic_test(dut):
@@ -585,14 +612,13 @@ async def ALU_add_test(dut):
 @cocotb.test()
 async def ALU_rand_test(dut):
     """Test for random alu ops"""
-    random.seed()
-    prog = []
-    for _ in range(2):
-        prog += init_reg_file()
-    prog += gen_rand_alu_prog(300)
-    verbose = True
+    random.seed(9) # TODO: prevent program from writing to instruction memory
 
     model = i8008_model()
+
+    model.gen_rand_alu_prog(300)
+    verbose = True
+
 
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
@@ -610,38 +636,59 @@ async def ALU_rand_test(dut):
     assert dut.state.value == T1, "Rand ALU test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
     assert dut.D_out.value == 0b00000000, "Rand ALU test failed with: {D_out} != {actual}".format(D_out=0b00000000, actual=dut.D_out.value)
 
+    # used to print 8008 state
     reg_state = [0, 0, 0, 0, 0, 0, 0]
-    ind = 0
     last_instr = 0
-    last_instr_ind = 0
-    while ind <= len(prog):
+    last_mem_read = 0
+
+    PC_L = 0
+    PC_H = 0
+
+    # begin program simulation
+    while model.get_pc() in model.prog: # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
         if dut.state.value == T1:
-            ind += 1
             if verbose:
                 print("\nRegDump:")
                 print("\tPC: ", dut.Stack.rs.value)
+                print("Cycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
                 for sel in range(7):
                     print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
                     reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
                 print("\tFlags: ", dut.Unit.flags.value)
                 print("\tREG_a = ", dut.A_out.value)
                 print("\tREG_b = ", dut.B_out.value)
-                print("PC_L = {D_out}".format(D_out=dut.Stack.PC_out.value))
+                print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+            PC_L = dut.D_out.value
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
             AddrType = dut.D_out.value>>6
-            if verbose: print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=AddrType))
-            dut.READY.value = 1
-            dut.D_in.value = prog[ind-1]
+            if verbose: 
+                print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=AddrType))
+            # print("Actual type: ", bin(dut.Stack.Stack_ctrl.value >> 5))
+            PC_H = (dut.D_out.value & 0b11_1111)
+            PC = PC_L | (PC_H << 8)
+
             if AddrType == PCI:
                 # update model
-                model.gen_reg_state(prog, last_instr_ind)
+                # print("Last insr: ", bin(last_instr))
+                # print("last mem: ", bin(last_mem_read))
+                model.gen_reg_state(model.prog, last_instr, last_mem_read)
                 if verbose: model.dump_reg()
-                model.state_check(reg_state, dut.Unit.flags.value, last_instr)
+                model.state_check(dut, last_instr)
 
                 # update for new instruction
-                last_instr = prog[ind-1]
-                last_instr_ind = ind
+                last_instr = model.prog[model.get_pc()]                
+            
+            # input new program value into simulation
+            dut.READY.value = 1
+            # print("8008 PC: ", bin(PC))
+            # print("Model pc: ", bin(model.get_pc()))
+            # print("D_in ", bin(model.read_mem(PC)))
+            last_mem_read = model.read_mem(PC)
+            dut.D_in.value = last_mem_read
+
+            if AddrType == PCI or (AddrType == PCR and last_instr & 0b11_000_111 != LrM and last_instr & 0b11_000_111 != 0b10_000_111 and last_instr & 0b11_111_000 != LMr):
+                model.incr_pc()
             await RisingEdge(dut.clk)
         elif dut.state.value == WAIT:
             dut.READY.value = 0
@@ -653,47 +700,24 @@ async def ALU_rand_test(dut):
 
             await RisingEdge(dut.clk)
         elif dut.state.value == STOPPED:
-            await RisingEdge(dut.clk)
+            assert False, "Program shouldn't be here"
         elif dut.state.value == T4:
             await RisingEdge(dut.clk)
         elif dut.state.value == T5:
-            # print(dut.Unit.d.value)
-            # print(dut.Unit.flag_in)
-            # print(dut.Unit.flags)
-            # print(dut.Unit.flag_reg.en)
             await RisingEdge(dut.clk)
         else:
-            assert 1==0, "Invalid state!"
+            assert False, "Invalid state!"
 
     if verbose:
         print("\nRegDump:")
         for sel in range(7):
             print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
 
-    # for sel in range(7):
-    #     assert dut.rf._id(f"rf[{sel}]", extended=False).value == 0
-    
-
-# @cocotb.test()
-# async def adder_randomised_test(dut):
-#     """Test for adding 2 random numbers multiple times"""
-
-#     for i in range(10):
-
-#         A = random.randint(0, 15)
-#         B = random.randint(0, 15)
-
-#         dut.A.value = A
-#         dut.B.value = B
-
-#         await Timer(2, units="ns")
-
-#         assert dut.X.value == adder_model(
-#             A, B
-#         ), "Randomised test failed with: {A} + {B} = {X}".format(
-#             A=dut.A.value, B=dut.B.value, X=dut.X.value
-#         )
-
+    count = 0
+    while dut.state.value != STOPPED:
+        if count > 10:
+            assert False, "Program did not reach end"
+        await RisingEdge(dut.clk)
 
 def test_i8008_runner():
     """Simulate the i8008 using the Python runner.

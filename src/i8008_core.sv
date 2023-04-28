@@ -152,10 +152,11 @@ module i8008_core
 
   always_comb begin
     if (ctrl_signals.Stack_ctrl.re_Stack) begin
-      bus = PC_out;
+      bus = PC_out | 
+            (ctrl_signals.Stack_ctrl.lower ? 8'd0 : (ctrl_signals.Stack_ctrl.cycle_ctrl << 6)); // cycle ctrl should only be set on T2
     end
     else if (ctrl_signals.rf_ctrl.re) begin
-      bus = rf_out;
+      bus = rf_out | (ctrl_signals.Stack_ctrl.cycle_ctrl << 6);
     end
     else if (ctrl_signals.ALU.re) begin
       bus = ALU_out;
@@ -168,7 +169,7 @@ module i8008_core
       bus = A_out;
     end
     else if (ctrl_signals.B.re) begin
-      bus = B_out;
+      bus = B_out | (ctrl_signals.Stack_ctrl.cycle_ctrl << 6);
     end
     else if (ctrl_signals.DBR.re) begin
       bus = D_in;
@@ -474,6 +475,11 @@ module fsm_decoder
           end
           T5: begin
             unique casez (instr)
+              Lr1r2: begin
+                ctrl_signals.B.re = 1'b1;
+                ctrl_signals.rf_ctrl.we = 1'b1;
+                ctrl_signals.rf_ctrl.sel = DDD;
+              end
               RST: begin
                 ctrl_signals.B.re = 1'b1;
                 ctrl_signals.Stack_ctrl.we_Stack = 1'b1;
@@ -530,16 +536,13 @@ module fsm_decoder
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
               end
               LrM, LMr, ALUM: begin
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Lo;
-                ctrl_signals.Stack_ctrl.cycle_ctrl = (instr[7:3] == 5'b11_111) ? PCW : PCR; // LMr case
                 ctrl_signals.DBR.we = 1'b1;
               end
               INP, OUT: begin
-                ctrl_signals.Stack_ctrl.cycle_ctrl = PCC;
                 ctrl_signals.A.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
               end
@@ -550,23 +553,24 @@ module fsm_decoder
           T2: begin
             next_state = Ready ? T3 : WAIT;
 
-            ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
-
             unique casez (instr)
               LMI, LrI, ALUI, JMP, JFc, JTc, CAL, CTc, CFc: begin
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
-                ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
+                ctrl_signals.Stack_ctrl.lower = 1'b0;
+                ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
               end
               LrM, LMr, ALUM: begin
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.rf_ctrl.sel = Hi;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = (instr[7:3] == 5'b11_111) ? PCW : PCR; // LMr case
+                ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
               end
               INP, OUT: begin
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCC;
+                ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.B.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
               end
@@ -673,20 +677,20 @@ module fsm_decoder
           T2: begin
             next_state = Ready ? T3 : WAIT;
 
-            ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
-
             unique casez (instr)
               LMI: begin
                 ctrl_signals.rf_ctrl.sel = Hi;
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCW;
+                ctrl_signals.Stack_ctrl.lower = 1'b0;
               end
               JMP, JFc, JTc, CAL, CTc, CFc: begin
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
                 ctrl_signals.DBR.we = 1'b1;
                 ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
+                ctrl_signals.Stack_ctrl.inc_PC = 1'b1;   // Increment PC here and not T1 so it doesn't affect PC_H
               end
               default: begin
               end
@@ -861,9 +865,8 @@ module stack
   logic [13:0] rf[8];  // TODO: may have to make 1D array
   logic [13:0] rs;
   logic [7:0] upper, RST_AAA;
-  assign upper[7:6] = Stack_ctrl.cycle_ctrl;
-  assign upper[5:0] = rs[13:8];
 
+  assign upper = {2'd0, rs[13:8]};
   assign PC_out = (Stack_ctrl.lower ? rs[7:0] : upper);
 
   assign RST_AAA[5:3] = bus[5:3];
