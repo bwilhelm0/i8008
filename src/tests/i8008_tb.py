@@ -94,6 +94,7 @@ class i8008_model:
         self.stack_ind = 0
         self.flags = 0b0000
         self.prog = dict()
+        self.instr_addrs = []
 
     def write_pc(self, pc):
         self.pc[self.stack_ind] = pc
@@ -168,7 +169,8 @@ class i8008_model:
             return 0b00000000
     
     def write_mem(self, addr, data):
-        self.prog[addr] = data
+        if addr not in self.instr_addrs: # Don't allow writes to instruction memory
+            self.prog[addr] = data
     
     def get_rf_addr(self):
         return self.reg_file[Hi] << 6 | self.reg_file[Lo]
@@ -285,8 +287,7 @@ class i8008_model:
                     assert False, "Invalid instruction"
             elif D2_0 == 0b100:
                 #ALU OP I
-                self.write_mem(self.get_rf_addr(), imm)
-                assert self.read_mem(self.get_rf_addr()) == imm
+                assert self.read_mem(self.get_pc() - 1) == imm
                 self.alu_op(D5_3, D2_0, imm, 1)
             elif D2_0 == 0b010: #rot ops
                 if D5_3 == RLC:
@@ -385,23 +386,28 @@ class i8008_model:
         # randomly initialize reg file
         for i in range(7):
             self.prog[addr] = (LrI | (i << 3))
+            self.instr_addrs.append(addr)
             addr += 1
             self.prog[addr] = rand_imm()
+            self.instr_addrs.append(addr)
             addr += 1
 
         # populate rest of addresses with alu instruction
         for _ in range(length):
             new_op = rand_alu_op()
             self.prog[addr] = new_op
+            self.instr_addrs.append(addr)
             addr += 1
             if (new_op & 0b11_000_111) == alu_I_op:
                 # Add a value to be read in I case
+                self.instr_addrs.append(addr)
                 self.prog[addr] = rand_imm()
                 addr += 1
             #elif (new_op & 0b11_000_111) == 0b10_000_111:
                 # what to do in this case?
 
         self.prog[addr] = HLT0
+        self.instr_addrs.append(addr)
             
         # for i in range(len(self.prog)):
         #     print(bin(self.prog[i]))
@@ -612,12 +618,12 @@ async def ALU_add_test(dut):
 @cocotb.test()
 async def ALU_rand_test(dut):
     """Test for random alu ops"""
-    random.seed(9) # TODO: prevent program from writing to instruction memory
+    random.seed()
 
     model = i8008_model()
 
-    model.gen_rand_alu_prog(300)
-    verbose = True
+    model.gen_rand_alu_prog(1000)
+    verbose = False
 
 
     clk = Clock(dut.clk, 10, units="us")
