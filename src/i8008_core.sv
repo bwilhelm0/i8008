@@ -442,13 +442,9 @@ module fsm_decoder
                 ctrl_signals.rf_ctrl.sel = Acc;
                 ctrl_signals.A.we = 1'b1;
               end
-              RET: begin // Pop stack
+              RET, RFc, RTc: begin // Pop stack
                 ctrl_signals.SP_ctrl.inc_SP = 1'b0;
                 ctrl_signals.SP_ctrl.en_SP = 1'b1;
-              end
-              RFc, RTc: begin // Pop stack conditionally
-                ctrl_signals.SP_ctrl.inc_SP = 1'b0;
-                ctrl_signals.SP_ctrl.en_SP = (~instr[5] & CF) | (instr[5] & ~CF);
               end
               RST: begin
                 ctrl_signals.A.re = 1'b1;
@@ -706,6 +702,7 @@ module fsm_decoder
               CAL: begin
                 ctrl_signals.SP_ctrl.inc_SP = 1'b1;
                 ctrl_signals.SP_ctrl.en_SP = 1'b1; 
+                next_state = T4; 
               end
               JFc, CFc: begin
                 if (~CF) begin

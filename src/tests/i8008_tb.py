@@ -332,6 +332,7 @@ class i8008_model:
             elif D2_0 == 0b111:
                 #RET
                 self.pop_pc()
+                print("Popped pc")
             elif D2_0 == 0b011 and D5_3 >> 2 == 1:
                 #RTc
                 if self.cond_met(D5_3 & 0b011):
@@ -466,7 +467,7 @@ class i8008_model:
 
         PC = 0b00_1100_0000_0000
         # JMP instruction
-        self.prog[addr] = JMP #| (Ca << 3)
+        self.prog[addr] = CAL #| (Ca << 3)
         self.instr_addrs.append(addr)
         addr += 1
         self.prog[addr] = PC & 0b1111_1111
@@ -654,6 +655,23 @@ def init_reg_file():
 
     return prog
 
+def print_reg_state(dut):
+    reg_state = [0, 0, 0, 0, 0, 0, 0]
+    print("\nRegDump:")
+    print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
+    print("\tStack: sel =", dut.sel_Stack.value)
+    for sel in range(8):
+        print("\tSTACK_{sel} = {val}".format(sel=sel, val=dut.Stack._id(f"rf[{sel}]", extended=False).value))
+    for sel in range(7):
+        print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+        reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+    print("\tFlags: ", dut.Unit.flags.value)
+    print("\tREG_a = ", dut.A_out.value)
+    print("\tREG_b = ", dut.B_out.value)
+    print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+
+    return reg_state
+
 
 
 @cocotb.test()
@@ -772,10 +790,7 @@ async def ALU_add_test(dut):
         if dut.state.value == T1:
             ind += 1
             if verbose:
-                print("\nRegDump:")
-                for sel in range(7):
-                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-                print("PC_L = {D_out}".format(D_out=dut.Stack.PC_out.value))
+                print_reg_state(dut)
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
             if verbose: print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=(dut.D_out.value>>6)))
@@ -798,9 +813,7 @@ async def ALU_add_test(dut):
             assert 1==0, "Invalid state!"
 
     if verbose:
-        print("\nRegDump:")
-        for sel in range(7):
-            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+        print_reg_state(dut)
 
     for sel in range(7):
         if sel == 0:
@@ -821,7 +834,7 @@ async def ALU_rand_test(dut):
 
     model = i8008_model()
 
-    model.gen_rand_alu_prog(100)
+    model.gen_rand_alu_prog(10000)
 
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
@@ -851,16 +864,7 @@ async def ALU_rand_test(dut):
     while model.get_pc() in model.prog: # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
         if dut.state.value == T1:
             if verbose:
-                print("\nRegDump:")
-                print("\tPC: ", dut.Stack.rs.value)
-                print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
-                for sel in range(7):
-                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-                    reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
-                print("\tFlags: ", dut.Unit.flags.value)
-                print("\tREG_a = ", dut.A_out.value)
-                print("\tREG_b = ", dut.B_out.value)
-                print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+                print_reg_state(dut)
             PC_L = dut.D_out.value
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
@@ -905,15 +909,7 @@ async def ALU_rand_test(dut):
             assert False, "Invalid state!"
 
     if verbose:
-        print("\nRegDump:")
-        print("\tPC: ", dut.Stack.rs.value)
-        print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
-        for sel in range(7):
-            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-            reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
-        print("\tFlags: ", dut.Unit.flags.value)
-        print("\tREG_a = ", dut.A_out.value)
-        print("\tREG_b = ", dut.B_out.value)
+        print_reg_state(dut)
 
     count = 0
     while dut.state.value != STOPPED:
@@ -926,7 +922,7 @@ async def ALU_rand_test(dut):
 async def basic_ctrl_test(dut):
     """Basic control flow testing"""
     model = i8008_model()
-    verbose = True
+    # verbose = True
     
     # insert period into memory
     model.gen_ctrl_flow()
@@ -959,18 +955,7 @@ async def basic_ctrl_test(dut):
     while model.get_pc() in model.prog: # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
         if dut.state.value == T1:
             if verbose:
-                print("\nRegDump:")
-                print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
-                print("\tStack: sel =", dut.sel_Stack.value)
-                for sel in range(8):
-                    print("\tSTACK_{sel} = {val}".format(sel=sel, val=dut.Stack._id(f"rf[{sel}]", extended=False).value))
-                for sel in range(7):
-                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-                    reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
-                print("\tFlags: ", dut.Unit.flags.value)
-                print("\tREG_a = ", dut.A_out.value)
-                print("\tREG_b = ", dut.B_out.value)
-                print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+                print_reg_state(dut)
             PC_L = dut.D_out.value
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
@@ -1020,15 +1005,7 @@ async def basic_ctrl_test(dut):
             assert False, "Invalid state!"
 
     if verbose:
-        print("\nRegDump:")
-        print("\tPC: ", dut.Stack.rs.value, int(dut.Stack.rs.value))
-        print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
-        for sel in range(7):
-            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-            reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
-        print("\tFlags: ", dut.Unit.flags.value)
-        print("\tREG_a = ", dut.A_out.value)
-        print("\tREG_b = ", dut.B_out.value)
+        print_reg_state(dut)
 
     count = 0
     while dut.state.value != STOPPED:
@@ -1038,7 +1015,7 @@ async def basic_ctrl_test(dut):
         count += 1
 
 
-# @cocotb.test()
+@cocotb.test()
 async def period_search_test(dut):
     """Test for finding period in memory"""
     seed = random.randint(0, 0xFFFFFFFF)
@@ -1046,7 +1023,6 @@ async def period_search_test(dut):
     print("period_search_test seed: ", seed)
 
     model = i8008_model()
-    # verbose = True
 
     mem = []
     for i in range(20):
@@ -1085,19 +1061,10 @@ async def period_search_test(dut):
     PC_H = 0
 
     # begin program simulation
-    while model.get_pc() in model.prog: # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
+    while (model.get_pc() in model.prog or model.get_pc() - 1 in model.prog): # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
         if dut.state.value == T1:
             if verbose:
-                print("\nRegDump:")
-                print("\tPC: ", dut.Stack.rs.value)
-                print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
-                for sel in range(7):
-                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-                    reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
-                print("\tFlags: ", dut.Unit.flags.value)
-                print("\tREG_a = ", dut.A_out.value)
-                print("\tREG_b = ", dut.B_out.value)
-                print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+                print_reg_state(dut)
             PC_L = dut.D_out.value
             await RisingEdge(dut.clk)
         elif dut.state.value == T2:
@@ -1113,8 +1080,9 @@ async def period_search_test(dut):
                 if verbose: model.dump_reg()
                 model.state_check(dut, last_instr)
 
-                # update for new instruction
-                last_instr = model.prog[model.get_pc()]        
+                if model.get_pc() in model.prog:
+                    # update for new instruction
+                    last_instr = model.prog[model.get_pc()]        
 
                 # reset mem_reads
                 mem_reads = []        
@@ -1134,9 +1102,12 @@ async def period_search_test(dut):
             if verbose: 
                 print("Instr: %b", dut.instr.value)
                 print("D_in: %b", dut.D_in.value)
+                print("enable_SP ", dut.enable_SP.value)
 
             await RisingEdge(dut.clk)
         elif dut.state.value == STOPPED:
+            assert dut.rf._id(f"rf[{Lo}]", extended=False).value == 200 + choice, "Period not in set location"
+            return
             assert False, "Program shouldn't be here"
         elif dut.state.value == T4:
             await RisingEdge(dut.clk)
@@ -1146,16 +1117,9 @@ async def period_search_test(dut):
             assert False, "Invalid state!"
 
     if verbose:
-        print("\nRegDump:")
-        print("\tPC: ", dut.Stack.rs.value, int(dut.Stack.rs.value))
-        print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
-        for sel in range(7):
-            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
-            reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
-        print("\tFlags: ", dut.Unit.flags.value)
-        print("\tREG_a = ", dut.A_out.value)
-        print("\tREG_b = ", dut.B_out.value)
+        print_reg_state(dut)
         print("Period should be found at: ", 200 + choice)
+        model.dump_reg()
 
     count = 0
     while dut.state.value != STOPPED:
