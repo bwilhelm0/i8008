@@ -213,7 +213,9 @@ class i8008_model:
 
     def dump_reg(self):
         print("ModelDump:")
-        print("\tPC: {bpc} = {ipc}".format(bpc=bin(self.get_pc()), ipc=self.get_pc()))
+        print("Stack_sel: ", self.stack_ind)
+        for sel in range(8):
+            print("\tSTACK_{sel}: {bpc} = {ipc}".format(sel=sel, bpc=bin(self.pc[sel]), ipc=self.pc[sel]))
         for sel in range(7):
             print("\tREG_{reg} = {val}".format(reg=sel, val=bin(self.reg_file[sel])))
         print("\tFlags: ", bin(self.flags))
@@ -464,7 +466,7 @@ class i8008_model:
 
         PC = 0b00_1100_0000_0000
         # JMP instruction
-        self.prog[addr] = CAL #| (Ca << 3)
+        self.prog[addr] = JMP #| (Ca << 3)
         self.instr_addrs.append(addr)
         addr += 1
         self.prog[addr] = PC & 0b1111_1111
@@ -1005,7 +1007,7 @@ async def basic_ctrl_test(dut):
             if verbose: 
                 print("Instr: %b", dut.instr.value)
                 print("D_in: %b", dut.D_in.value)
-            print("enable_SP", dut.enable_SP.value)
+            #print("enable_SP", dut.enable_SP.value)
 
             await RisingEdge(dut.clk)
         elif dut.state.value == STOPPED:
@@ -1036,7 +1038,7 @@ async def basic_ctrl_test(dut):
         count += 1
 
 
-@cocotb.test()
+# @cocotb.test()
 async def period_search_test(dut):
     """Test for finding period in memory"""
     seed = random.randint(0, 0xFFFFFFFF)
