@@ -54,9 +54,14 @@ T5 = 5 # 0b101
 op_mask = 0b11_000_111
 reg_mask = 0b00_111_000
 
+Lr1r2 = 0b11_000_000
 LrI = 0b00_000_110
+LMI = 0b00_111_110
 LrM = 0b11_000_111
 LMr = 0b11_111_000
+
+INr = 0b00_000_000
+DCr = 0b00_000_001
 
 # ALU uops
 ADx = 0b000
@@ -67,6 +72,7 @@ NDx = 0b100
 XRx = 0b101
 ORx = 0b110
 CPx = 0b111
+CPI = 0b00_111_100
 alu_r_M_op = 0b10_000_000
 alu_I_op = 0b00_000_100
 
@@ -79,11 +85,20 @@ alu_rot_op = 0b00_000_010
 alu_inr_op = 0b00_000_000
 
 
+JMP = 0b01_000_100
+JFc = 0b01_000_000
+JTc = 0b01_100_000
+CAL = 0b01_000_110
+CFc = 0b01_000_010
+CTc = 0b01_100_010
+RET = 0b00_000_111
+RFc = 0b00_000_011
+RTc = 0b00_100_011
+RST = 0b00_000_101
 
 HLT0 = 0b00_000_000
 HLT0_1 = 0b00_000_001
 HLT1 = 0b11_111_111
-RST = 0b00_000_101
 
 verbose = False
 
@@ -189,14 +204,16 @@ class i8008_model:
             self.reg_file[rf_ind] = data
 
     def state_check(self, dut, instr):
-        assert self.pc[self.stack_ind] == dut.Stack.rs.value, "Model failed with: %r, %r != %r" % (bin(instr), bin(self.pc[self.stack_ind]), dut.Stack.rs.value)
+        for i in range(8):
+            assert self.pc[i] == dut.Stack._id(f"rf[{i}]", extended=False).value, "Model failed with: %r, %r != %r" % (bin(instr), bin(self.pc[i]), dut.Stack._id(f"rf[{i}]", extended=False).value)
+
         for i in range(7):
             assert self.reg_file[i] == dut.rf._id(f"rf[{i}]", extended=False).value, "Model failed with: %r %r, %r != %r" % (bin(instr), i, bin(self.reg_file[i]), dut.rf._id(f"rf[{i}]", extended=False).value)
         assert self.flags == dut.Unit.flags.value, "Model failed with: %r, %r != %r" % (bin(instr), bin(self.flags), dut.Unit.flags.value)
 
     def dump_reg(self):
         print("ModelDump:")
-        print("\tPC: ", bin(self.get_pc()))
+        print("\tPC: {bpc} = {ipc}".format(bpc=bin(self.get_pc()), ipc=self.get_pc()))
         for sel in range(7):
             print("\tREG_{reg} = {val}".format(reg=sel, val=bin(self.reg_file[sel])))
         print("\tFlags: ", bin(self.flags))
@@ -242,10 +259,10 @@ class i8008_model:
             self.gen_flags(res)
 
     
-    def gen_reg_state(self, prog, instr, mem_read):        
+    def gen_reg_state(self, prog, instr, mem_read, second_mem_read):        
         imm = mem_read
-        # PC_L = mem_read
-        # PC_H = prog[ind + 1]
+        PC_L = mem_read
+        PC_H = second_mem_read
 
         if instr == HLT1 or instr == HLT0 or instr == HLT0_1:
             return
@@ -325,41 +342,40 @@ class i8008_model:
                 #RST
                 self.push_pc(D5_3 << 3)
         elif op_class == 0b01:
-            return
-        #     new_pc = PC_L | (PC_H << 8)
-        #     if D2_0 == 0b100:
-        #         #JMP
-        #         self.update_pc(new_pc)
-        #     elif D2_0 == 0b000 and (D5_3 >> 2 == 1):
-        #         #JTc
-        #         cond = (0b011 & D5_3)
-        #         if (self.cond_met(cond)):
-        #             self.update_pc(new_pc)
-        #     elif D2_0 == 0b000 and (D5_3 >> 2 == 0):
-        #         #JFc
-        #         cond = (0b011 & D5_3)
-        #         if (not(self.cond_met(cond))):
-        #             self.update_pc(new_pc)
-        #     elif D2_0 == 0b110:
-        #         #CAL
-        #         self.push_pc(new_pc)
-        #     elif D2_0 == 0b010 and (D5_3 >> 2 == 1):
-        #         #CTc
-        #         cond = (0b011 & D5_3)
-        #         if (self.cond_met(cond)):
-        #             self.push_pc(new_pc)
-        #     elif D2_0 == 0b010 and (D5_3 >> 2 == 0):
-        #         #CFc
-        #         cond = (0b011 & D5_3)
-        #         if (not(self.cond_met(cond))):
-        #             self.push_pc(new_pc)
-            # elif D2_0 & 0b001 == 1:
-            #     if D5_3 >> 1 == 0:
-            #         #INP
-            #         self.write_rf(0, )
-            #     else:
-            #         #OUT
-            #         return
+            new_pc = PC_L | (PC_H << 8)
+            if D2_0 == 0b100:
+                #JMP
+                self.write_pc(new_pc)
+            elif D2_0 == 0b000 and (D5_3 >> 2 == 1):
+                #JTc
+                cond = (0b011 & D5_3)
+                if (self.cond_met(cond)):
+                    self.write_pc(new_pc)
+            elif D2_0 == 0b000 and (D5_3 >> 2 == 0):
+                #JFc
+                cond = (0b011 & D5_3)
+                if (not(self.cond_met(cond))):
+                    self.write_pc(new_pc)
+            elif D2_0 == 0b110:
+                #CAL
+                self.push_pc(new_pc)
+            elif D2_0 == 0b010 and (D5_3 >> 2 == 1):
+                #CTc
+                cond = (0b011 & D5_3)
+                if (self.cond_met(cond)):
+                    self.push_pc(new_pc)
+            elif D2_0 == 0b010 and (D5_3 >> 2 == 0):
+                #CFc
+                cond = (0b011 & D5_3)
+                if (not(self.cond_met(cond))):
+                    self.push_pc(new_pc)
+            elif D2_0 & 0b001 == 1:
+                if D5_3 >> 1 == 0:
+                    #INP
+                    self.write_rf(0, )
+                else:
+                    #OUT
+                    return
         elif op_class == 0b10:
             # alu ops
             self.alu_op(D5_3, D2_0, imm, D2_0 == 0b111)
@@ -403,10 +419,8 @@ class i8008_model:
                 self.instr_addrs.append(addr)
                 self.prog[addr] = rand_imm()
                 addr += 1
-            #elif (new_op & 0b11_000_111) == 0b10_000_111:
-                # what to do in this case?
 
-        self.prog[addr] = HLT0
+        self.prog[addr] = rand_halt()
         self.instr_addrs.append(addr)
             
         # for i in range(len(self.prog)):
@@ -414,10 +428,163 @@ class i8008_model:
         #     assert self.prog[i] != 0b00_001_101, "Model failed with: {i}".format(i=i)
 
         return self.prog
+    
+    def gen_ctrl_flow(self):
+        self.prog = dict()
+        addr = 0b00_0000_0000_0000
+
+        # Load 1 into Acc
+        self.prog[addr] = (LrI | (0 << 3))
+        self.instr_addrs.append(addr)
+        addr += 1
+        self.prog[addr] = 0b0000_0001
+        self.instr_addrs.append(addr)
+        addr += 1
+
+        # Load -1 into B
+        self.prog[addr] = (LrI | (1 << 3))
+        self.instr_addrs.append(addr)
+        addr += 1
+        self.prog[addr] = 0b1111_1111
+        self.instr_addrs.append(addr)
+        addr += 1
+
+        # Load 2 into C
+        self.prog[addr] = (LrI | (2 << 3))
+        self.instr_addrs.append(addr)
+        addr += 1
+        self.prog[addr] = 0b0000_0010
+        self.instr_addrs.append(addr)
+        addr += 1
+
+        # Compare A to B
+        self.prog[addr] = alu_r_M_op | (B) | (CPx << 3)
+        self.instr_addrs.append(addr)
+        addr += 1
+
+        PC = 0b00_1100_0000_0000
+        # JMP instruction
+        self.prog[addr] = CAL #| (Ca << 3)
+        self.instr_addrs.append(addr)
+        addr += 1
+        self.prog[addr] = PC & 0b1111_1111
+        self.instr_addrs.append(addr)
+        addr += 1
+        self.prog[addr] = PC >> 8
+        self.instr_addrs.append(addr)
+        addr += 1
+        
+        # Add halt in case of fall through
+        self.prog[addr] = rand_halt()
+        self.instr_addrs.append(addr)
+        addr = PC
+
+        # Add halt if jump succeeds
+        self.prog[addr] = rand_halt()
+        self.instr_addrs.append(addr)
+        addr += 1
+
+        return self.prog
+    
+    def format_prog(self, asm, start_addr):
+        prog = dict()
+        instr_addrs = []
+        addr = start_addr
+
+        for i in asm:
+            prog[addr] = i
+            addr += 1
+            instr_addrs.append(addr)
+        
+        self.prog.update(prog)
+        self.instr_addrs.extend(instr_addrs)
+
+    def write_mem(self, asm, start_addr):
+        prog = dict()
+        addr = start_addr
+
+        for i in asm:
+            prog[addr] = i
+            addr += 1
+        
+        self.prog.update(prog)
+
+    def gen_period_search(self, mem):
+        self.prog = dict()
+        self.instr_addrs = []
+
+        period_search = [
+            (LrI | (Lo << 3)),  # Load 200 into Lo
+            200,
+            (LrI | (Hi << 3)),  # Load 0 into Hi
+            0,
+            LrM,                # Load character for memory
+            CPI,
+            0b00101110,
+            (JTc | (Ze << 3)),  # If equal go to return
+            0b01110111,
+            0,
+            CAL,                # Call increment function
+            0b00111100,
+            0,
+            (Lr1r2 | (A << 3) | (Lo)),              # Load Lo into A
+            CPI,                # Compare with 220
+            220,
+            (JFc | (Ze << 3)),  # If unequal go to loop
+            0b01101000,
+            0,
+            RET                 # Found, return
+        ]
+
+        increment = [
+            (INr | (Lo << 3)),  # Increment L
+            (RFc | (Ze << 3)),  # Return if not zero
+            (INr | (Hi << 3)),  # Increment H
+            RET
+        ]
+
+        main = [
+            CAL,
+            100,
+            0,
+            rand_halt()
+        ]
+
+        # Add instructions to instruction memory
+        self.format_prog(main, 0)
+        self.format_prog(period_search, 100)
+        self.format_prog(increment, 60)
+
+        # Fill memory to search
+        self.write_mem(mem, 200)
+
+    
+    # def gen_rand_ctrl_flow(self, length):
+    #     self.prog = dict()
+    #     addr = 0b00_0000_0000_0000
+
+    #     # randomly initialize reg file
+    #     for i in range(7):
+    #         self.prog[addr] = (LrI | (i << 3))
+    #         self.instr_addrs.extend(addr)
+    #         addr += 1
+    #         self.prog[addr] = rand_imm()
+    #         self.instr_addrs.extend(addr)
+    #         addr += 1
+        
 
 
 def rand_imm():
     return random.randint(0, 0b11111111)
+
+def rand_halt():
+    choice = random.randint(0, 2)
+    if choice == 0:
+        return HLT0
+    elif choice == 1:
+        return HLT0_1
+    else:
+        return HLT1
 
 def rand_alu_op():
     a_uops = [ADx, ACx, SUx, SBx, NDx, XRx, ORx, CPx]
@@ -448,6 +615,34 @@ def rand_alu_op():
 
     assert op != HLT0 and op != HLT1 and op != HLT0_1 and op & 0b11_000_111 != LrI and op & 0b11_000_111 != RST and op != 0b00_110_101, "{op_type}".format(op_type=op_type)
     return op
+
+
+def rand_ctrl():
+    choice = random.randint(0, 9)
+
+    if choice == 0:
+        instr = JMP
+    elif choice == 1:
+        instr = JFc
+    elif choice == 2:
+        instr = JTc
+    elif choice == 3:
+        instr = CAL
+    elif choice == 4:
+        instr = CFc
+    elif choice == 5:
+        instr = CTc
+    elif choice == 6:
+        instr = RET
+    elif choice == 7:
+        instr = RFc
+    elif choice == 8:
+        instr = RTc
+    elif choice == 9:
+        instr = RST
+
+
+    return instr
 
 def init_reg_file():
     prog = []
@@ -618,13 +813,13 @@ async def ALU_add_test(dut):
 @cocotb.test()
 async def ALU_rand_test(dut):
     """Test for random alu ops"""
-    random.seed()
+    seed = random.randint(0, 0xFFFFFFFF)
+    random.seed(seed)
+    print("ALU_rand_test seed: ", seed)
 
     model = i8008_model()
 
-    model.gen_rand_alu_prog(1000)
-    verbose = False
-
+    model.gen_rand_alu_prog(100)
 
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
@@ -656,7 +851,7 @@ async def ALU_rand_test(dut):
             if verbose:
                 print("\nRegDump:")
                 print("\tPC: ", dut.Stack.rs.value)
-                print("Cycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
+                print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
                 for sel in range(7):
                     print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
                     reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
@@ -670,15 +865,11 @@ async def ALU_rand_test(dut):
             AddrType = dut.D_out.value>>6
             if verbose: 
                 print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=AddrType))
-            # print("Actual type: ", bin(dut.Stack.Stack_ctrl.value >> 5))
             PC_H = (dut.D_out.value & 0b11_1111)
             PC = PC_L | (PC_H << 8)
 
             if AddrType == PCI:
-                # update model
-                # print("Last insr: ", bin(last_instr))
-                # print("last mem: ", bin(last_mem_read))
-                model.gen_reg_state(model.prog, last_instr, last_mem_read)
+                model.gen_reg_state(model.prog, last_instr, last_mem_read, 0)
                 if verbose: model.dump_reg()
                 model.state_check(dut, last_instr)
 
@@ -687,9 +878,6 @@ async def ALU_rand_test(dut):
             
             # input new program value into simulation
             dut.READY.value = 1
-            # print("8008 PC: ", bin(PC))
-            # print("Model pc: ", bin(model.get_pc()))
-            # print("D_in ", bin(model.read_mem(PC)))
             last_mem_read = model.read_mem(PC)
             dut.D_in.value = last_mem_read
 
@@ -716,14 +904,266 @@ async def ALU_rand_test(dut):
 
     if verbose:
         print("\nRegDump:")
+        print("\tPC: ", dut.Stack.rs.value)
+        print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
         for sel in range(7):
             print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+            reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+        print("\tFlags: ", dut.Unit.flags.value)
+        print("\tREG_a = ", dut.A_out.value)
+        print("\tREG_b = ", dut.B_out.value)
 
     count = 0
     while dut.state.value != STOPPED:
         if count > 10:
-            assert False, "Program did not reach end"
+            assert False, "Program did not halt"
         await RisingEdge(dut.clk)
+        count += 1
+
+@cocotb.test()
+async def basic_ctrl_test(dut):
+    """Basic control flow testing"""
+    model = i8008_model()
+    verbose = True
+    
+    # insert period into memory
+    model.gen_ctrl_flow()
+
+    clk = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clk.start())
+
+    # Setup the processor for testing
+    await RisingEdge(dut.clk)
+    dut.D_in.value = 0
+    dut.INTR.value = 0
+    dut.READY.value = 0
+    dut.rst.value = 1
+    await RisingEdge(dut.clk)
+    dut.rst.value = 0
+    await RisingEdge(dut.clk)
+
+    assert dut.state.value == T1, "Rand ALU test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
+    assert dut.D_out.value == 0b00000000, "Rand ALU test failed with: {D_out} != {actual}".format(D_out=0b00000000, actual=dut.D_out.value)
+
+    # used to print 8008 state
+    reg_state = [0, 0, 0, 0, 0, 0, 0]
+    last_instr = 0
+    mem_reads = []
+
+    PC_L = 0
+    PC_H = 0
+
+    # begin program simulation
+    while model.get_pc() in model.prog: # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
+        if dut.state.value == T1:
+            if verbose:
+                print("\nRegDump:")
+                print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
+                print("\tStack: sel =", dut.sel_Stack.value)
+                for sel in range(8):
+                    print("\tSTACK_{sel} = {val}".format(sel=sel, val=dut.Stack._id(f"rf[{sel}]", extended=False).value))
+                for sel in range(7):
+                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+                    reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+                print("\tFlags: ", dut.Unit.flags.value)
+                print("\tREG_a = ", dut.A_out.value)
+                print("\tREG_b = ", dut.B_out.value)
+                print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+            PC_L = dut.D_out.value
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T2:
+            AddrType = dut.D_out.value>>6
+            if verbose: 
+                print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=AddrType))
+            PC_H = (dut.D_out.value & 0b11_1111)
+            PC = PC_L | (PC_H << 8)
+
+            if AddrType == PCI:
+                mem_reads.extend([0, 0, 0])
+                model.gen_reg_state(model.prog, mem_reads[0], mem_reads[1], mem_reads[2])
+                if verbose: model.dump_reg()
+                model.state_check(dut, last_instr)
+
+                # update for new instruction
+                last_instr = model.prog[model.get_pc()]        
+
+                # reset mem_reads
+                mem_reads = []        
+            
+            # input new program value into simulation
+            dut.READY.value = 1
+            mem_reads.append(model.read_mem(PC))
+            dut.D_in.value = model.read_mem(PC)
+
+            if AddrType == PCI or (AddrType == PCR and last_instr & 0b11_000_111 != LrM and last_instr & 0b11_000_111 != 0b10_000_111 and last_instr & 0b11_111_000 != LMr):
+                model.incr_pc()
+            await RisingEdge(dut.clk)
+        elif dut.state.value == WAIT:
+            dut.READY.value = 0
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T3:
+            if verbose: 
+                print("Instr: %b", dut.instr.value)
+                print("D_in: %b", dut.D_in.value)
+            print("enable_SP", dut.enable_SP.value)
+
+            await RisingEdge(dut.clk)
+        elif dut.state.value == STOPPED:
+            assert False, "Program shouldn't be here"
+        elif dut.state.value == T4:
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T5:
+            await RisingEdge(dut.clk)
+        else:
+            assert False, "Invalid state!"
+
+    if verbose:
+        print("\nRegDump:")
+        print("\tPC: ", dut.Stack.rs.value, int(dut.Stack.rs.value))
+        print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
+        for sel in range(7):
+            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+            reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+        print("\tFlags: ", dut.Unit.flags.value)
+        print("\tREG_a = ", dut.A_out.value)
+        print("\tREG_b = ", dut.B_out.value)
+
+    count = 0
+    while dut.state.value != STOPPED:
+        if count > 10:
+            assert False, "Program did not halt"
+        await RisingEdge(dut.clk)
+        count += 1
+
+
+@cocotb.test()
+async def period_search_test(dut):
+    """Test for finding period in memory"""
+    seed = random.randint(0, 0xFFFFFFFF)
+    random.seed(seed)
+    print("period_search_test seed: ", seed)
+
+    model = i8008_model()
+    # verbose = True
+
+    mem = []
+    for i in range(20):
+        num = rand_imm()
+        while num == 0b00101110:
+            num = rand_imm()
+        mem.append(num)
+    choice = random.randint(0, 19)
+    
+    # insert period into memory
+    mem[choice] = 0b00101110
+    model.gen_period_search(mem)
+
+    clk = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clk.start())
+
+    # Setup the processor for testing
+    await RisingEdge(dut.clk)
+    dut.D_in.value = 0
+    dut.INTR.value = 0
+    dut.READY.value = 0
+    dut.rst.value = 1
+    await RisingEdge(dut.clk)
+    dut.rst.value = 0
+    await RisingEdge(dut.clk)
+
+    assert dut.state.value == T1, "Rand ALU test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
+    assert dut.D_out.value == 0b00000000, "Rand ALU test failed with: {D_out} != {actual}".format(D_out=0b00000000, actual=dut.D_out.value)
+
+    # used to print 8008 state
+    reg_state = [0, 0, 0, 0, 0, 0, 0]
+    last_instr = 0
+    mem_reads = []
+
+    PC_L = 0
+    PC_H = 0
+
+    # begin program simulation
+    while model.get_pc() in model.prog: # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
+        if dut.state.value == T1:
+            if verbose:
+                print("\nRegDump:")
+                print("\tPC: ", dut.Stack.rs.value)
+                print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
+                for sel in range(7):
+                    print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+                    reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+                print("\tFlags: ", dut.Unit.flags.value)
+                print("\tREG_a = ", dut.A_out.value)
+                print("\tREG_b = ", dut.B_out.value)
+                print("PC_L = {D_out}".format(D_out=dut.D_out.value))
+            PC_L = dut.D_out.value
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T2:
+            AddrType = dut.D_out.value>>6
+            if verbose: 
+                print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=AddrType))
+            PC_H = (dut.D_out.value & 0b11_1111)
+            PC = PC_L | (PC_H << 8)
+
+            if AddrType == PCI:
+                mem_reads.extend([0, 0, 0])
+                model.gen_reg_state(model.prog, mem_reads[0], mem_reads[1], mem_reads[2])
+                if verbose: model.dump_reg()
+                model.state_check(dut, last_instr)
+
+                # update for new instruction
+                last_instr = model.prog[model.get_pc()]        
+
+                # reset mem_reads
+                mem_reads = []        
+            
+            # input new program value into simulation
+            dut.READY.value = 1
+            mem_reads.append(model.read_mem(PC))
+            dut.D_in.value = model.read_mem(PC)
+
+            if AddrType == PCI or (AddrType == PCR and last_instr & 0b11_000_111 != LrM and last_instr & 0b11_000_111 != 0b10_000_111 and last_instr & 0b11_111_000 != LMr):
+                model.incr_pc()
+            await RisingEdge(dut.clk)
+        elif dut.state.value == WAIT:
+            dut.READY.value = 0
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T3:
+            if verbose: 
+                print("Instr: %b", dut.instr.value)
+                print("D_in: %b", dut.D_in.value)
+
+            await RisingEdge(dut.clk)
+        elif dut.state.value == STOPPED:
+            assert False, "Program shouldn't be here"
+        elif dut.state.value == T4:
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T5:
+            await RisingEdge(dut.clk)
+        else:
+            assert False, "Invalid state!"
+
+    if verbose:
+        print("\nRegDump:")
+        print("\tPC: ", dut.Stack.rs.value, int(dut.Stack.rs.value))
+        print("\tCycle: {cyc}, State: {state}".format(cyc=dut.Brain.cycle.value, state=dut.Brain.state.value))
+        for sel in range(7):
+            print("\tREG_{reg} = {val}".format(reg=sel, val=dut.rf._id(f"rf[{sel}]", extended=False).value))
+            reg_state[sel] = dut.rf._id(f"rf[{sel}]", extended=False).value
+        print("\tFlags: ", dut.Unit.flags.value)
+        print("\tREG_a = ", dut.A_out.value)
+        print("\tREG_b = ", dut.B_out.value)
+        print("Period should be found at: ", 200 + choice)
+
+    count = 0
+    while dut.state.value != STOPPED:
+        if count > 10:
+            assert False, "Program did not halt"
+        await RisingEdge(dut.clk)
+        count += 1
+
+    assert dut.rf._id(f"rf[{Lo}]", extended=False).value == 200 + choice, "Period not in set location"
+
 
 def test_i8008_runner():
     """Simulate the i8008 using the Python runner.

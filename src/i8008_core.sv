@@ -662,13 +662,11 @@ module fsm_decoder
                 ctrl_signals.rf_ctrl.sel = Lo;
                 ctrl_signals.rf_ctrl.re = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.Stack_ctrl.cycle_ctrl = PCW;
               end
               JMP, JFc, JTc, CAL, CTc, CFc: begin
                 ctrl_signals.Stack_ctrl.re_Stack = 1'b1;
                 ctrl_signals.Stack_ctrl.lower = 1'b1;
                 ctrl_signals.DBR.we = 1'b1;
-                ctrl_signals.Stack_ctrl.cycle_ctrl = PCR;
               end
               default: begin
               end
@@ -705,13 +703,21 @@ module fsm_decoder
                 next_state = T1;
                 next_cycle = CYCLE1;
               end
+              CAL: begin
+                ctrl_signals.SP_ctrl.inc_SP = 1'b1;
+                ctrl_signals.SP_ctrl.en_SP = 1'b1; 
+              end
               JFc, CFc: begin
                 if (~CF) begin
                   next_state = T1;
                   next_cycle = CYCLE1;
                 end
                 else begin
-                  next_state = T4; // WAIT state
+                  if (instr[7:5] == 3'b010 && instr[2:0] == 3'b010) begin    // CFc case
+                    ctrl_signals.SP_ctrl.inc_SP = 1'b1;
+                    ctrl_signals.SP_ctrl.en_SP = 1'b1;
+                  end
+                  next_state = T4; 
                 end
               end
               JTc, CTc: begin
@@ -720,10 +726,14 @@ module fsm_decoder
                   next_cycle = CYCLE1;
                 end
                 else begin
-                  next_state = T4; // WAIT state
+                  if (instr[7:5] == 3'b011 && instr[2:0] == 3'b010) begin    // CTc case
+                    ctrl_signals.SP_ctrl.inc_SP = 1'b1;
+                    ctrl_signals.SP_ctrl.en_SP = 1'b1;
+                  end
+                  next_state = T4; 
                 end
               end
-              default: next_state = T4; // WAIT state
+              default: next_state = T4; 
             endcase
 
             unique casez (instr)
@@ -744,27 +754,23 @@ module fsm_decoder
 
             unique casez (instr)
               CAL, CTc, CFc: begin // Is there an issue where the stack isn't pushed early enough?
-
-
                 ctrl_signals.A.re = 1'b1;
-                ctrl_signals.Stack_ctrl.we_Stack =
-                  ((instr[7:6] == 2'b01 && instr[2:0] == 3'b110) |          // CAL case
-                  ((instr[7:5] == 3'b011 && instr[2:0] == 3'b010) & ~CF) | // CTc case
-                  ((instr[7:5] == 3'b010 && instr[2:0] == 3'b010) & CF));    // CFc case
+                ctrl_signals.Stack_ctrl.we_Stack = 1'b1;
+                  // ((instr[7:6] == 2'b01 && instr[2:0] == 3'b110) |          // CAL case
+                  // ((instr[7:5] == 3'b011 && instr[2:0] == 3'b010) & ~CF) | // CTc case
+                  // ((instr[7:5] == 3'b010 && instr[2:0] == 3'b010) & CF));    // CFc case
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
 
-                ctrl_signals.SP_ctrl.inc_SP = 1'b1;
-                ctrl_signals.SP_ctrl.en_SP =
-                  ((instr[7:6] == 2'b01 && instr[2:0] == 3'b110) |          // CAL case
-                  ((instr[7:5] == 3'b011 && instr[2:0] == 3'b010) & ~CF) | // CTc case
-                  ((instr[7:5] == 3'b010 && instr[2:0] == 3'b010) & CF));    // CFc case
+                  // ((instr[7:6] == 2'b01 && instr[2:0] == 3'b110) |          // CAL case
+                  // ((instr[7:5] == 3'b011 && instr[2:0] == 3'b010) & ~CF) | // CTc case
+                  // ((instr[7:5] == 3'b010 && instr[2:0] == 3'b010) & CF));    // CFc case
               end
               JMP, JFc, JTc: begin
                 ctrl_signals.A.re = 1'b1;
-                ctrl_signals.Stack_ctrl.we_Stack =
-                  ((instr[7:6] == 2'b01 && instr[2:0] == 3'b100) |          // JMP case
-                  ((instr[7:5] == 3'b011 && instr[2:0] == 3'b000) & ~CF) | // JTc case
-                  ((instr[7:5] == 3'b010 && instr[2:0] == 3'b000) & CF));    // JFc case
+                ctrl_signals.Stack_ctrl.we_Stack = 1'b1;
+                  // ((instr[7:6] == 2'b01 && instr[2:0] == 3'b100) |          // JMP case
+                  // ((instr[7:5] == 3'b011 && instr[2:0] == 3'b000) & ~CF) | // JTc case
+                  // ((instr[7:5] == 3'b010 && instr[2:0] == 3'b000) & CF));    // JFc case
                 ctrl_signals.Stack_ctrl.lower = 1'b0;
               end
               default: begin
