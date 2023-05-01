@@ -3,93 +3,93 @@
 
 `default_nettype none
 
-module top (
-    input logic clk100, // 100MHz clock
-    input logic reset_n, // Active-low reset
+// module top (
+//     input logic clk100, // 100MHz clock
+//     input logic reset_n, // Active-low reset
 
-    input logic uart_rx,
-    output logic uart_tx,
+//     input logic uart_rx,
+//     output logic uart_tx,
 
-    output logic [7:0] base_led, // LEDs on the far right side of the board
-    output logic [23:0] led, // LEDs in the middle of the board
+//     output logic [7:0] base_led, // LEDs on the far right side of the board
+//     output logic [23:0] led, // LEDs in the middle of the board
 
-    input logic [23:0] sw, // The tiny slide-switches
+//     input logic [23:0] sw, // The tiny slide-switches
 
-    output logic [3:0] display_sel, // Select between the 4 segments
-    output logic [7:0] display // Seven-segment display
-);
+//     output logic [3:0] display_sel, // Select between the 4 segments
+//     output logic [7:0] display // Seven-segment display
+// );
 
-  logic clk, rst;
-  logic [11:0] chip_inputs, chip_outputs;
-  logic [7:0] D_in, D_out;
-  logic INTR, READY, Sync;
-  state_t state;
-  logic [1:0] display_cnt;
-  logic [3:0] disp_arr [4];
+//   logic clk, rst;
+//   logic [11:0] chip_inputs, chip_outputs;
+//   logic [7:0] D_in, D_out;
+//   logic INTR, READY, Sync;
+//   state_t state;
+//   logic [1:0] display_cnt;
+//   logic [3:0] disp_arr [4];
 
-  debug_harness dbg (
-      .uart_rx, .uart_tx,
+//   debug_harness dbg (
+//       .uart_rx, .uart_tx,
 
-      .chip_inputs,
-      .chip_outputs,
+//       .chip_inputs,
+//       .chip_outputs,
 
-      .chip_clock(clk),
-      .chip_reset(rst),
+//       .chip_clock(clk),
+//       .chip_reset(rst),
 
-      .clk100
-  );
+//       .clk100
+//   );
 
-  //   // 100MHz -> 25MHz
-  // SB_PLL40_CORE #(
-  //     .FEEDBACK_PATH("SIMPLE"),
-  //     .DIVR(4'b0000),         // DIVR =  0
-  //     .DIVF(7'b0000111),      // DIVF =  7
-  //     .DIVQ(3'b100),          // DIVQ =  4
-  //     .FILTER_RANGE(3'b101)   // FILTER_RANGE = 5
-  // ) pll (
-  //     .LOCK(),
-  //     .RESETB(1'b1),
-  //     .BYPASS(1'b0),
-  //     .REFERENCECLK(clk100),
-  //     .PLLOUTCORE(clk)
-  // );
+//   //   // 100MHz -> 25MHz
+//   // SB_PLL40_CORE #(
+//   //     .FEEDBACK_PATH("SIMPLE"),
+//   //     .DIVR(4'b0000),         // DIVR =  0
+//   //     .DIVF(7'b0000111),      // DIVF =  7
+//   //     .DIVQ(3'b100),          // DIVQ =  4
+//   //     .FILTER_RANGE(3'b101)   // FILTER_RANGE = 5
+//   // ) pll (
+//   //     .LOCK(),
+//   //     .RESETB(1'b1),
+//   //     .BYPASS(1'b0),
+//   //     .REFERENCECLK(clk100),
+//   //     .PLLOUTCORE(clk)
+//   // );
 
-  always_ff @(posedge clk100) begin
-    if (rst)
-      display_cnt <= 2'd0;
-    else
-      display_cnt <= display_cnt + 1;
-  end
+//   always_ff @(posedge clk100) begin
+//     if (rst)
+//       display_cnt <= 2'd0;
+//     else
+//       display_cnt <= display_cnt + 1;
+//   end
 
-  assign display_sel = ~(1 << display_cnt);
+//   assign display_sel = ~(1 << display_cnt);
 
-  hex_to_sevenseg convert (.hexdigit(disp_arr[display_cnt]), .seg(display));
-  assign disp_arr[0] = chip_inputs[3:0];
-  assign disp_arr[1] = chip_inputs[7:4];
-  assign disp_arr[2] = chip_outputs[3:0];
-  assign disp_arr[3] = chip_outputs[7:4];
+//   hex_to_sevenseg convert (.hexdigit(disp_arr[display_cnt]), .seg(display));
+//   assign disp_arr[0] = chip_inputs[3:0];
+//   assign disp_arr[1] = chip_inputs[7:4];
+//   assign disp_arr[2] = chip_outputs[3:0];
+//   assign disp_arr[3] = chip_outputs[7:4];
 
-  // assign D_in = sw[7:0];
-  // assign INTR = sw[8];
-  // assign READY = sw[9];
-  //assign clk = sw[10];
-  //assign rst = ~reset_n;
-  //assign rst = sw[11];
+//   // assign D_in = sw[7:0];
+//   // assign INTR = sw[8];
+//   // assign READY = sw[9];
+//   //assign clk = sw[10];
+//   //assign rst = ~reset_n;
+//   //assign rst = sw[11];
 
-  assign chip_outputs[7:0] = D_out;
-  assign chip_outputs[10:8] = state;
-  //assign chip_outputs[11] = 0; //Sync;
-  assign D_in = chip_inputs[7:0];
-  assign INTR = chip_inputs[8];
-  assign READY = chip_inputs[9];
+//   assign chip_outputs[7:0] = D_out;
+//   assign chip_outputs[10:8] = state;
+//   //assign chip_outputs[11] = 0; //Sync;
+//   assign D_in = chip_inputs[7:0];
+//   assign INTR = chip_inputs[8];
+//   assign READY = chip_inputs[9];
 
 
-  i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT (.D_in(D_in), .INTR(INTR), .READY(READY), .clk(clk), .rst(rst), .D_out(D_out), .Sync(Sync), .state(state));
+//   i8008_core #(.WIDTH(8), .STACK_HEIGHT(8)) DUT (.D_in(D_in), .INTR(INTR), .READY(READY), .clk(clk), .rst(rst), .D_out(D_out), .Sync(Sync), .state(state));
 
-  // Mirror the chip inputs and outputs to the LEDs for debugging convenience
-  //assign led = {rst, clk, chip_outputs[10:0], chip_inputs[9:0]};
-  assign led = {rst, clk, chip_inputs[9:8], chip_outputs[10:0], chip_inputs[7:0]};
-endmodule: top
+//   // Mirror the chip inputs and outputs to the LEDs for debugging convenience
+//   //assign led = {rst, clk, chip_outputs[10:0], chip_inputs[9:0]};
+//   assign led = {rst, clk, chip_inputs[9:8], chip_outputs[10:0], chip_inputs[7:0]};
+// endmodule: top
 
 module i8008_core
   #(parameter WIDTH = 8,
@@ -108,14 +108,6 @@ module i8008_core
   flags_t flags;
   logic [2:0] sel_Stack;
   cycle_t cycle;
-
-  // TODO: Rewrite FSM because state transitions and ctrl_signals are off by a cycle
-  // TODO: Write testbenches using yosys to figure out why synthesis is optimizing everything away
-  // TODO: Fix problem with writes to IR outside of CYCLE1
-
-  // How does program terminate? Call END?
-  // Is END an instruction? I think this is just Halt in disguise. Followed by RST?
-  // How does proc reset? Will need to reset PC and Stack_sel
 
   always_ff @(posedge clk) begin
     if (rst) begin
@@ -137,6 +129,7 @@ module i8008_core
     end
     else begin
       Intr <= 1'b0;
+      S_Intr <= 1'b0;
     end
   end
 
@@ -144,11 +137,6 @@ module i8008_core
   assign Sync = ctrl_signals.DBR.we;
 
   assign D_out = bus;
-
-  // Shouldn't be a register, just a bus buffer
-  // But since there's 8 ins and outs, use buffer for out
-  // Connect DBR enable to Ready?? Done, now external mem can write to reg
-  // I think add an in, and out buffer for ease of use
 
   always_comb begin
     if (ctrl_signals.Stack_ctrl.re_Stack) begin
@@ -336,11 +324,6 @@ module fsm_decoder
     endcase
   end
 
-  // Make sure all internal states are represented. Should be
-  // How does T1I work? Why no PC increment? I think maybe it can happen any time and is just recorded?
-  // Fix Conditional instruction logic. I think it's fixed
-
-  // TODO: Verify Ready logic, add flip flop for it?
   always_comb begin
     next_cycle = cycle;
     ctrl_signals = 'd0; // Should these be initialized to X's? No, apparently doesn't minimize logic
