@@ -65,6 +65,7 @@ DCr = 0b00_000_001
 
 # ALU uops
 ADx = 0b000
+ADr = 0b10_000_000
 ACx = 0b001
 SUx = 0b010
 SBx = 0b011
@@ -73,6 +74,7 @@ XRx = 0b101
 ORx = 0b110
 CPx = 0b111
 CPI = 0b00_111_100
+CPM = 0b10_111_111
 alu_r_M_op = 0b10_000_000
 alu_I_op = 0b00_000_100
 
@@ -467,7 +469,7 @@ class i8008_model:
 
         PC = 0b00_1100_0000_0000
         # JMP instruction
-        self.prog[addr] = CAL #| (Ca << 3)
+        self.prog[addr] = CAL | (Ca << 3)
         self.instr_addrs.append(addr)
         addr += 1
         self.prog[addr] = PC & 0b1111_1111
@@ -481,6 +483,11 @@ class i8008_model:
         self.prog[addr] = rand_halt()
         self.instr_addrs.append(addr)
         addr = PC
+
+        # Add return to test call
+        self.prog[addr] = RET
+        self.instr_addrs.append(addr)
+        addr += 1
 
         # Add halt if jump succeeds
         self.prog[addr] = rand_halt()
@@ -502,7 +509,7 @@ class i8008_model:
         self.prog.update(prog)
         self.instr_addrs.extend(instr_addrs)
 
-    def write_mem(self, asm, start_addr):
+    def fill_mem(self, asm, start_addr):
         prog = dict()
         addr = start_addr
 
@@ -559,21 +566,83 @@ class i8008_model:
         self.format_prog(increment, 60)
 
         # Fill memory to search
-        self.write_mem(mem, 200)
+        self.fill_mem(mem, 200)
 
-    
-    # def gen_rand_ctrl_flow(self, length):
-    #     self.prog = dict()
-    #     addr = 0b00_0000_0000_0000
+    def gen_fibonacci(self, num):
+        # WARNING: can only do 7 levels of recursion
+        # must call with num >= 0
+        self.prog = dict()
+        self.instr_addrs = []
+        # Start at address stored in {hi, lo}, increment twice for every recursion
+        # store answers in hi lo
+        # compute fib of number in Acc
 
-    #     # randomly initialize reg file
-    #     for i in range(7):
-    #         self.prog[addr] = (LrI | (i << 3))
-    #         self.instr_addrs.extend(addr)
-    #         addr += 1
-    #         self.prog[addr] = rand_imm()
-    #         self.instr_addrs.extend(addr)
-    #         addr += 1
+        fib = [
+            # If check
+            LMI,
+            1,
+            CPI,                # Compare num with 1
+            1,
+            (RTc | (Ca << 3)),  # Return if less than
+            (RTc | (Ze << 3)),  # Return if equal
+            LMr | (A),
+
+            # b = 1, c = 1
+            LrI | (B << 3),
+            1,
+            LrI | (C << 3),
+            1,
+
+            #i = 2
+            LrI | (E << 3),     # Store 2 into E
+            1,
+
+            # A = b + c, JUMP HERE
+            Lr1r2 | (A << 3) | (B),
+            ADr | (C),
+            Lr1r2 | (D << 3) | (A), 
+
+            # c = b, b = A
+            Lr1r2 | (C << 3) | B,
+            Lr1r2 | (B << 3) | D,
+
+            # i++ 
+            INr | (E << 3),
+
+            # while ( i <= num )
+            Lr1r2 | (A << 3) | (E),
+            CPM,
+            JFc | (Ze << 3),    # Jump if less than or equal
+            113,
+            0,
+
+            LMr | (D),          # Store answer to mem
+            Lr1r2 | (A << 3) | D,# And to A
+            RET
+        ]
+
+        main = [
+            (LrI | (Lo << 3)),  # Load 200 into Lo
+            200,
+            (LrI | (Hi << 3)),  # Load 0 into Hi
+            0,
+            (LrI | (0 << 3)),   # Load the fib number into Acc
+            num,
+            CAL,                # Call fib
+            100,
+            0,
+            LrM | (A << 3),     # Load result from memory
+            rand_halt()
+        ]
+        
+        mem = [0]
+
+        # Add instructions to instruction memory
+        self.format_prog(main, 0)
+        self.format_prog(fib, 100)
+
+        # Fill memory to search
+        self.fill_mem(mem, 200)
         
 
 
@@ -834,7 +903,7 @@ async def ALU_rand_test(dut):
 
     model = i8008_model()
 
-    model.gen_rand_alu_prog(10000)
+    model.gen_rand_alu_prog(100)
 
     clk = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clk.start())
@@ -924,7 +993,6 @@ async def basic_ctrl_test(dut):
     model = i8008_model()
     # verbose = True
     
-    # insert period into memory
     model.gen_ctrl_flow()
 
     clk = Clock(dut.clk, 10, units="us")
@@ -1129,6 +1197,125 @@ async def period_search_test(dut):
         count += 1
 
     assert dut.rf._id(f"rf[{Lo}]", extended=False).value == 200 + choice, "Period not in set location"
+
+def fib(num):
+    if num <= 1:
+        return 1
+    else:
+        return fib(num - 1) + fib(num - 2)
+
+@cocotb.test()
+async def fibonacci_test(dut):
+    """Test for finding nth fib num"""
+    seed = random.randint(0, 0xFFFFFFFF)
+    random.seed(seed)
+    print("fibonacci seed: ", seed)
+
+    model = i8008_model()
+
+    choice = random.randint(0, 12)
+    expected = fib(choice)
+    
+    # generate fibonacci prog
+    model.gen_fibonacci(choice)
+
+    clk = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clk.start())
+
+    # Setup the processor for testing
+    await RisingEdge(dut.clk)
+    dut.D_in.value = 0
+    dut.INTR.value = 0
+    dut.READY.value = 0
+    dut.rst.value = 1
+    await RisingEdge(dut.clk)
+    dut.rst.value = 0
+    await RisingEdge(dut.clk)
+
+    assert dut.state.value == T1, "Rand ALU test failed with: {state} != {actual}".format(state=T1, actual=dut.state.value)
+    assert dut.D_out.value == 0b00000000, "Rand ALU test failed with: {D_out} != {actual}".format(D_out=0b00000000, actual=dut.D_out.value)
+
+    # used to print 8008 state
+    reg_state = [0, 0, 0, 0, 0, 0, 0]
+    last_instr = 0
+    mem_reads = []
+
+    PC_L = 0
+    PC_H = 0
+
+    # begin program simulation
+    while (model.get_pc() in model.prog or model.get_pc() - 1 in model.prog): # and (model.prog[model.get_pc()] != HLT0 or model.prog[model.get_pc()] != HLT0_1 or model.prog[model.get_pc()] != HLT1):
+        if dut.state.value == T1:
+            if verbose:
+                print_reg_state(dut)
+            PC_L = dut.D_out.value
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T2:
+            AddrType = dut.D_out.value>>6
+            if verbose: 
+                print("PC_H = {PC_H}, TYPE = {AddrType}".format(PC_H=dut.D_out.value, AddrType=AddrType))
+            PC_H = (dut.D_out.value & 0b11_1111)
+            PC = PC_L | (PC_H << 8)
+
+            if AddrType == PCI:
+                mem_reads.extend([0, 0, 0])
+                model.gen_reg_state(model.prog, mem_reads[0], mem_reads[1], mem_reads[2])
+                if verbose: model.dump_reg()
+                model.state_check(dut, last_instr)
+
+                if model.get_pc() in model.prog:
+                    # update for new instruction
+                    last_instr = model.prog[model.get_pc()]        
+
+                # reset mem_reads
+                mem_reads = []        
+            
+            # input new program value into simulation
+            dut.READY.value = 1
+            mem_reads.append(model.read_mem(PC))
+            dut.D_in.value = model.read_mem(PC)
+
+            if AddrType == PCI or (AddrType == PCR and last_instr & 0b11_000_111 != LrM and last_instr & 0b11_000_111 != 0b10_000_111 and last_instr & 0b11_111_000 != LMr):
+                model.incr_pc()
+            await RisingEdge(dut.clk)
+        elif dut.state.value == WAIT:
+            dut.READY.value = 0
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T3:
+            if verbose: 
+                print("Instr: %b", dut.instr.value)
+                print("D_in: %b", dut.D_in.value)
+
+            await RisingEdge(dut.clk)
+        elif dut.state.value == STOPPED:
+            assert dut.rf._id(f"rf[0]", extended=False).value == expected, "fib value wrong, {sim} != {expected}".format(sim=dut.rf._id(f"rf[0]", extended=False).value, expected=expected)
+            if verbose:
+                print_reg_state(dut)
+                print("result should be: ", fib(choice))
+            return
+            assert False, "Program shouldn't be here"
+        elif dut.state.value == T4:
+            await RisingEdge(dut.clk)
+        elif dut.state.value == T5:
+            await RisingEdge(dut.clk)
+        else:
+            assert False, "Invalid state!"
+
+    if verbose:
+        print_reg_state(dut)
+        print("result should be: ", expected)
+        model.dump_reg()
+
+    count = 0
+    while dut.state.value != STOPPED:
+        if count > 10:
+            assert False, "Program did not halt"
+        await RisingEdge(dut.clk)
+        count += 1
+
+    assert dut.rf._id(f"rf[0]", extended=False).value == fib(choice), "fib value wrong"
+
+
 
 
 def test_i8008_runner():
